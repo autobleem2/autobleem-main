@@ -82,6 +82,19 @@ proxy handles only the browser's cookie sessions).
 5. compose + Caddy; deployed on the build server, tried end to end with a dry-run promotion and a
    one-platform nightly.
 
+## Status (2026-09-23, evening)
+
+Steps 1-5 are written and pushed; nothing is deployed, because everything waits for step 0.
+- 1: autobleem-main `tools/release.py` (+ `tests/test_release.py`, 8 cases), `.github/workflows/nightly.yml`,
+  `promote.yml` (dry run by default); autobleem-repo `tools/repo_withdraw.sh` (moves to `.withdrawn/`, never
+  deletes; restore; a stable release refused) + `.github/workflows/withdraw.yml`.
+- 2-4: autobleem-repo `admin/` - the service, the page, Telegram and desktop notifications, 8 tests over a
+  fake GitHub; the page previewed locally over sample data.
+- 5: `admin/Dockerfile`, `docker/repo/compose.yml` (profile `admin`: the panel + oauth2-proxy), the
+  Caddyfile's `/admin` and `/oauth2/` routes - `caddy validate` and `docker compose config` pass on the build
+  server, with and without `admin/.env`. `admin/README.md` has step 0 for the owner, then the one command
+  that deploys it.
+
 ## Open
 
 - Whether the masters that carry unreleased CI commits (see `decisions.md`) are reset before the first
