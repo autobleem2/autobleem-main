@@ -1,0 +1,20 @@
+# the repositories tools/workspace.sh clones next to this one (repos.txt)
+/autobleem/
+/autobleem-core/
+/autobleem-console-tools/
+/autobleem-pc-tools/
+/autobleem-appliance/
+/autobleem-build/
+/autobleem-repo/
+/autobleem-themes/
+/autobleem-samples/
+/autobleem-manuals/
+/pcsx-ab/
+/pcsx-abnxt/
+/libpicofe/
+/retroarch-psc/
+/psc-kernel/
+/psc-kernel-payload/
+
+# the machine-specific facts docs/infrastructure.md points to - addresses, accounts, local paths
+/infrastructure.local.md

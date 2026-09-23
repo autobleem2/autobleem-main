@@ -1,0 +1,19 @@
+# The AutoBleem 2 repositories, all under github.com/autobleem2, cloned by tools/workspace.sh next to this
+# file. One per line: <name>  <what it is>. Every one defaults to develop; master (main in retroarch-psc)
+# moves only with a release.
+autobleem              the launcher (EvolutionUI, the rc scripts, the console and Linux payload skeletons, abpad)
+autobleem-core         the shared C++ SDK: lib_ableem, ab_core, ab_classic, ab_installer - a submodule of the programs
+autobleem-console-tools  PSC-Bios and ABFlashKit, the two tools the console runs from Apps/
+autobleem-pc-tools     AutoBleemInstaller, AutoBleemFlasher, AutoBleemWinSetup and UpdateRoms (Windows)
+autobleem-appliance    assembles every platform's package and image from the components' releases
+autobleem-build        the Docker build image every component compiles in, and the site's RetroArch refresh
+autobleem-repo         the download site: its page generator, the publish tooling, Caddy
+autobleem-themes       the themes beyond the default
+autobleem-samples      the sample games pack
+autobleem-manuals      the user manuals (Markdown -> HTML/PDF)
+pcsx-ab                the classic PS1 emulator (2017 upstream snapshot + Sony's and our patches)
+pcsx-abnxt             the next PS1 emulator (upstream r26 + our work)
+libpicofe              pcsx-abnxt's front-end library (our fork)
+retroarch-psc          RetroArch built for the console
+psc-kernel             the console's Linux 4.4 kernel fork
+psc-kernel-payload     the AutoBleem kernel payload ABFlashKit flashes (Buildroot)
