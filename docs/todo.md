@@ -42,6 +42,13 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   are assembled from). They had drifted: the appliance's lacked the virtual gamepad's `rc/app_env.sh` and
   `pad.default.ini` until 2026-09-23. Keep one - the appliance's, the launcher's removed - or have the
   launcher's tarball carry it.
+- **The download page's PS1 emulators tab has no channels** (the owner asked, 2026-09-24 - "later"): it shows
+  one build per emulator (today v2.0.0-alpha2), never a nightly. Two causes: pcsx-ab's and pcsx-abnxt's
+  `build.yml` `publish` job runs only for a `v*` tag or a manual run with `publish` (a develop push reaches
+  only the repository's GitHub `nightly` pre-release), and autobleem-repo's `index_pcsx()` keeps the newest
+  version in `emu/<name>/` and deletes the rest. Fix: publish develop pushes too (e.g.
+  `emu/<name>/nightly/<version>/`), keep the newest per channel (release / testing / nightly) with a catalog
+  each next to `latest.json`, and draw the panel with the channel pills the other tabs use.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)
