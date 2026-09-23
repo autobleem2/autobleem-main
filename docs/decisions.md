@@ -20,6 +20,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The build image has two channels** (2026-09-23): develop builds compile in `autobleem-build:develop`,
   `v*` releases in `:latest` (master's). A nightly is develop all the way down, the compilers and SDL
   included; a toolchain change reaches releases only when autobleem-build's master moves.
+- **Windows programs are signed and never UPX-packed** (2026-09-23): every exe we build is Authenticode-signed
+  through SignPath in CI (a release must be signed; a nightly ships unsigned when not approved in time), and
+  no Windows exe is UPX-packed. *Why:* Defender quarantined the packed, unsigned installer as
+  Trojan:Win32/Wacatac.C!ml; the unpacked one scanned clean. `docs/code-signing.md`.
 - **Three channels**: release (the newest stable tag), testing (the one pre-release), nightly (the newest
   development build). The launcher, the installers, the flasher and Raspberry Pi Imager all offer them.
 - **Compile once, assemble many**: each component builds and releases its own artifacts; the appliance
