@@ -30,6 +30,9 @@ waits up to an hour for the request to be approved and signed, and leaves the fo
 repository keeps the files it signs in **`.signpath/artifact-configuration.xml`** - a copy of what the
 SignPath project's artifact configuration must say (SignPath reads its own, not the file).
 
+- **Signing is switched OFF** (the owner, 2026-09-24) by a per-repository switch, the variable
+  **`AB_SIGNING_ENABLED`** - unset, the sign jobs only pass the unsigned files through, quietly. Everything
+  below applies to a repository once it is set to `true`. The no-UPX rule does not depend on it.
 - **A `v*` tag / release must come back signed**, or the job fails and nothing is released.
 - **A develop build / nightly** ships **unsigned** when the request is not approved within the hour (or
   refused), with a warning in the run - a nightly never waits on a person.
@@ -57,7 +60,7 @@ SignPath project's artifact configuration must say (SignPath reads its own, not 
      cover/rdb downloads (`OnlineAssets`, config.ini `online`), the installer's RetroArch/BIOS fetches, the
      flasher's image download. If any of those runs without being asked, link a short privacy policy instead
      (what is fetched from where, that nothing about the user is sent).
-3. **In SignPath**, once approved: one **project per repository** - slugs `autobleem-pc-tools`, `autobleem`,
+3. **In SignPath**, once approved (then, last, `AB_SIGNING_ENABLED=true` on each of the five repositories): one **project per repository** - slugs `autobleem-pc-tools`, `autobleem`,
    `pcsx-ab`, `pcsx-abnxt`, `autobleem-appliance` (the action defaults to the repository's name; a different
    slug goes in the repository variable `SIGNPATH_PROJECT_SLUG`) - each linked to its GitHub repository as a
    trusted build system, with its `.signpath/artifact-configuration.xml` pasted as the default artifact

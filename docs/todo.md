@@ -11,8 +11,9 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   history in as it is.
 - **Code signing through SignPath** (`docs/code-signing.md`): apply to SignPath Foundation, publish the code
   signing policy (check the privacy statement against the update check and the online downloads), set up the
-  five SignPath projects, then the org variable `SIGNPATH_ORGANIZATION_ID` and secret `SIGNPATH_API_TOKEN`.
-  The CI is wired and ships unsigned until then.
+  five SignPath projects, then the org variable `SIGNPATH_ORGANIZATION_ID` and secret `SIGNPATH_API_TOKEN`,
+  and last each repository's switch `AB_SIGNING_ENABLED=true`. Parked (the owner, 2026-09-24): the CI is
+  wired and switched off, and ships unsigned until then.
 - **Telegram for the admin panel**: a bot and a chat id into the server's `admin/.env`
   (`AB_TELEGRAM_TOKEN`, `AB_TELEGRAM_CHAT`), then restart the panel (autobleem-repo `admin/README.md`, step 3).
 - **Tier-2 repositories** - `amiberry-psc`, `openbor-psc`, `autobleem-themes-pack`, `autobleem-gameports-pack`
