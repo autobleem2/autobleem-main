@@ -1,0 +1,51 @@
+# Refresh the nightly by hand: the components whose develop moved past their rolling nightly are rebuilt,
+# then autobleem-appliance assembles the nightly for the platforms asked (tools/release.py nightly). What
+# the admin panel's "Refresh nightly" buttons run; the scheduled nightly stays the appliance's own run.
+#
+# Needs the autobleem-admin GitHub App (docs/admin-panel-plan.md): its id in the variable AB_ADMIN_APP_ID
+# and its private key in the secret AB_ADMIN_APP_KEY - the default GITHUB_TOKEN cannot start workflows in
+# the other repositories. Gated by AB_CI_ENABLED.
+name: nightly
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: platforms to assemble (space separated; rpi-armhf rpi-arm64 pcusb psc win)
+        type: string
+        default: 'rpi-armhf rpi-arm64 pcusb psc win'
+      rebuild_all:
+        description: rebuild every component, not only those whose develop moved
+        type: boolean
+        default: false
+      dry_run:
+        description: only print what would be started
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-train
+  cancel-in-progress: false
+
+jobs:
+  nightly:
+    if: vars.AB_CI_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AB_ADMIN_APP_ID }}
+          private-key: ${{ secrets.AB_ADMIN_APP_KEY }}
+          owner: autobleem2
+      - name: Refresh the nightly
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          set -euo pipefail
+          args=(nightly --platforms "${{ inputs.platforms }}")
+          [ "${{ inputs.rebuild_all }}" = true ] && args+=(--all)
+          [ "${{ inputs.dry_run }}" = true ] && args+=(--dry-run)
+          python3 tools/release.py "${args[@]}"

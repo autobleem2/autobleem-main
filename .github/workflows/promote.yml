@@ -1,0 +1,56 @@
+# Promote: develop to the testing channel (alpha, beta), a release candidate, or a release
+# (tools/release.py promote - docs/admin-panel-plan.md has the model, docs/versioning.md the tags). What
+# the admin panel's promotion buttons run.
+#
+#   alpha / beta  the next vX.Y.Z-alphaN / -betaN tag on develop's head of every component
+#   rc            release/vX.Y.Z cut from develop (the first rc), vX.Y.Z-rcN tagged on it
+#   release       vX.Y.Z tagged on the release branches, merged into master and back into develop
+#
+# Components are tagged stage by stage, each stage's release build awaited, the appliance last (its build
+# assembles the release and publishes the channel). `version` is needed only for the first pre-release of
+# a new X.Y.Z. Needs the autobleem-admin GitHub App (AB_ADMIN_APP_ID, AB_ADMIN_APP_KEY). Gated by
+# AB_CI_ENABLED.
+name: promote
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: what to make
+        type: choice
+        options: [alpha, beta, rc, release]
+      version:
+        description: X.Y.Z - only for the first pre-release of a new version
+        type: string
+        default: ''
+      dry_run:
+        description: only print what would be tagged, branched and merged
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-train
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: vars.AB_CI_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AB_ADMIN_APP_ID }}
+          private-key: ${{ secrets.AB_ADMIN_APP_KEY }}
+          owner: autobleem2
+      - name: Promote
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          set -euo pipefail
+          args=(promote "${{ inputs.kind }}")
+          [ -n "${{ inputs.version }}" ] && args+=(--version "${{ inputs.version }}")
+          [ "${{ inputs.dry_run }}" = true ] && args+=(--dry-run)
+          python3 tools/release.py "${args[@]}"
