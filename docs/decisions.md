@@ -10,10 +10,16 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   (2026-09-23). Scheduled workflows and checkouts without a ref take develop, so a development build needs
   nothing from master. Nothing is pushed to master for a nightly's sake. *Why:* master must always be what
   was released.
-- **One unified version for a release**: every component is tagged `v2.0.0-alpha2`-style together, and
-  autobleem-appliance assembles a release from the components' releases of that tag. A nightly is named
-  after the launcher's `git describe` (`v2.0.0-alpha2-17-g1760cc8`) - the name the launcher's update check
-  compares with, so it must never be renamed by hand.
+- **One unified version for a release**: every component is tagged `v2.0.0-alpha2`-style together (numbers
+  not dot-separated: `-alpha3`, `-rc1`), and autobleem-appliance assembles a release from the components'
+  releases of that tag. A nightly is named after the launcher's `git describe`
+  (`v2.0.0-alpha2-17-g1760cc8`) - the name the launcher's update check compares with, so it must never be
+  renamed by hand. `docs/versioning.md`.
+- **Every program shows the package's version** (2026-09-23), exactly as the package's `VERSION` writes it -
+  never a component's own describe. `Env::productVersion()` / `$AB_VERSION`; RetroArch is the one exception.
+- **The build image has two channels** (2026-09-23): develop builds compile in `autobleem-build:develop`,
+  `v*` releases in `:latest` (master's). A nightly is develop all the way down, the compilers and SDL
+  included; a toolchain change reaches releases only when autobleem-build's master moves.
 - **Three channels**: release (the newest stable tag), testing (the one pre-release), nightly (the newest
   development build). The launcher, the installers, the flasher and Raspberry Pi Imager all offer them.
 - **Compile once, assemble many**: each component builds and releases its own artifacts; the appliance

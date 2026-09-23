@@ -22,7 +22,7 @@ the owner's standing rules - read it before changing anything that crosses a rep
 | `retroarch-psc` | RetroArch built for the console, following upstream releases | `psc/retroarch/` on the site |
 | `psc-kernel`, `psc-kernel-payload` | the console's 4.4 kernel and the AutoBleem kernel payload (Buildroot: boot.img + the rootfs overlay - WiFi, BlueZ, curl) | a payload release ABFlashKit ships |
 | `autobleem-appliance` | **assembles** every platform from the components' releases - never compiles: the console stick package + installer zip, the Pi and PC-stick packages and images, the Windows product | the release's and the nightly's packages and images, on the site |
-| `autobleem-build` | the Docker build image every component compiles in; the scheduled RetroArch/cores refresh for the site | `ghcr.io/autobleem2/autobleem-build:latest` |
+| `autobleem-build` | the Docker build image every component compiles in; the scheduled RetroArch/cores refresh for the site | `ghcr.io/autobleem2/autobleem-build:develop` (develop builds) and `:latest` (releases) |
 | `autobleem-repo` | the download site: the page generator (`tools/repo_index.py`), `repo_publish.sh`, Caddy | `https://autobleem.retromenele.pl/` |
 | `autobleem-themes`, `autobleem-samples`, `autobleem-manuals` | the extra themes, the sample-games pack, the user manuals | their packs on the site |
 
@@ -34,8 +34,9 @@ core commit, then a submodule bump in each consumer.
 
 - **develop** is every repository's default and where work lands; **master** (retroarch-psc: `main`) moves
   only with a release. A development build needs nothing from master.
-- A **release** is one tag across the components (`v2.0.0-alpha2`); the appliance assembles that tag's
-  component releases. A **nightly** is each component's rolling `nightly` release (its develop CI keeps it
+- A **release** is one tag across the components (`v2.0.0-alpha2`; `docs/versioning.md`), made by
+  `tools/release.py promote`; the appliance assembles that tag's component releases. Every program shows
+  the **package's** version (its `VERSION` file), never its own describe. A **nightly** is each component's rolling `nightly` release (its develop CI keeps it
   current, through autobleem-build's `nightly-release` action), assembled by the appliance's scheduled run
   into `nightly/<launcher's git describe>/` on the site.
 - **Channels** - `release` (newest stable), `testing` (the one pre-release), `nightly` - are what the

@@ -13,47 +13,47 @@ uses the **same grammar**, driven by its git tag:
 | Kind | Tag / version | Example |
 |---|---|---|
 | **Stable release** | `vX.Y.Z` | `v2.0.0` |
-| **Pre-release** | `vX.Y.Z-alpha.N` / `-beta.N` / `-rc.N` | `v2.0.0-rc.1` |
-| **Nightly (develop)** | `vX.Y.Z-dev.<shortsha>` | `v2.1.0-dev.a09927c` |
-| **Upstream lineage** (forks) | append semver build metadata `+…` | `v2.0.0+r26.g0f4727f1`, `v2.0.0+ra1.22.2` |
+| **Pre-release** (the testing channel) | `vX.Y.Z-alphaN` / `-betaN` / `-rcN` | `v2.0.0-alpha3`, `v2.0.0-rc1` |
+| **Nightly** (develop) | the launcher's `git describe` against the newest release tag | `v2.0.0-alpha2-25-g7a37132` |
+| **Upstream lineage** (forks) | not used yet - the upstream base is recorded in `manifest.json` (§3) | |
 
-- **Unified**: for a coordinated release, every component is tagged the **same** `vX.Y.Z`. "AutoBleem 2.0.0"
-  means every component at `v2.0.0`. The assembly pulls that one version of each piece.
-- **Pre-release suffixes are dot-numbered** (`-alpha.1`, not `-alpha1`) so they sort by semver.
-- **Ordering** is plain semver: `2.0.0-alpha.1 < 2.0.0-beta.1 < 2.0.0-rc.1 < 2.0.0`; a `-dev.<sha>` build of
-  the next version sorts below its release. `repo_index.py` uses **one** semver sort — the per-scheme
-  `pcsx_version_key` / `psc_version_key` hacks go away.
-- **Upstream base never lost**: a fork's own tag is the AutoBleem version; its upstream base (notaz r26,
-  RetroArch 1.22.2) rides in the `+build` metadata and in `manifest.json` (see §3).
-- **Unified applies to *releases*, not to development.** A coordinated `vX.Y.Z` tag is what makes every
-  component match. Develop/nightly builds carry their own `-dev.<sha>` per component (which naturally
-  differ), and a developer may build any **mix** — a "dirty" assembly of whatever is checked out or newest —
-  on request. The assembly enforces one version only for a tagged release; for a dev/dirty build it composes
-  whatever component versions it is given (latest dev of each, or a locally built component), stamps the
-  result `-dev` and records each component's actual version in the manifest. Nothing forces the whole suite
-  to rev together during day-to-day work.
+- **Unified**: for a coordinated release, every component is tagged the **same** tag (`autobleem-main`'s
+  `tools/release.py` makes it: the next number is the launcher's newest of that kind plus one). "AutoBleem
+  2.0.0" means every component at `v2.0.0`. The assembly pulls that one version of each piece.
+- **Pre-release numbers are not dot-separated** (`-alpha3`, not `-alpha.3`) - what the tags since
+  `v2.0.0-alpha1` are. **This section said the opposite until 2026-09-23** (dot-numbered pre-releases,
+  `-dev.<sha>` nightlies): that was the plan of 2026-09-22, which the tags never followed. The site orders
+  them by its own key (`repo_index.py`'s version key: `alpha < beta < rc < release`, numbers numerically).
+- **A nightly is named after the launcher's describe** - `git describe --tags --exclude nightly --match 'v*'`
+  of the launcher's develop, the name of its folder on the site (`nightly/<name>/`), the `VERSION` file of
+  every package assembled from it, and what every program shows (§4). The launcher's update check compares
+  exactly that string, so a nightly folder is never renamed by hand.
+- **Unified applies to *releases*, not to development.** A coordinated tag is what makes every component
+  match. A nightly takes each component's rolling `nightly` release (its develop's newest build), whatever
+  their own describes say; the package's `VERSION` is the one name the user sees.
 
 ## 2. How each repo derives it
 
 A single shared helper (lives in `autobleem-build`, copied into each repo's build, à la the launcher's
 `cmake/generate_version.cmake`) turns the tag into the version fields at build time:
 
-- `git describe --tags --always --dirty` → the tag when on one, else `<next>-dev.<sha>`.
+- `git describe --tags --exclude nightly --match 'v*'` → the tag when on one, else `<tag>-<n>-g<sha>`
+  (`--exclude nightly`: the rolling `nightly` tag must never name a build).
 - Emits a generated `version.h` (C/C++) or a `VERSION`/`manifest.json` (scripts) with the fields in §3.
 - `BUILD_TIMESTAMP` is kept stable while tag/hash/branch/dirty are unchanged (the launcher already does this
   — avoids needless rebuilds).
-- Nightlies get `<next>` from a repo constant (the launcher's `AB_VERSION_FALLBACK`, renamed consistently);
-  a tagged build takes the tag verbatim.
+- A build with no tag in its history at all takes a repo constant (the launcher's `AB_VERSION_FALLBACK`); a
+  tagged build takes the tag verbatim.
 
 ## 3. The recorded fields (version.h / manifest.json)
 
 Every component records, and its packaged `manifest.json` carries:
 
-- `version` — the semver string (`v2.0.0` / `v2.0.0-rc.1` / `v2.0.0-dev.<sha>`).
+- `version` — the version string (`v2.0.0` / `v2.0.0-rc1` / `v2.0.0-alpha2-25-g7a37132`).
 - `commit`, `branch`, `dirty`, `build_date`.
 - `upstream` — for forks, the upstream base (`r26 / g0f4727f1`, `RetroArch 1.22.2`); empty otherwise.
 - `full` — a human string combining the above (what the UI shows), e.g.
-  `v2.0.0 (master@a09927c)` or `v2.0.0-dev.a09927c+r26`.
+  `v2.0.0 (master@a09927c)` or `v2.0.0-alpha2-25-g7a37132 (develop@7a37132)`.
 
 ## 4. It must be visible — every component shows **the package's** version
 
@@ -99,7 +99,8 @@ core), drawn in a consistent, unobtrusive spot (a footer or an About/System line
 ## 6. Migration (applies as each repo is touched)
 
 1. Add/point the shared `generate_version` helper; emit the §3 fields.
-2. Normalise existing tags: the emulators' `v2.0.0-alpha1` → `v2.0.0-alpha.1`; retroarch's `v1.22.2-1` →
-   `v2.0.0+ra1.22.2` on its next AutoBleem-coordinated tag (its own `retroarch.version` keeps `1.22.2`).
+2. ~~Normalise existing tags to dot-numbered pre-releases~~ - dropped (2026-09-23): the tags stay as they
+   are (`v2.0.0-alpha1`, see §1). retroarch-psc keeps its own `v<RetroArch>-<build>` tags; it is not part of
+   the coordinated release.
 3. Add the UI version line wherever §4 says it is missing.
 4. Collapse `repo_index.py` to one semver sort once every publisher emits the standard string.
