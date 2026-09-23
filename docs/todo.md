@@ -31,16 +31,12 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   showing which pads the daemon sees; keyboard mode (step 5) is written and never exercised.
 - **The manuals**: the update and install sections for the channels - Options -> Updates, the console
   updating itself, AutoBleemInstaller's channel box, AutoBleemFlasher (autobleem-manuals, all languages).
-- **An installed nightly misses an emulator-only change**: a nightly folder is named by the launcher's
-  describe, so a night on which only an emulator changed looks like the same version. Name the folder by date
-  + hash, or have the update compare `sources.json`.
 - **The launcher's stale `docker/`**: autobleem-build is the image's one source. Remove the copy once nothing
   in the launcher (`ci/build.sh`, `test.yml`, the docs) calls its `run.sh`.
-- **The licence guard test**: fail when a file with a known Sony hash is under `payload/` or `src/resources/`
-  (`archive/licensing-plan.md`, step 5).
-- **The game editor on ab2**: check that all rows fit the panel (`archive/legacy-1x-analysis.md`, item 3).
-- **The Pi 400's pad is dead for 1-3 s** after every game and at boot (the launcher's CLAUDE.md, under
-  Payload): hidapi re-enumerates it; the fix has to keep hidapi's mapping.
+- **`payload_linux/` exists twice** - the launcher's (edited) and autobleem-appliance's (what the packages
+  are assembled from). They had drifted: the appliance's lacked the virtual gamepad's `rc/app_env.sh` and
+  `pad.default.ini` until 2026-09-23. Keep one - the appliance's, the launcher's removed - or have the
+  launcher's tarball carry it.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)

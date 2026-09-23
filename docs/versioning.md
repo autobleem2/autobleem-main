@@ -14,7 +14,7 @@ uses the **same grammar**, driven by its git tag:
 |---|---|---|
 | **Stable release** | `vX.Y.Z` | `v2.0.0` |
 | **Pre-release** (the testing channel) | `vX.Y.Z-alphaN` / `-betaN` / `-rcN` | `v2.0.0-alpha3`, `v2.0.0-rc1` |
-| **Nightly** (develop) | the launcher's `git describe` against the newest release tag | `v2.0.0-alpha2-25-g7a37132` |
+| **Nightly** (develop) | the launcher's `git describe` against the newest release tag, `-n` + the components' fingerprint | `v2.0.0-alpha2-25-g7a37132-n3f9c2e` |
 | **Upstream lineage** (forks) | not used yet - the upstream base is recorded in `manifest.json` (§3) | |
 
 - **Unified**: for a coordinated release, every component is tagged the **same** tag (`autobleem-main`'s
@@ -24,10 +24,14 @@ uses the **same grammar**, driven by its git tag:
   `v2.0.0-alpha1` are. **This section said the opposite until 2026-09-23** (dot-numbered pre-releases,
   `-dev.<sha>` nightlies): that was the plan of 2026-09-22, which the tags never followed. The site orders
   them by its own key (`repo_index.py`'s version key: `alpha < beta < rc < release`, numbers numerically).
-- **A nightly is named after the launcher's describe** - `git describe --tags --exclude nightly --match 'v*'`
-  of the launcher's develop, the name of its folder on the site (`nightly/<name>/`), the `VERSION` file of
-  every package assembled from it, and what every program shows (§4). The launcher's update check compares
-  exactly that string, so a nightly folder is never renamed by hand.
+- **A nightly is named after the launcher's describe and what it was built from** - `git describe --tags
+  --exclude nightly --match 'v*'` of the launcher's develop, then `-n` and six hex digits of the fingerprint
+  of every component's nightly assets (autobleem-appliance's `assemble.yml`; since 2026-09-23 - named after
+  the launcher alone, a night on which only an emulator or a tool changed kept the old name and no installed
+  nightly was offered it). It is the name of its folder on the site (`nightly/<name>/`), the `VERSION` file
+  of every package assembled from it, and what every program shows (§4). The launcher's update check
+  compares its package's `VERSION` (`Env::productVersion()`; `install.sh` copies it to the Pi's and the PC
+  stick's data partition) with exactly that string, so a nightly folder is never renamed by hand.
 - **Unified applies to *releases*, not to development.** A coordinated tag is what makes every component
   match. A nightly takes each component's rolling `nightly` release (its develop's newest build), whatever
   their own describes say; the package's `VERSION` is the one name the user sees.
