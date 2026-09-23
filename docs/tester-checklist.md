@@ -141,6 +141,21 @@ setup asked for the graphical or text screen; the update must draw with the same
 | 8.2 | Every download link on every tab | Each one downloads, and its size matches the table. |
 | 8.3 | Phone-width browser | No sideways scrolling. The tabs and tables stay readable. |
 
+## 9. PlayStation Classic Power Off - ready from launcher `f3e88ff`
+
+**You need:** a console with the AutoBleem stick. Test the setups you have: the stick in front port 2
+(stock or AutoBleem kernel), and, on the AutoBleem kernel, the stick on a hub in the micro-USB (power) port.
+
+| # | Do | Expect |
+|---|---|---|
+| 9.1 | Stick in a front port: L2+R2 -> Power Off -> confirm | After a few seconds only the red LED is on (standby). The stick may be pulled now. |
+| 9.2 | Press POWER | Green LED, the AutoBleem picture, and the launcher is back within about 15 s (no full boot). |
+| 9.3 | Stick on a hub in the power port (AutoBleem kernel): L2+R2 -> Power Off -> confirm | After about 10 s the console switches off (red LED). The launcher does not come back by itself. |
+| 9.4 | Press POWER | A normal full boot into AutoBleem. The stick is not reported as needing repair in Windows afterwards. |
+
+**Logs:** `System/Logs/standby.log`. A power-port setup ends each Power Off with "powering off instead" and
+the kernel's reason (`usb1 failed to suspend`).
+
 ---
 
 ### Reporting
