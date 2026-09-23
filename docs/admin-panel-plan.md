@@ -38,6 +38,22 @@ The logic lives in **workflows**, not in the panel: the panel only dispatches th
 Everything it can do can also be done with `gh workflow run` from the command line, and every run is in
 the Actions log.
 
+## An API for scripts and Claude sessions (the owner's ask, 2026-09-23)
+
+Everything the page shows and every button it has is also a **JSON API**, the page being only one client of
+it: `GET /admin/api/status` (running and recent runs, ETA), `/channels`, `/health`, `/audit`; `POST
+/admin/api/nightly`, `/promote` (with `preview` = the tag it would make, no change), `/runs/<repo>/<id>/cancel`,
+`/rerun`, `/withdraw`, `/page`. A Claude session drives and monitors builds through it exactly as the owner
+does in the browser - one place that knows what is running, how long it has left and what finished, instead
+of polling each repository's Actions.
+
+A script cannot do the browser's login, so the API also takes **`Authorization: Bearer <GitHub token>`**
+(a user's own token - the `gh` CLI's, a fine-grained PAT): the service asks GitHub who the token belongs to
+and applies the same rules - an org member reads, a `release-managers` member acts - and the audit log
+records that user with "via API". No separate API keys to issue or leak; revoking the GitHub token revokes
+the access. Caddy passes `/admin/api/` requests that carry a bearer token straight to the service (oauth2-
+proxy handles only the browser's cookie sessions).
+
 ## How it is built
 
 - **One GitHub App**, `autobleem-admin`, installed on the org: the users' login (its OAuth web flow) and the
