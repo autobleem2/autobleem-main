@@ -4,7 +4,7 @@
 # The PC USB stick (2026-09-20, `pcusb`)
 
 The Pi appliance on a **32-bit x86 PC** (the owner's call: older CPUs must boot it), first of the two PC
-targets of `docs/pc-targets-plan.md` (the other, the Windows product, comes after). **Debian 12 Bookworm
+targets of `docs/archive/pc-targets-plan.md` (the other, the Windows product, comes after). **Debian 12 Bookworm
 i386** - the last Debian with a 32-bit x86 kernel (Trixie has none; Bookworm LTS runs to mid-2028) - and
 everything of the Pi's: the launcher on tty1 over kmsdrm, the exFAT data partition, the first-boot screen,
 `install.sh`, the online update through `autobleem-update`. What is shared and what differs:

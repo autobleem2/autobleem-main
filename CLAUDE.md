@@ -47,8 +47,10 @@ core commit, then a submodule bump in each consumer.
 
 GitHub Actions in each repository, gated by the repository variable `AB_CI_ENABLED`; compiling runs in the
 `autobleem-build` image on hosted runners, anything that needs the build server's disk (publishing to the
-site, building images) on the org's self-hosted runner. `docs/ci-org-migration-plan.md` is the plan of the
-move to this setup (its progress log is the record), `docs/ci.md` the operator's page for by-hand builds.
+site, building images) on the org's self-hosted runner. `docs/history/ci-and-site.md` is what the move to
+this setup built (the plan, `docs/archive/ci-org-migration-plan.md`, has the progress log), `docs/ci.md` the
+operator's page for by-hand builds. The build server's disk is kept clear by autobleem-repo's nightly
+`cleanup.yml`, and the admin panel (`/admin/` on the site) shows and starts builds.
 The site's page is generated, never stored - autobleem-repo's CLAUDE.md has its rules.
 
 ## Where to find things
@@ -58,12 +60,12 @@ The site's page is generated, never stored - autobleem-repo's CLAUDE.md has its 
 | `docs/decisions.md` | the owner's standing rules, with reasons |
 | `docs/infrastructure.md` | what runs where (the addresses are in the git-ignored `infrastructure.local.md`) |
 | `docs/tester-checklist.md` | the hardware proofs, for testers |
-| `docs/ci-org-migration-plan.md`, `docs/repo-split-*.md` | the org migration and the repository split |
-| `docs/pc-targets-plan.md`, `docs/rpi-image-and-update-plan.md` | the PC targets and the Pi image plans |
-| `docs/versioning.md`, `docs/licensing-plan.md` | the version scheme; the GPL-3.0 analysis |
+| **`docs/todo.md`** | **what is left** - every open item of every plan, in one list |
+| `docs/versioning.md` | the version scheme |
 | `docs/kernel-flash-recovery.md`, `docs/pi-install-guide.md` | recovering a console; installing on a Pi |
 | `docs/history/*.md` | how each platform and the big features came to be (moved from the launcher's CLAUDE.md, 2026-09-23) |
-| `docs/archive/` | superseded plans, kept for what they record |
+| `docs/archive/` | finished and superseded plans, kept for what they record: the org/CI migration, the admin panel, the repository split, the PC targets, the Pi image, licensing (GPL-3.0), the ROM scanner, the 1.x history |
 
-When a plan is done, its last word goes into `docs/history/` (or the repository's CLAUDE.md) and the plan
-moves to `docs/archive/`.
+When a plan is done, its last word goes into `docs/history/` (or the repository's CLAUDE.md), what is still
+open into `docs/todo.md`, and the plan moves to `docs/archive/`. Plans for work not yet done stay in the
+repository they belong to (the launcher's `docs/`: `atari-vcs-plan.md`, `virtual-gamepad-plan.md`, `IDEAS.md`).

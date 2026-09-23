@@ -3,7 +3,7 @@
 
 # The Windows product (2026-09-20, `win`)
 
-The second PC target of `docs/pc-targets-plan.md` (phases B and C): AutoBleem as a Windows program from an
+The second PC target of `docs/archive/pc-targets-plan.md` (phases B and C): AutoBleem as a Windows program from an
 NSIS installer - **per user, no administrator rights** (the owner's call), the program in
 `%LOCALAPPDATA%\Programs\AutoBleem`, the data tree (games, settings, themes, RetroArch) in a folder of the
 user's choosing, `Documents\AutoBleem` by default. **Full screen always** (the owner's rule for every real

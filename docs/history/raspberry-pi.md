@@ -185,7 +185,7 @@ works because the fstab entry has no `noexec`. Trixie renamed packages for its 6
   was an absolute console path that the installer had to rewrite per install - gone since 2026-09-18, the
   selection script is `Env::getPathToRCDir() + autobleem_cfg.sh` on every platform.
 
-**Flashable image for Raspberry Pi Imager** (2026-09-19, plan at `docs/rpi-image-and-update-plan.md`). A
+**Flashable image for Raspberry Pi Imager** (2026-09-19, plan at `docs/archive/rpi-image-and-update-plan.md`). A
 second way to get AutoBleem onto a Pi, alongside the tarball + `install.sh` flow: `tools/make_rpi_image.sh`
 takes an official Raspberry Pi OS Lite image (downloaded automatically per architecture from Raspberry Pi
 Foundation's stable "latest" redirect, sha256-verified against its published checksum, or a local `--base`),

@@ -1,7 +1,7 @@
 # AutoBleem versioning standard
 
 One version scheme for every component of the suite, so a release is trivial to track and the
-compile-once/assemble-many pipeline (`docs/repo-split-analysis.md` §6b) can pull "version X" of each piece.
+compile-once/assemble-many pipeline (`docs/archive/repo-split-analysis.md` §6b) can pull "version X" of each piece.
 Decided 2026-09-22 (owner): **unified semver + build metadata**, and the version must be **visible in every
 component's UI**.
 
