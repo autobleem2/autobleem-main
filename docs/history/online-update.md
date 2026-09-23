@@ -24,12 +24,26 @@ The first version (below, 2026-09-20) was a Pi's alone, with two channels. What 
   most every 30 s, so a stock console (no network at all) is never probed or handed a download command; the
   AutoBleem kernel's WiFi (PSC-Bios sets it up) is what gives a console a route - its USB network to a PC
   does not. The key on the site is `psc-fs` (the stick package). The catalogs and the package come through
-  `psc.ini`'s `update_download_command` - **curl from the kernel payload** (psc-kernel-payload `d2e3e55`
-  adds it; it reaches consoles with the next payload release that ABFlashKit ships). After "Update now" the
-  launcher leaves with `MENU_OPTION_UPDATE`; `rc/selection.sh` copies `abupdate` (`src/tools/abupdate.cpp`)
-  to tmpfs and runs it under the AutoBleem picture: autobleem-core's `InstallerJob` over the downloaded
-  package - the PC installer's own update, the user's games, saves, settings, RetroArch and cover
-  databases kept - then the new launcher starts. `System/Logs/update.log` is its record.
+  `psc.ini`'s `update_download_command`, which is **`abfetch`** (`src/tools/abfetch`, `"%r/abfetch" ...`,
+  `%r` = the launcher's folder): the launcher's own HTTP/1.1 client over a vendored mbedTLS 3.6 (TLS 1.2,
+  the Mozilla CA bundle as `cacert.pem` next to it, redirects, a connect timeout and a stall timeout, a
+  partial file removed). It replaced the kernel payload's curl the same day, on the owner's rule that the
+  update must not depend on the payload: the AutoBleem 1.x kernel's overlay has no curl, and a payload
+  release only reaches a console through ABFlashKit. A certificate's **validity dates are not checked** -
+  the console has no battery-backed clock - while the chain, the signatures and the host name are, and the
+  package is checked against the catalog's sha256 anyway. After "Update now" the launcher leaves with
+  `MENU_OPTION_UPDATE`; `rc/selection.sh` copies `abupdate` (`src/tools/abupdate.cpp`), `abfetch` and
+  `cacert.pem` to tmpfs and runs `abupdate` under the AutoBleem picture: autobleem-core's `InstallerJob`
+  over the downloaded package - the PC installer's own update, the user's games, saves, settings, RetroArch
+  and cover databases kept (UpdateRoms is fetched with the tmpfs `abfetch`) - then the new launcher starts.
+  `System/Logs/update.log` is its record, with abupdate's exit status. **Proven on a PC** (2026-09-23, the
+  Windows dev build on a `tools/make_usb.py` stick, `AB_UPDATE_PLATFORM=psc-fs` and the stick's `pc.ini` set
+  as `psc.ini` is): the start-up check through `abfetch`, the prompt, the 62 MB nightly package downloaded
+  and sha256-checked, `pending.json`, then `abupdate` - games, save states, memory cards and databases
+  byte-identical, `config.ini`'s theme/language/channel kept, `System/Updates` removed. On a console:
+  `docs/tester-checklist.md`, section 3. (Two things the PC run showed: `InstallerJob` calls a stick an
+  update only when `Autobleem/bin/autobleem/autobleem-gui` exists - true on every console stick, not on a
+  PC-staged one with only the `.exe` - and a nightly's UpdateRoms comes from the testing release.)
 - **The installers take the same channels**: AutoBleemInstaller downloads the stick package of the channel
   picked in it (no package in its zip any more, no offline fallback), AutoBleemFlasher the PC stick image
   (`pc/images/{release,testing}.json`, `nightly/latest.json`'s `pc-i386`), Raspberry Pi Imager one list per
@@ -38,11 +52,16 @@ The first version (below, 2026-09-20) was a Pi's alone, with two channels. What 
 
 ## The first version (2026-09-20, a Pi and the dev hosts)
 
+*History: this section is how the update was first built. Its console paragraph no longer holds - since
+launcher `5b53dd6` (2026-09-23) the update is compiled into the console build too; see "Where it stands"
+above.*
+
 The launcher keeps itself current from the download repository, the way the owner asked: **check at
 start and once a day, say so, ask, and on a yes fetch everything and re-run the installer with the
-first-boot screen**. The console has no network and updates from a stick, so **none of this is compiled
-into the console build**: the CMake option `AB_ONLINE_UPDATE` (on by default) is switched off in the
-PSC branch of the root CMakeLists, and every hook in the launcher sits behind `#ifdef AB_ONLINE_UPDATE`.
+first-boot screen**. At the time the console had no network and updated from a stick, so none of this was
+compiled into the console build: the CMake option `AB_ONLINE_UPDATE` (on by default) was switched off in
+the PSC branch of the root CMakeLists (it no longer is), and every hook in the launcher sits behind
+`#ifdef AB_ONLINE_UPDATE`.
 
 - **`UpdateService`** (`core/services/update_service.*`, `App::updates()`, configured by
   `App::applyUpdateSetting()` at start and after Options): a worker thread fetches

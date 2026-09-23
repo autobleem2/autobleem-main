@@ -60,17 +60,20 @@ the stick's files are downloaded).
 
 ---
 
-## 3. PlayStation Classic updating itself - blocked
+## 3. PlayStation Classic updating itself - ready from the first nightly with `abfetch`
 
-**Blocked on:** a release of the AutoBleem kernel payload with `curl` (it is on psc-kernel-payload's develop,
-`d2e3e55`), flashed with ABFlashKit. The launcher side is in the nightly since 2026-09-23. This item will be
-marked ready here once the payload is released.
+The console downloads with `abfetch`, the launcher's own downloader on the stick - nothing from the kernel
+payload - so the current AutoBleem kernel and the old 1.x one are tested the same way.
 
-**You need:** a console with the **AutoBleem kernel** (ABFlashKit) and WiFi set up in PSC-Bios, plus a
-stick one version behind the channel you test (for example a Testing stick, with the Nightly channel chosen).
+**You need:** a console with an **AutoBleem kernel** (ABFlashKit's, or the 1.x one) and WiFi set up in
+PSC-Bios, plus a stick that **already has `abfetch`** (`Autobleem/bin/autobleem/abfetch` - a nightly from after
+2026-09-23's `abfetch` change, put on with AutoBleemInstaller) and is one version behind the channel you test
+(for example yesterday's nightly, with the Nightly channel chosen). A stick from before that change cannot
+update itself (it looks for a curl the kernel does not have) - update it once with AutoBleemInstaller.
 
 | # | Do | Expect |
 |---|---|---|
+| 3.0 | PSC-Bios (L2+R2 -> Hardware Information on the console) -> WiFi: connect | PSC-Bios shows an IP address. |
 | 3.1 | Options -> Updates | The row is there, with release / testing / nightly / off. |
 | 3.2 | Choose **nightly**, go back to the carousel, wait up to a minute | An "Update available" dialog shows both versions. |
 | 3.3 | "Remind me tomorrow" | The dialog goes away and does not come back when you restart the launcher. |
@@ -79,9 +82,11 @@ stick one version behind the channel you test (for example a Testing stick, with
 | 3.6 | Check the result | About shows the new version. Games, save states, memory cards, the theme and other settings are unchanged. |
 | 3.7 | Turn WiFi off (or use a console with the stock kernel), then L2+R2 -> Software Update | "Not connected". No dialog appears at start and nothing slows down. |
 | 3.8 | Pull the stick during 3.5's download (only on a stick you can re-install) | The launcher reports the failure. The next boot starts the old launcher. |
+| 3.9 | After 3.5, open `System/Logs/update.log` on a PC | It ends with `abupdate exit status 0` and "the stick is AutoBleem <new version> now"; `System/Updates/` is gone. |
+| 3.10 | If you have one: repeat 3.0-3.6 on a console with the **AutoBleem 1.x kernel** | The same results. |
 
 **Logs:** `System/Logs/update.log` (the update step), `System/Logs/installer.log`, `System/Logs/autobleem.log`
-(the check and the download).
+(the check and the download - the `abfetch` command lines and their exit codes are in it).
 
 ---
 

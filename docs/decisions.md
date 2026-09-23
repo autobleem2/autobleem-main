@@ -61,6 +61,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   chosen channel (2026-09-23).
 - **The console updates itself only with a network** (the AutoBleem kernel's WiFi); a stock console never
   checks.
+- **The console's update never relies on a tool in the kernel payload** (2026-09-23): it downloads with
+  `abfetch`, the launcher's own HTTPS client shipped on the stick, so every AutoBleem kernel - the 1.x one
+  included - updates the same way.
 - **Themes**: all five stay in the launcher repository; `ab2/ab.ogg` is the owner's own composition.
 - **Images**: xz level 2 (`AB_XZ_LEVEL=2`) - speed over size; cache the base images between builds.
 
