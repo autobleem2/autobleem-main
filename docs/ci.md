@@ -74,10 +74,18 @@ merged before the runner exists, and the pipeline can be paused without touching
 
 - **The image** is built by **`autobleem2/autobleem-build`**'s `image.yml` (moved there 2026-09-23; that
   repo owns the Dockerfile - this tree's `docker/` is a stale copy): on the self-hosted runner for the host's
-  layer cache, the cover databases fetched from the site's `db/` against their `.sha256`, pushed as
-  `ghcr.io/autobleem2/autobleem-build:latest` + `:<sha>` on master or by hand. The package grants the
-  autobleem-build repo write access under the organisation's Packages -> autobleem-build -> Package settings
-  -> Manage Actions access.
+  layer cache, the cover databases fetched from the site's `db/` against their `.sha256`. **Two channels
+  (2026-09-23)**: a push to master is `ghcr.io/autobleem2/autobleem-build:latest`, a push to develop is
+  `:develop` (both also `:<sha>`; `docker/build-image.sh --channel latest|develop`). Every component's
+  workflow picks by ref - `:latest` for a `v*` tag build (a release), `:develop` for everything else (the
+  develop builds that make the rolling nightlies) - and the appliance's assembly picks by its channel
+  (`nightly` -> `:develop`, a release -> `:latest`). The owner's rule: a nightly is develop all the way down,
+  the compilers and SDL included. Until then both branches pushed `:latest`, so whichever built last decided
+  what every build compiled in. A component rebuilds (and its nightly moves) only when its own develop
+  changes; a new `:develop` image alone does not rebuild the components. The push needs the package to grant
+  the autobleem-build repo **Write** under the organisation's Packages -> autobleem-build -> Package
+  settings -> Manage Actions access (granted 2026-09-23; before that every push failed with
+  `denied: permission_denied: write_package`).
 - **`.github/workflows/ci.yml`**: `native` on every push and pull request; `psc`/`rpi`/`rpi64`/`pcusb`/`win`
   on pushes to develop/master, on `v*` tags and by hand, each with both emulators checked out next to the
   tree (`autobleem/pcsx-ab2`, `autobleem/pcsx-abnxt` with its submodules and tags - its `REV` is `git
@@ -137,7 +145,11 @@ Housekeeping: `docker system prune -f` now and then (build cache grows with ever
 ## Changing a toolchain version
 
 Every version is a build-arg at the top of its stage in `docker/Dockerfile` (SDL2 for the console, the
-mingw SDL2 packages, LLVM, UPX, the Debian release). Change the default there, build the image, and let
+mingw SDL2 packages, LLVM, UPX, the Debian release). Change it on autobleem-build's **develop** (the
+nightlies pick it up as `:develop`; it reaches the releases' `:latest` when master moves). **The console's
+SDL2 stops at 2.0.14** - the last with a `wl_shell` window, the only shell Sony's Weston 1.11 has (2.0.16
+dropped it; 2.0.20+ also want libwayland >= 1.18, the console has 1.12); Wayland + ALSA only, no X11, no
+OSS; `ab-validate psc` enforces all of it. Change the default there, build the image, and let
 `ab-validate` (`docker/ab-validate.sh`, run at the end of each stage) prove the stage still links a C++ +
 SDL program that fits the target - for the console: nothing above GLIBC_2.24 / GLIBCXX_3.4.22, ARMv8, no
 RPATH, a Wayland SDL2.

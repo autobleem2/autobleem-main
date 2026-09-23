@@ -55,20 +55,38 @@ Every component records, and its packaged `manifest.json` carries:
 - `full` — a human string combining the above (what the UI shows), e.g.
   `v2.0.0 (master@a09927c)` or `v2.0.0-dev.a09927c+r26`.
 
-## 4. It must be visible — every component shows its version
+## 4. It must be visible — every component shows **the package's** version
 
-A user (and a bug report) must be able to read the version off the screen, on every piece:
+**The owner's rule (2026-09-23): every program except RetroArch shows the version of the package it came
+in, written exactly as the package's `VERSION` file writes it** — `v2.0.0-alpha2-17-g1760cc8` for a
+nightly, `v2.0.0-alpha2` at a tag. Not a component's own `git describe`: on one stick the launcher,
+pcsx-ab and pcsx-abnxt used to show three different `v2.0.0-alpha2-…` strings (each repo describes
+itself against the shared release tags with its own commit count and hash), and the splash showed a
+fourth, the bare tag.
+
+How it works (all in `autobleem-core`, `core/services/environment.*`):
+
+- **`Env::productVersion()`** — `$AB_VERSION` when a parent set it; else the first line of a `VERSION`
+  file: the data root's (the stick's own, written by the assembly and the installer), the one next to the
+  running program (`Env::executableDir()`), or the one a folder up (`<stick>/UpdateRoms/UpdateRoms.exe`
+  reads the stick's); else this build's `Version::DESCRIBE`.
+- **`Env::exportProductVersion()`** — the launcher's `main()` puts it into `AB_VERSION` before anything
+  starts, so every program it runs (the emulators, the console tools, the Apps) inherits the same string.
+- **The assembly** (`autobleem-appliance`) writes the release's `VERSION` next to every PC program: into
+  `AutoBleemInstaller/`, `UpdateRoms/` and `AutoBleemFlasher/` before zipping them, and into the Windows
+  program folder (the NSIS script installs it, and the Windows launcher reads it from there).
 
 | Component | Where the version shows |
 |---|---|
-| **Launcher** | Splash screen + About screen (already: `Version::FULL_VERSION`). Keep. |
-| **Console tools** (pscbios, abflashkit) | Their About/opening screen footer — the same `version.h` the launcher uses while co-built; their own after the split. |
-| **PC tools** (updateroms, installer) | The window title bar and/or the first-boot/setup screen header. |
-| **Emulators** (pcsx-ab, pcsx-abnxt) | Already shown in-menu: pcsx-ab draws `build: <date> <time> <REV>` (`menu.c`), pcsx-abnxt draws `pcsx-abnxt <REV>` on the menu bar (`ab_menu.c`). `REV` is `git describe`, so a tagged build shows the semver (`v2.0.0`). No change needed for visibility; only the *scheme* (the dev-build form) aligns in §6. |
-| **RetroArch (console build)** | Already shows RetroArch's version; our build stamp goes in `retroarch.version` and the log. |
+| **Launcher** | Splash, About, Hardware Information (`Env::productVersion()`); the log's first line is `AutoBleem <package version> (launcher <branch>@<hash>, built …)`. |
+| **Console tools** (pscbios, abflashkit) | The shared classic screens (About, Hardware Information) — `Env::productVersion()`, through `AB_VERSION` from the launcher. |
+| **PC tools** (installer, setup helper, UpdateRoms, flasher) | The window title and the log's first line (`Env::productVersion()`, the build's own `FULL_VERSION` in brackets in the log). |
+| **Emulators** (pcsx-ab, pcsx-abnxt) | `AutoBleem <AB_VERSION>`: pcsx-abnxt's AutoBleem menu footer (`ab_menu.c`) and both emulators' credits frame (`menu.c`); their log line puts it before their own `REV`. Without `AB_VERSION` (started by hand) they show their own `REV` as before. |
+| **RetroArch (console build)** | The one exception: RetroArch's own version; our build stamp goes in `retroarch.version` and the log. |
 
-Rule for new UI: the version is drawn in a consistent, unobtrusive spot (a footer or an About/System line),
-in `full` form, and is always written as the **first line of the component's log**.
+Rule for new UI: the version is `Env::productVersion()` (or `$AB_VERSION` in a program that does not link
+core), drawn in a consistent, unobtrusive spot (a footer or an About/System line), and written in the
+**first line of the component's log**, where the component's own build identity may follow in brackets.
 
 ## 5. Assembly & the site
 
