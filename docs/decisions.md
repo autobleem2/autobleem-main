@@ -88,6 +88,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - It is **installed by hand** onto the stick and is **always a separate download**: none is bundled with
     a release. Nothing downloads or installs an extension, the Store included.
   - It is built for every target.
+  - Its `extension.ini` says whether it needs the network (`Network=required|optional|none`). The
+    launcher **refuses to run one that requires it while the network is unreachable**: offline mode on the
+    console, meaning no default route. The Store is `required`.
+  - It **logs through the launcher's facility**: the same `PLOG_*` macros, into `System/Logs/autobleem.log`,
+    each line tagged with the extension's name. There is no log file of its own.
   - Extensions in autobleem2 follow the 16-language rule; other people's fall back to English.
   - **PSC-Bios and ABFlashKit stay Apps**, shipped with the console package: the console needs them. They
     are not extensions.
