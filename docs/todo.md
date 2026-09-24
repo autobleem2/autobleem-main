@@ -32,6 +32,9 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   2026-09-25): the console on the AutoBleem kernel's WiFi (an App from the catalog - the eight console Apps
   are there since 2026-09-25 - a two-disc game from a TSV source, a download resumed after a standby), the
   Pi 400, the PC stick, Windows.
+- **Scanner processors on hardware** (the launcher's `docs/scanner-processors-plan.md`; the owner tests
+  later, 2026-09-25): `docs/tester-checklist.md` section 11 - proc_unzip on the console and a Pi, stopped by a
+  game and finished by the next scan, the new folders from the installers.
 - **LAN Share's disc reading on hardware** (autobleem-pc-tools `docs/lan-share-plan.md`, step 7 - a TODO, the
   owner 2026-09-25; the first disc, RE3 PAL, read bit-perfect): a multi-disc game, a game with CD audio
   tracks, a LibCrypt game (PAL, needs a drive that gives the subchannel), each published to a Pi's abstored
@@ -85,6 +88,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     OpenTyrian for every target);
   - the TSV format written up for source owners;
   - the other manual languages when they come.
+- **Scanner processors - next** (the launcher's `docs/scanner-processors-next-plan.md`, the owner
+  2026-09-25: later, after the hardware pass): `proc_unzip` v1.0.0 (its first release), `.7z` (vendored LZMA
+  SDK, or a separate `proc_un7z`), processors as a Store item kind, launch-time processors, signatures or a
+  trusted list, and a `Heavy=` flag if the console's heavy jobs call for one.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)

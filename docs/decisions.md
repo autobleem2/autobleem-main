@@ -79,7 +79,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - An App's ini says whether it runs with our virtual pad mapper (`VirtualPad=true|false`, absent =
     true); `app_env.sh` starts abpadd and the preload only for one that does.
 - **Repository names** (2026-09-24): an extension's repository is `ext_<name>` (`autobleem2/ext_store`),
-  an App's `app_<name>` (`app_opentyrian`). The folder it installs to keeps the bare name.
+  an App's `app_<name>` (`app_opentyrian`), a scanner processor's `proc_<name>` (`autobleem2/proc_unzip`,
+  2026-09-24). The folder it installs to keeps the bare name.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
@@ -115,6 +116,19 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     how legal games from private sources get distributed. We ship no source but our own catalog.
   - A static notice sits on the Sources tab ("You are responsible for what your sources contain"). It is
     not a gate, and there is no dead-link checking.
+- **Scanner processors** (2026-09-24, the launcher's `docs/scanner-processors-plan.md`): community console
+  programs in `System/Processors/<name>/` that the scan runs over the games before it reads them.
+  - The folder processors ("preprocessors") are the **first thing every scan does**, whoever asked for it
+    (the user, the watcher, the start-up check); then each game folder and ROM file through its chain.
+  - They run in **two sequences the user sorts** (PS1, ROMs - the System menu's Scanner processors, stored
+    in `sequence.ini`); a new processor goes to the end.
+  - A processor **may delete the original, but only after its output is complete**: written as `.part`,
+    renamed, then the original deleted.
+  - **Mods and patches run at scan time**, in place; the state file makes sure a game is not patched twice.
+  - They **always run on the automatic scan**, heavy ones too - revisited if testing shows problems.
+  - The built-in ECM decoding stays as it is (no `proc_unecm` for now).
+  - `proc_unzip` is the first processor and the example; `tools/proc_check.py` checks one before publishing.
+  - The installers make `System/Processors/` (and `Extensions/`), each with a README, written once.
 - **No Project Eris code, ever** (2026-09-24): nothing from Project Eris or its mods (PSC Store included)
   is used in any repository. That covers sources, binaries, scripts, databases, samples, artwork and text.
   A feature inspired by theirs is a clean implementation from an analysis of what it does, written on our
