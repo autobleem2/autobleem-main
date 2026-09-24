@@ -1,4 +1,4 @@
-# What is left (2026-09-23)
+# What is left (2026-09-25)
 
 Everything still open from the finished plans (`docs/archive/`) and the open ones, in one list. Strike an
 item when it is done and delete it at the next cleanup; a new piece of work that needs more than a line gets
@@ -28,6 +28,14 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
 - **`docs/tester-checklist.md`** - the flasher, the installer's channel box, the console, the Pi, the PC
   stick and Windows updating themselves, the Imager lists, the download page.
 - **The PC stick beyond the BIOS VM**: 32- and 64-bit UEFI and real hardware, with a pad.
+- **The AutoBleem Store on hardware** (the launcher's `docs/store-plan.md`, step 8 - a TODO, the owner
+  2026-09-25): the console on the AutoBleem kernel's WiFi (an App from the catalog - the eight console Apps
+  are there since 2026-09-25 - a two-disc game from a TSV source, a download resumed after a standby), the
+  Pi 400, the PC stick, Windows.
+- **LAN Share's disc reading on hardware** (autobleem-pc-tools `docs/lan-share-plan.md`, step 7 - a TODO, the
+  owner 2026-09-25; the first disc, RE3 PAL, read bit-perfect): a multi-disc game, a game with CD audio
+  tracks, a LibCrypt game (PAL, needs a drive that gives the subchannel), each published to a Pi's abstored
+  and installed through the Store on the Pi 400 and the console.
 
 ## Engineering
 
@@ -68,9 +76,14 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   (2026-09-24): the public catalog (the Terminal App, published from app_terminal's v1.0.0), a LAN source
   served by `abstored` (ext_store/server, any Linux; the Pi runs one from its crontab), covers from our covers
   databases, sources renamed/moved/switched http-https, the new keyboard. The site shows it at `/store/`; the
-  manuals (English, Polish) have its section. Left:
-  - the console (the AutoBleem kernel's WiFi) and the PC stick, Windows;
-  - more Apps for the public catalog (the console Apps converted, OpenTyrian);
+  manuals (English, Polish) have its section. Since 2026-09-25: its own CI (the Store for every target and
+  abstored, a nightly, the site's Store page), the eight console Apps in the psc catalog (`pack_psc_apps.py
+  --per-app`), and LAN Share (autobleem-pc-tools, done: the Windows app that publishes games and read discs to
+  an abstored, and removes them; on the Store page). Left:
+  - on hardware - see Testers above;
+  - more Apps, one by one (each a porting session of its own: the console Apps converted to `bin/psc/`,
+    OpenTyrian for every target);
+  - the TSV format written up for source owners;
   - the other manual languages when they come.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
