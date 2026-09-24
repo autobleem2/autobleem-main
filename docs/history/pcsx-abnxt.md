@@ -21,8 +21,13 @@ emulator keeps, and the binary keeps the name `pcsx-ab` in the payloads.
 which `LaunchService::launchPcsx` passes as the **10th argument** of `launch.sh`; the console's and the Pi's
 scripts run `Autobleem/bin/emu/pcsx-ab` or **`Autobleem/bin/emunxt/pcsx-ab`** (the same binary name and
 `plugins/` layout, `emunxt-arm64/` for the 64-bit Pi as `emu-arm64/`) and fall back to `emu/` when the
-chosen folder has no binary. Both read the same `.pcsx` (pcsx.cfg, memory cards); a resume point one wrote
-does not load in the other (save-state versions differ) - the game starts fresh. `ci/build.sh` builds
+chosen folder has no binary. Both read the same `.pcsx` (pcsx.cfg, memory cards) and, since 2026-09-24, the
+same resume points: pcsx-abnxt writes and reads pcsx-ab's (Sony's) save-state layout - its
+`libpcsxcore/state_sony.c`, and its CLAUDE.md's "The save-state layout" - so a game left in one continues in
+the other (until then neither could load the other's: the header and version were the same, but Sony had
+added fields upstream never had, which shifted everything after the GPU). An HLE-BIOS state is refused
+either way. Verified: the console's 2018 states continue in nxt; pcsx-ab loading nxt's still wants a run on
+a console or a Pi (the Windows pcsx-ab dev build crashes after loading any state). `ci/build.sh` builds
 pcsx-abnxt into `emunxt/` from `AB_PCSXNXT_DIR` / `../pcsx-abnxt` next to pcsx-ab; `make_rpi_package.sh`,
 `install.sh`, the PC installer's update list and `install_autobleem.py` know the folder. The checked-in
 `emunxt/` binaries are `r26-24-g0f4727f1` (console, Pi armhf, Pi arm64); on a PC a game launch is a splash
