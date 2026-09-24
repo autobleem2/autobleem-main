@@ -76,6 +76,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - The launcher resolves it by one rule (`AppManifest`, over the target's ordered key list), and `run.sh`
     and Windows start what it resolved.
   - A new target adds keys and never changes an existing App.
+  - An App's ini says whether it runs with our virtual pad mapper (`VirtualPad=true|false`, absent =
+    true); `app_env.sh` starts abpadd and the preload only for one that does.
+- **Repository names** (2026-09-24): an extension's repository is `ext_<name>` (`autobleem2/ext_store`),
+  an App's `app_<name>` (`app_opentyrian`). The folder it installs to keeps the bare name.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
@@ -97,7 +101,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - **PSC-Bios and ABFlashKit stay Apps**, shipped with the console package: the console needs them. They
     are not extensions.
 - **The Store** (2026-09-24, the launcher's `docs/store-plan.md`):
-  - It is the **first extension, "AutoBleem Store"** (its own repository), on **every target** (psc, rpi,
+  - It is the **first extension, "AutoBleem Store"** (its own repository, `ext_store`), on **every target** (psc, rpi,
     rpi64, pcusb, win).
   - It only *pulls*: nothing listens on a port, and nothing is installed or uploaded to it from another
     device over the network.
