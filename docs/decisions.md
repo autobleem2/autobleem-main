@@ -89,8 +89,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     that disables an extension which brought the launcher down.
   - It lives in `Extensions/<name>/` with an `extension.ini`, and runs from **one central place**: the
     System menu's Extensions list.
-  - It is **installed by hand** onto the stick and is **always a separate download**: none is bundled with
-    a release. Nothing downloads or installs an extension, the Store included.
+  - It is **installed by hand** onto the stick and is **a separate download**: none is bundled with a
+    release, **PSC-Bios excepted** (below). Nothing downloads or installs an extension, the Store included.
   - It is built for every target.
   - Its `extension.ini` says whether it needs the network (`Network=required|optional|none`). The
     launcher **refuses to run one that requires it while the network is unreachable**: offline mode on the
@@ -98,8 +98,13 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - It **logs through the launcher's facility**: the same `PLOG_*` macros, into `System/Logs/autobleem.log`,
     each line tagged with the extension's name. There is no log file of its own.
   - Extensions in autobleem2 follow the 16-language rule; other people's fall back to English.
-  - **PSC-Bios and ABFlashKit stay Apps**, shipped with the console package: the console needs them. They
-    are not extensions.
+  - **PSC-Bios is an extension bundled with the console package; ABFlashKit stays an App** (the owner, later
+    on 2026-09-24; until then both stayed Apps).
+    - PSC-Bios is `Extensions/pscbios/`, a console-only plugin from autobleem-console-tools, run by the
+      System menu's Hardware Information. The built-in screen shows wherever it cannot run.
+    - Its `AB_SDK_ABI` must be the launcher's, which the console tools' CI enforces.
+    - An update replaces it and removes the old `Apps/pscbios/`.
+    - ABFlashKit flashes the kernel, so it runs with the launcher out of the way, as an App.
 - **The Store** (2026-09-24, the launcher's `docs/store-plan.md`):
   - It is the **first extension, "AutoBleem Store"** (its own repository, `ext_store`), on **every target** (psc, rpi,
     rpi64, pcusb, win).
