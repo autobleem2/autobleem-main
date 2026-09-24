@@ -56,21 +56,22 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     packs them for the Store as they are);
   - OpenTyrian built for every target (the tier-2 App repositories, `app_<name>`).
 - **Extensions** (the launcher's `docs/extensions-plan.md`). The plugin mechanism, the SDK side, the
-  Extensions list and `hello` are in `develop` (2026-09-24), proven on Windows and Linux x86_64 and built
-  for every target. Left:
-  - a console and a Pi running `hello` and the Store (the tester checklist);
+  Extensions list and `hello` are in `develop` (2026-09-24), proven on Windows, Linux x86_64 and the Pi 400
+  (the Store), built for every target; `hello` is built for dev hosts only. PSC-Bios is a bundled extension
+  on the console. Left:
+  - a console running the Store (the tester checklist);
   - the Windows *product* with a plugin (it links libstdc++ statically);
   - the curated SDK surface with its export list;
   - the ABI check in CI;
   - the SDK package, so an `ext_<name>` repository can build without the launcher's tree.
-- **The AutoBleem Store** (the launcher's `docs/store-plan.md`). It works on the Windows dev build (an App
-  and a game installed from a local test site). It is kept in a local repository until
-  **`autobleem2/ext_store` is created (the owner's step)**. The site's side (`store/<platform>/catalog.json`,
-  `repo_publish.sh store`) is on autobleem-repo's `feature/extensions`. Left:
-  - the first items published;
-  - Apps for the other targets;
-  - hardware;
-  - the manuals.
+- **The AutoBleem Store** (the launcher's `docs/store-plan.md`, `autobleem2/ext_store`). Tested on the Pi 400
+  (2026-09-24): the public catalog (the Terminal App, published from app_terminal's v1.0.0), a LAN source
+  served by `abstored` (ext_store/server, any Linux; the Pi runs one from its crontab), covers from our covers
+  databases, sources renamed/moved/switched http-https, the new keyboard. The site shows it at `/store/`; the
+  manuals (English, Polish) have its section. Left:
+  - the console (the AutoBleem kernel's WiFi) and the PC stick, Windows;
+  - more Apps for the public catalog (the console Apps converted, OpenTyrian);
+  - the other manual languages when they come.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)
