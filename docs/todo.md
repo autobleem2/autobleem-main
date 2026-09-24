@@ -49,10 +49,17 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   version in `emu/<name>/` and deletes the rest. Fix: publish develop pushes too (e.g.
   `emu/<name>/nightly/<version>/`), keep the newest per channel (release / testing / nightly) with a catalog
   each next to `latest.json`, and draw the panel with the channel pills the other tabs use.
-- **The Store** (the launcher's `docs/store-plan.md`, planned 2026-09-24): a System-menu screen on every
-  target that downloads and installs Apps (one zip per App per platform) and games from our catalog and
-  from user TSV sources, in the background. Nine steps: core formats and services first, then the screen,
-  the site's `store/<platform>/catalog.json`, and Apps for the targets beyond the console.
+- **Multi-platform Apps** (the launcher's `docs/app-format-plan.md`, planned 2026-09-24): one App or
+  extension folder carries every platform's binary (`bin/<key>/`), and the ini names them. Seven steps:
+  `Env::appPlatformKeys()` + `AppManifest`, the launcher and `app_env.sh`, the Windows direct launch, the
+  eight console Apps converted, OpenTyrian on every target. It comes before the Store and extensions.
+- **Extensions** (the launcher's `docs/extensions-plan.md`, planned 2026-09-24): binary packages on the
+  AutoBleem SDK in `Extensions/<name>/`, installed by hand and run from the System menu's Extensions list.
+  Seven steps: `ExtensionService` + `ab_extension` + a `hello` sample in core, then the launcher's list and
+  launch protocol.
+- **The AutoBleem Store** (the launcher's `docs/store-plan.md`, planned 2026-09-24): the first extension,
+  in its own repository. It downloads and installs Apps (one zip per App per platform) and games from our
+  catalog and from user TSV sources, on every target. Nine steps, after the extension mechanism.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)

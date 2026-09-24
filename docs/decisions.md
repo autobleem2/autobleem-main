@@ -67,9 +67,25 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The console's update never relies on a tool in the kernel payload** (2026-09-23): it downloads with
   `abfetch`, the launcher's own HTTPS client shipped on the stick, so every AutoBleem kernel - the 1.x one
   included - updates the same way.
+- **Apps and extensions are multi-platform folders** (2026-09-24, the launcher's
+  `docs/app-format-plan.md`):
+  - One `Apps/<name>/` (or `Extensions/<name>/`) holds a binary for every platform we build for, now or
+    later, side by side in `bin/<key>/`, with its data shared.
+  - The ini says which binary is for which platform key (`Exec.<key>=`, or `Exec=bin/{key}/...`).
+  - The launcher resolves it by one rule (`AppManifest`, over the target's ordered key list), and `run.sh`
+    and Windows start what it resolved.
+  - A new target adds keys and never changes an existing App.
+- **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
+  - An extension is a binary package built on the AutoBleem SDK (autobleem-core: `ab_core`, `ab_classic`,
+    `lib_ableem`), drawing its screens with the user's theme and our UI components.
+  - It lives in `Extensions/<name>/` with an `extension.ini`, and runs from **one central place**: the
+    System menu's Extensions list.
+  - It is **installed by hand** onto the stick. Nothing downloads or installs an extension, the Store
+    included.
+  - It is built for every target.
 - **The Store** (2026-09-24, the launcher's `docs/store-plan.md`):
-  - It is one launcher screen, reached from the System menu, on **every target** (psc, rpi, rpi64, pcusb,
-    win).
+  - It is the **first extension, "AutoBleem Store"** (its own repository), on **every target** (psc, rpi,
+    rpi64, pcusb, win).
   - It only *pulls*: nothing listens on a port, and nothing is installed or uploaded to it from another
     device over the network.
   - Our Apps are store items, one zip per App per platform.
