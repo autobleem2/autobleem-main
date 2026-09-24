@@ -5,6 +5,8 @@ autobleem              the launcher (EvolutionUI, the rc scripts, the console an
 autobleem-core         the shared C++ SDK: lib_ableem, ab_core, ab_classic, ab_installer - a submodule of the programs
 autobleem-console-tools  PSC-Bios and ABFlashKit, the two tools the console runs from Apps/
 autobleem-pc-tools     AutoBleemInstaller, AutoBleemFlasher, AutoBleemWinSetup and UpdateRoms (Windows)
+ext_store              the AutoBleem Store, the first extension (a plugin of the launcher) - repositories
+                       named ext_<name> are extensions, app_<name> Apps
 autobleem-appliance    assembles every platform's package and image from the components' releases
 autobleem-build        the Docker build image every component compiles in, and the site's RetroArch refresh
 autobleem-repo         the download site: its page generator, the publish tooling, Caddy
