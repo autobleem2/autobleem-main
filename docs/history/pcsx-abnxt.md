@@ -34,7 +34,18 @@ loading any state and is no test. Commits: pcsx-abnxt `d720d84a` and `c8080b0d` 
 `94998a8` - the launcher's and this repository's messages of that day name `eb3ce741`, the first commit's
 hash before an amend, which never reached GitHub. The same day (pcsx-abnxt `f609480a`) **every way out of a
 game leaves it as it is at that moment**: the menu button held, Reset and Power used to leave the autosave
-ring's oldest snapshot, ~10 s back, as Sony's firmware did; the ring is gone. `ci/build.sh` builds
+ring's oldest snapshot, ~10 s back, as Sony's firmware did; the ring is gone. **A game's config has one
+source** (the same day, `feature/custom-config` in pcsx-abnxt, pcsx-ab2, autobleem-core and the launcher,
+merged to develop): the old "Save AutoBleem config" entries wrote an `autobleem.cfg` that the launcher
+copied back over its pcsx.cfg after the run. Next to them was a `cfg/<label>-<id>.cfg` that the launcher's
+edits patched as well, so it was never clear which file was in charge. Now both emulators load pcsx.cfg and
+then `.pcsx/pcsx.custom.cfg` over it. Their menus have one "Save settings for this game", which writes only
+the custom file: foreign keys are kept, and Bios goes back as SET_BY_PCSX. While that file exists, the
+launcher's game editor greys the PCSX rows behind an "Unlock the settings" row, and unlocking deletes the
+file. Old files become the custom one (`PcsxConfig::migrateLegacy`). The owner's four answers were: the
+name `pcsx.custom.cfg`; unlocking goes back to the launcher's values; a saved screen shape beats the global
+Widescreen option; an old file becomes the custom one. The launcher's `CLAUDE.md` and
+`docs/menu-options.md` have the details. `ci/build.sh` builds
 pcsx-abnxt into `emunxt/` from `AB_PCSXNXT_DIR` / `../pcsx-abnxt` next to pcsx-ab; `make_rpi_package.sh`,
 `install.sh`, the PC installer's update list and `install_autobleem.py` know the folder. The checked-in
 `emunxt/` binaries are `r26-24-g0f4727f1` (console, Pi armhf, Pi arm64); on a PC a game launch is a splash
