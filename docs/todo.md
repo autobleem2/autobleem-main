@@ -49,18 +49,28 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   version in `emu/<name>/` and deletes the rest. Fix: publish develop pushes too (e.g.
   `emu/<name>/nightly/<version>/`), keep the newest per channel (release / testing / nightly) with a catalog
   each next to `latest.json`, and draw the panel with the channel pills the other tabs use.
-- **Multi-platform Apps** (the launcher's `docs/app-format-plan.md`, planned 2026-09-24): one App or
-  extension folder carries every platform's binary (`bin/<key>/`), and the ini names them. Seven steps:
-  `Env::appPlatformKeys()` + `AppManifest`, the launcher and `app_env.sh`, the Windows direct launch, the
-  eight console Apps converted, OpenTyrian on every target. It comes before the Store and extensions.
-- **Extensions** (the launcher's `docs/extensions-plan.md`, planned 2026-09-24): plugins (`.so`/`.dll`)
-  on the AutoBleem SDK in `Extensions/<name>/`, installed by hand and run from the System menu's Extensions
-  list. Eight steps, starting with a proof: a plugin `dlopen`'d by a launcher that exports its symbols, on
-  Windows, a Pi and the console, with UPX packing checked. Then the SDK surface + ABI stamp, a `hello`
-  sample, the launcher's side, and the ABI check in CI.
-- **The AutoBleem Store** (the launcher's `docs/store-plan.md`, planned 2026-09-24): the first extension,
-  in its own repository. It downloads and installs Apps (one zip per App per platform) and games from our
-  catalog and from user TSV sources, on every target. Nine steps, after the extension mechanism.
+- **Multi-platform Apps** (the launcher's `docs/app-format-plan.md`). The format, `AppManifest`, the launcher
+  and the three rc scripts are in `develop` (2026-09-24). Left:
+  - the Windows product's `Apps/` folder;
+  - the eight console Apps converted to `bin/psc/` (the owner's `F:/Apps`; `pack_psc_apps.py --per-app`
+    packs them for the Store as they are);
+  - OpenTyrian built for every target (the tier-2 App repositories, `app_<name>`).
+- **Extensions** (the launcher's `docs/extensions-plan.md`). The plugin mechanism, the SDK side, the
+  Extensions list and `hello` are in `develop` (2026-09-24), proven on Windows and Linux x86_64 and built
+  for every target. Left:
+  - a console and a Pi running `hello` and the Store (the tester checklist);
+  - the Windows *product* with a plugin (it links libstdc++ statically);
+  - the curated SDK surface with its export list;
+  - the ABI check in CI;
+  - the SDK package, so an `ext_<name>` repository can build without the launcher's tree.
+- **The AutoBleem Store** (the launcher's `docs/store-plan.md`). It works on the Windows dev build (an App
+  and a game installed from a local test site). It is kept in a local repository until
+  **`autobleem2/ext_store` is created (the owner's step)**. The site's side (`store/<platform>/catalog.json`,
+  `repo_publish.sh store`) is on autobleem-repo's `feature/extensions`. Left:
+  - the first items published;
+  - Apps for the other targets;
+  - hardware;
+  - the manuals.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)
