@@ -49,6 +49,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   version in `emu/<name>/` and deletes the rest. Fix: publish develop pushes too (e.g.
   `emu/<name>/nightly/<version>/`), keep the newest per channel (release / testing / nightly) with a catalog
   each next to `latest.json`, and draw the panel with the channel pills the other tabs use.
+- **The Store** (the launcher's `docs/store-plan.md`, planned 2026-09-24): a System-menu screen on every
+  target that downloads and installs Apps (one zip per App per platform) and games from our catalog and
+  from user TSV sources, in the background. Nine steps: core formats and services first, then the screen,
+  the site's `store/<platform>/catalog.json`, and Apps for the targets beyond the console.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
 ## Later (ideas, not planned)

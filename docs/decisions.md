@@ -67,6 +67,19 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The console's update never relies on a tool in the kernel payload** (2026-09-23): it downloads with
   `abfetch`, the launcher's own HTTPS client shipped on the stick, so every AutoBleem kernel - the 1.x one
   included - updates the same way.
+- **The Store** (2026-09-24, the launcher's `docs/store-plan.md`):
+  - It is one launcher screen, reached from the System menu, on **every target** (psc, rpi, rpi64, pcusb,
+    win).
+  - It only *pulls*: nothing listens on a port, and nothing is installed or uploaded to it from another
+    device over the network.
+  - Our Apps are store items, one zip per App per platform.
+  - **User TSV sources are not limited**: any number, local or remote, any host, every item kind. They are
+    how legal games from private sources get distributed. We ship no source but our own catalog.
+- **No Project Eris code, ever** (2026-09-24): nothing from Project Eris or its mods (PSC Store included)
+  is used in any repository. That covers sources, binaries, scripts, databases, samples, artwork and text.
+  A feature inspired by theirs is a clean implementation from an analysis of what it does, written on our
+  own code. *Why:* their code carries its own licence and authorship, and ours must stay GPLv3 and
+  provably our own.
 - **Themes**: all five stay in the launcher repository; `ab2/ab.ogg` is the owner's own composition.
 - **Images**: xz level 2 (`AB_XZ_LEVEL=2`) - speed over size; cache the base images between builds.
 
