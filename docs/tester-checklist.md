@@ -156,6 +156,28 @@ setup asked for the graphical or text screen; the update must draw with the same
 **Logs:** `System/Logs/standby.log`. A power-port setup ends each Power Off with "powering off instead" and
 the kernel's reason (`usb1 failed to suspend`).
 
+## 10. Extensions and the AutoBleem Store - ready once a nightly from launcher `develop` after 2026-09-24 is out
+
+**You need:** that nightly on a console (AutoBleem kernel, WiFi set up in PSC-Bios), a Pi or the PC stick. You
+also need the extension packages the developers hand you: `hello` and `ext_store` for your system, each an
+`Extensions/<name>/` folder to copy onto the stick.
+
+| # | Do | Expect |
+|---|---|---|
+| 10.1 | Without any extension: L2+R2 -> Extensions | "No extensions installed" and a line saying where they go. |
+| 10.2 | Copy `Extensions/hello/` onto the stick and start the launcher | For a few seconds a "Hello - A background extension is running" bubble at the top right. |
+| 10.3 | L2+R2 -> Extensions -> Hello -> Cross | A "Hello" dialog in the launcher's look. Confirm, and back in the carousel a "Confirmed in the extension" bubble for a few seconds. |
+| 10.4 | Start a game with `hello` installed, play a minute, come back | The game runs as usual; back in the launcher nothing is missing (theme, sound, pads). |
+| 10.5 | Copy `Extensions/store/`; turn WiFi off; L2+R2 -> Extensions | The Store's row is greyed: "Needs a network connection". Cross does nothing. |
+| 10.6 | WiFi on: open the Store | The tabs Apps / Games / Downloads / Sources; the Sources tab lists "AutoBleem" with its item count. |
+| 10.7 | Install an App; leave the Store while it downloads | The download goes on in a bubble in the carousel. When it is done, the App is in the Apps set and starts. |
+| 10.8 | Start a large download, then start a game; come back | The download stopped for the game and continues where it was. |
+| 10.9 | Power Off in the middle of a download; power on | The download continues after the start. |
+| 10.10 | Put a `.tsv` source (from the Store's README) into `System/Extensions/store/sources/` | Its items appear under Games after Square (Refresh) or reopening the Store. |
+
+**Logs:** `System/Logs/autobleem.log`; every extension line is tagged `[hello]` or `[store]`. The Store's own
+files are in `System/Extensions/store/`.
+
 ---
 
 ### Reporting
