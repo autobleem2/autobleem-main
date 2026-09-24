@@ -53,10 +53,11 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   extension folder carries every platform's binary (`bin/<key>/`), and the ini names them. Seven steps:
   `Env::appPlatformKeys()` + `AppManifest`, the launcher and `app_env.sh`, the Windows direct launch, the
   eight console Apps converted, OpenTyrian on every target. It comes before the Store and extensions.
-- **Extensions** (the launcher's `docs/extensions-plan.md`, planned 2026-09-24): binary packages on the
-  AutoBleem SDK in `Extensions/<name>/`, installed by hand and run from the System menu's Extensions list.
-  Seven steps: `ExtensionService` + `ab_extension` + a `hello` sample in core, then the launcher's list and
-  launch protocol.
+- **Extensions** (the launcher's `docs/extensions-plan.md`, planned 2026-09-24): plugins (`.so`/`.dll`)
+  on the AutoBleem SDK in `Extensions/<name>/`, installed by hand and run from the System menu's Extensions
+  list. Eight steps, starting with a proof: a plugin `dlopen`'d by a launcher that exports its symbols, on
+  Windows, a Pi and the console, with UPX packing checked. Then the SDK surface + ABI stamp, a `hello`
+  sample, the launcher's side, and the ABI check in CI.
 - **The AutoBleem Store** (the launcher's `docs/store-plan.md`, planned 2026-09-24): the first extension,
   in its own repository. It downloads and installs Apps (one zip per App per platform) and games from our
   catalog and from user TSV sources, on every target. Nine steps, after the extension mechanism.

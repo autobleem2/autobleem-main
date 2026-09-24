@@ -71,18 +71,26 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   `docs/app-format-plan.md`):
   - One `Apps/<name>/` (or `Extensions/<name>/`) holds a binary for every platform we build for, now or
     later, side by side in `bin/<key>/`, with its data shared.
-  - The ini says which binary is for which platform key (`Exec.<key>=`, or `Exec=bin/{key}/...`).
+  - The ini says which binary is for which platform key (`Exec.<key>=`, or `Exec=bin/{key}/...`; an
+    extension's `Plugin=` resolves the same way).
   - The launcher resolves it by one rule (`AppManifest`, over the target's ordered key list), and `run.sh`
     and Windows start what it resolved.
   - A new target adds keys and never changes an existing App.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
-  - An extension is a binary package built on the AutoBleem SDK (autobleem-core: `ab_core`, `ab_classic`,
-    `lib_ableem`), drawing its screens with the user's theme and our UI components.
+  - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
+    (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
+    and draws with the user's theme and our UI components.
+  - It may run in the background (`poll`/`suspend`/`resume`).
+  - Load-time safety comes from a checked ABI stamp (`AB_SDK_ABI` + compiler + target) and a crash guard
+    that disables an extension which brought the launcher down.
   - It lives in `Extensions/<name>/` with an `extension.ini`, and runs from **one central place**: the
     System menu's Extensions list.
-  - It is **installed by hand** onto the stick. Nothing downloads or installs an extension, the Store
-    included.
+  - It is **installed by hand** onto the stick and is **always a separate download**: none is bundled with
+    a release. Nothing downloads or installs an extension, the Store included.
   - It is built for every target.
+  - Extensions in autobleem2 follow the 16-language rule; other people's fall back to English.
+  - **PSC-Bios and ABFlashKit stay Apps**, shipped with the console package: the console needs them. They
+    are not extensions.
 - **The Store** (2026-09-24, the launcher's `docs/store-plan.md`):
   - It is the **first extension, "AutoBleem Store"** (its own repository), on **every target** (psc, rpi,
     rpi64, pcusb, win).
@@ -91,6 +99,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - Our Apps are store items, one zip per App per platform.
   - **User TSV sources are not limited**: any number, local or remote, any host, every item kind. They are
     how legal games from private sources get distributed. We ship no source but our own catalog.
+  - A static notice sits on the Sources tab ("You are responsible for what your sources contain"). It is
+    not a gate, and there is no dead-link checking.
 - **No Project Eris code, ever** (2026-09-24): nothing from Project Eris or its mods (PSC Store included)
   is used in any repository. That covers sources, binaries, scripts, databases, samples, artwork and text.
   A feature inspired by theirs is a clean implementation from an analysis of what it does, written on our
