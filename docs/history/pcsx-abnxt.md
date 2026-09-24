@@ -7,7 +7,8 @@ pcsx-ab (`autobleem/pcsx-ab2`, `E:\Programming\pcsx-rearmed-develop`) is a 2017 
 `bebe989b`, r22 + 25 commits - what Sony's firmware took) with Sony's and our patches; it stays the shipped
 emulator until pcsx-abnxt's phase 8. **pcsx-abnxt** (`E:\Programming\pcsx-abnxt`) is a public GitHub fork of
 `notaz/pcsx_rearmed` at **r26** with our own `autobleem/libpicofe` fork as the submodule, re-implementing
-what Sony and we added (the front buttons, the resume-point contract, the autosave ring, disc change, the
+what Sony and we added (the front buttons, the resume-point contract, the autosave ring - gone since
+2026-09-24, see below - disc change, the
 menu, filters, two pads, `SET_BY_PCSX`) on top of what upstream has now - aarch64 dynarec, lightrec, C-SIMD
 gpu_neon, lid emulation, SlowBoot, a per-serial hack database. Sony's 131-serial per-title hacks are **not**
 ported (tested instead, ported on evidence). **Its port plan is complete** (2026-09-20 night, the owner's call -
@@ -26,8 +27,14 @@ same resume points: pcsx-abnxt writes and reads pcsx-ab's (Sony's) save-state la
 `libpcsxcore/state_sony.c`, and its CLAUDE.md's "The save-state layout" - so a game left in one continues in
 the other (until then neither could load the other's: the header and version were the same, but Sony had
 added fields upstream never had, which shifted everything after the GPU). An HLE-BIOS state is refused
-either way. Verified: the console's 2018 states continue in nxt; pcsx-ab loading nxt's still wants a run on
-a console or a Pi (the Windows pcsx-ab dev build crashes after loading any state). `ci/build.sh` builds
+either way. Verified: the console's 2018 states continue in nxt, and on the Pi 400 pcsx-ab continues nxt's -
+after one more fix, pcsx-ab's GPU busy bit, which it keeps in its copy of GPUSTAT (a state nxt saved in a
+busy moment left Crash on its loading screen in pcsx-ab). The Windows pcsx-ab dev build crashes after
+loading any state and is no test. Commits: pcsx-abnxt `d720d84a` and `c8080b0d` (the GPU bit), pcsx-ab2
+`94998a8` - the launcher's and this repository's messages of that day name `eb3ce741`, the first commit's
+hash before an amend, which never reached GitHub. The same day (pcsx-abnxt `f609480a`) **every way out of a
+game leaves it as it is at that moment**: the menu button held, Reset and Power used to leave the autosave
+ring's oldest snapshot, ~10 s back, as Sony's firmware did; the ring is gone. `ci/build.sh` builds
 pcsx-abnxt into `emunxt/` from `AB_PCSXNXT_DIR` / `../pcsx-abnxt` next to pcsx-ab; `make_rpi_package.sh`,
 `install.sh`, the PC installer's update list and `install_autobleem.py` know the folder. The checked-in
 `emunxt/` binaries are `r26-24-g0f4727f1` (console, Pi armhf, Pi arm64); on a PC a game launch is a splash
