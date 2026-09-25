@@ -198,3 +198,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   another session committed to.
 - Post a one-line progress note at each step of long multi-repository work, mapped to the plan; don't
   idle-wait on CI - pick up the next item meanwhile.
+- **Clean up after yourself on the build server** (the owner, 2026-09-25, after `psc-build` reached 88%):
+  when a build there is finished - its result fetched, or CI now builds it - delete what the build left
+  behind: the `build_*/` and `dist/` folders, fetched data caches, logs you wrote to `~`, containers and
+  images you pulled only for it (`alpine` for a root-owned delete, say). A synced tree that CI builds from
+  now on goes entirely. Only your own: another session's files are theirs to delete - ask it (`ListAgents`,
+  `SendMessage`) or the owner, never remove them yourself; the site (`~/autobleem-repo`), the runner and the
+  shared build images are never "leftovers".
