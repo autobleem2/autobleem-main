@@ -53,6 +53,14 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The PlayStation Classic's own storage is never written** - not the root file system, not `/data`,
   nothing on the eMMC (ABFlashKit flashing the kernel on the user's request is the one exception).
   Everything lives on the stick and in `/tmp`.
+- **The console's kernel stays at 4.4** (2026-09-25).
+  - No new kernel and no new root filesystem.
+  - The GPU (PowerVR GE8300, a DDK 1.9 blob) has no usable driver on a newer kernel.
+  - More USB devices (WiFi dongles, pads) come from **backports** and out-of-tree modules built against
+    4.4.
+  - A newer userland comes from the kernel payload's overlay: the stock root scanned for what is outdated,
+    newer libraries laid over the console's own (same soname only), **never the graphics stack**.
+  - psc-kernel-payload's `docs/userland-refresh.md` has the plan.
 - **The console's SDL2 is 2.0.14 at most**, Wayland video and ALSA audio only (Sony's Weston offers only
   `wl_shell`, which 2.0.16 removed; the console's libwayland is 1.12).
 - **No BIOS file in any repository or on the download site** - only lists of hashes and upstream URLs.

@@ -46,6 +46,16 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
 
 ## Engineering
 
+- **The console's kernel payload: backports and a newer userland** (psc-kernel-payload
+  `docs/userland-refresh.md`, decided 2026-09-25):
+  - a backports package (WiFi) for the 4.4 kernel;
+  - the out-of-tree Realtek drivers and HID pad modules backports lacks;
+  - `scripts/rootfs-versions.py`;
+  - `overlay.py check` refusing a shadowed graphics library;
+  - a supported-dongle list tested on a console.
+  - **Owner's call first**: a newer btusb needs `BT=m` in the kernel config, which is the owner's to
+    change.
+
 - **The virtual gamepad on a console** (the launcher's `docs/virtual-gamepad-plan.md`, step 9): compile
   `abpad` with the console toolchain and run an App through it on a console. Then step 8, a launcher page
   showing which pads the daemon sees; keyboard mode (step 5) is written and never exercised.
