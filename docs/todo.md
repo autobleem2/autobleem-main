@@ -93,8 +93,8 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   - the TSV format written up for source owners;
   - the other manual languages when they come.
 - **Scanner processors - next** (the launcher's `docs/scanner-processors-next-plan.md`, the owner
-  2026-09-25: later, after the hardware pass): `proc_unzip` v1.0.0 (its first release), `.7z` (vendored LZMA
-  SDK, or a separate `proc_un7z`), processors as a Store item kind, launch-time processors, signatures or a
+  2026-09-25: later, after the hardware pass): `proc_unzip`'s first release (a `v*` tag; `.7z` and `.rar` went
+  in as 1.1.0 on 2026-09-25), processors as a Store item kind, launch-time processors, signatures or a
   trusted list, and a `Heavy=` flag if the console's heavy jobs call for one.
 - Optional hardening: pin the `actions/*` to commit hashes, Dependabot for the workflows.
 
