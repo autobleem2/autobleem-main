@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior) and the way out - ready from the next nightly (launcher `6e5b580`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior, Duke Nukem 3D) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -258,6 +258,15 @@ catalogs) or `github.com/autobleem2/app_wolf4sdl` -> Releases:
 | 12.22 | Install it and start it (on Windows too) | Straight into the game, full screen, 4:3 - no setup window, not even for a moment. The old RetroBoot Shadow Warrior is replaced. |
 | 12.23 | Play on the console's own pad: D-pad, Square, Cross, Circle, Triangle, L1, R1, L2/R2, Select, Start | Move and turn; fire; crouch; open; jump; next item; next weapon; strafe; use item; menu (Start twice: the map). |
 | 12.24 | The console: sound and music; does it run smoothly | Effects and music; note any slowdown (the software renderer at 640x480). |
+
+**Duke Nukem 3D (Shareware) (JFDuke3D)** - one Store item (v20260105-1, all five catalogs; it replaces the old
+EDuke32 App) or `github.com/autobleem2/app_jfduke3d` -> Releases:
+
+| # | Do | Expect |
+|---|---|---|
+| 12.25 | Install it and start it (on Windows too) | Straight into the game, full screen, 4:3, no setup window. |
+| 12.26 | Play on the console's own pad: D-pad, Cross, Circle, Triangle, Square (once, twice), L1 (once, twice), R1, L2/R2, Select, Start | Move and turn; fire; crouch; jump; open / kick; next item / use it; next weapon; strafe; map; menu. |
+| 12.27 | Save, leave, start again, load | The save is in the App folder (`Apps/eduke32/`). |
 
 **The way out, every App above** (launcher `6e5b580` or later):
 

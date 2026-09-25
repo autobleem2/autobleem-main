@@ -115,7 +115,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     shareware, Freedoom: Phase 1 and 2 - the 2020 pad layout, a twin-stick layout dropped because the
     console's pad has no sticks), Wolf4SDL (`app_wolf4sdl`: Wolfenstein 3D shareware and, the owner's
     addition, the Spear of Destiny demo), JFSW (`app_jfsw`: Shadow Warrior shareware, the software renderer
-    everywhere; upstream's own Win32 build on Windows), all 2026-09-25.
+    everywhere; upstream's own Win32 build on Windows), JFDuke3D (`app_jfduke3d`: Duke Nukem 3D shareware -
+    JFDuke3D chosen over EDuke32, the 2020 engine; kept as `app/eduke32` to replace it in place), all
+    2026-09-25.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
