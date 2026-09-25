@@ -79,8 +79,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     any App** since launcher `6e5b580` (abpadd's Reset watch). **Wolf4SDL too** (`autobleem2/app_wolf4sdl`,
     v20260504-1: Wolfenstein 3D shareware and the Spear of Destiny demo). **JFSW too** (`autobleem2/app_jfsw`,
     v20260105-1: Shadow Warrior shareware). **Duke Nukem 3D too** (`autobleem2/app_jfduke3d`, v20260105-1:
-    JFDuke3D with the shareware episode, as `app/eduke32`). Left for all six: the hardware pass
-    (`tester-checklist.md` section 12), the Reset watch on a console first. Next: OpenBOR (with our branding).
+    JFDuke3D with the shareware episode, as `app/eduke32`). **OpenBOR too** (`autobleem2/app_openbor`,
+    v7533-1: the engine with our branding and no games - the owner can name one or two free paks for a
+    `-2`). Left for all seven: the hardware pass (`tester-checklist.md` section 12), the Reset watch on a
+    console first. Next: Amiberry (with our branding), the last port.
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).

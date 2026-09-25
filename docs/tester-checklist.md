@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior, Duke Nukem 3D) and the way out - ready from the next nightly (launcher `6e5b580`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior, Duke Nukem 3D, OpenBOR) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -267,6 +267,17 @@ EDuke32 App) or `github.com/autobleem2/app_jfduke3d` -> Releases:
 | 12.25 | Install it and start it (on Windows too) | Straight into the game, full screen, 4:3, no setup window. |
 | 12.26 | Play on the console's own pad: D-pad, Cross, Circle, Triangle, Square (once, twice), L1 (once, twice), R1, L2/R2, Select, Start | Move and turn; fire; crouch; jump; open / kick; next item / use it; next weapon; strafe; map; menu. |
 | 12.27 | Save, leave, start again, load | The save is in the App folder (`Apps/eduke32/`). |
+
+**OpenBOR** - one Store item (v7533-1, all five catalogs; it replaces the old RetroBoot OpenBOR) or
+`github.com/autobleem2/app_openbor` -> Releases. It comes without games: copy one or two `.pak` files you have
+into `Apps/openbor/Paks` first.
+
+| # | Do | Expect |
+|---|---|---|
+| 12.28 | Start it with the Paks folder empty (on Windows too) | Full screen: the OpenBOR logo with the AutoBleem mark, then the blue AutoBleem menu saying "No Mods In Paks Folder!". |
+| 12.29 | Add a pak, start it again, pick it with the D-pad, Start | The game starts; music plays; a game with an intro video plays it (WebM). |
+| 12.30 | Play on the console's own pad: D-pad, Cross, Circle, Square, Triangle, L1, R1, Start, Select, L2 | Move; attack 1-4; jump; special; start/pause; a screenshot in `ScreenShots/`; the menu. The same on any other pad; on Windows an Xbox-style pad the same way (L2 is the left trigger). |
+| 12.31 | Change a setting, leave, start again | The setting kept (`Apps/openbor/Saves/`). |
 
 **The way out, every App above** (launcher `6e5b580` or later):
 
