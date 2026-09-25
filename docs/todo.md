@@ -16,8 +16,6 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   wired and switched off, and ships unsigned until then.
 - **Telegram for the admin panel**: a bot and a chat id into the server's `admin/.env`
   (`AB_TELEGRAM_TOKEN`, `AB_TELEGRAM_CHAT`), then restart the panel (autobleem-repo `admin/README.md`, step 3).
-- **Tier-2 repositories** - `amiberry-psc`, `openbor-psc`, `autobleem-themes-pack`, `autobleem-gameports-pack`
-  under `screemerpl`: move them into `autobleem2`, or leave them as the Apps pack's personal sources.
 - **Licensing leftovers** (`archive/licensing-plan.md`): Nihilore's terms for the music track (step 6); a note
   from Axanar and cornelk that their contributions are GPLv3 (step 7, optional).
 - **Atari VCS 800**: the one on-hardware test that decides the port's shape (the launcher's
@@ -69,7 +67,12 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   - the Windows product's `Apps/` folder;
   - the eight console Apps converted to `bin/psc/` (the owner's `F:/Apps`; `pack_psc_apps.py --per-app`
     packs them for the Store as they are);
-  - OpenTyrian built for every target (the tier-2 App repositories, `app_<name>`).
+  - the third-party Apps ported from source, one `app_<name>` repository each (`decisions.md`, "Third-party
+    App ports"), in this order: OpenTyrian, SDLPoP, Crispy Doom (shareware and Freedoom), Wolf4SDL, JFSW,
+    EDuke32, OpenBOR, Amiberry. Each replaces the RetroBoot binary in the psc catalog.
+- **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
+  format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
+  later (the owner, 2026-09-25).
 - **Extensions** (the launcher's `docs/extensions-plan.md`). The plugin mechanism, the SDK side, the
   Extensions list and `hello` are in `develop` (2026-09-24), proven on Windows, Linux x86_64 and the Pi 400
   (the Store), built for every target; `hello` is built for dev hosts only. PSC-Bios is a bundled extension
@@ -88,8 +91,7 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   --per-app`), and LAN Share (autobleem-pc-tools, done: the Windows app that publishes games and read discs to
   an abstored, and removes them; on the Store page). Left:
   - on hardware - see Testers above;
-  - more Apps, one by one (each a porting session of its own: the console Apps converted to `bin/psc/`,
-    OpenTyrian for every target);
+  - more Apps, one by one (each a porting session of its own - the `app_<name>` ports above);
   - the TSV format written up for source owners;
   - the other manual languages when they come.
 - **Scanner processors - next** (the launcher's `docs/scanner-processors-next-plan.md`, the owner

@@ -81,6 +81,21 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **Repository names** (2026-09-24): an extension's repository is `ext_<name>` (`autobleem2/ext_store`),
   an App's `app_<name>` (`app_opentyrian`), a scanner processor's `proc_<name>` (`autobleem2/proc_unzip`,
   2026-09-24). The folder it installs to keeps the bare name.
+- **Third-party App ports** (the owner, 2026-09-25):
+  - The four Tier-2 repositories under `screemerpl` (`amiberry-psc`, `openbor-psc`,
+    `autobleem-gameports-pack`, `autobleem-themes-pack`) are **archived** there, not moved: reference only.
+  - Each third-party App is ported from its upstream source into its own `app_<name>` repository in
+    `autobleem2`, built like `app_terminal` for every target. The shape is **our patches over a pinned
+    upstream submodule**, not a fork.
+  - **A package carries its own libraries** in `lib/<key>/` (`Lib=lib/{key}`, which `app_env.sh` and the
+    App's `run.sh` put first on the library path). Not bundled: the **SDL2 family** (the launcher's 2.0.14
+    in `/tmp/lib` on the console, the system's elsewhere - shared, and known to be stable), glibc,
+    libstdc++/libgcc_s and the graphics driver stack. The RetroBoot libs pack is not used by the ports.
+  - **Shareware and freeware game data ships** with its App. Doom is two packages: the shareware
+    `DOOM1.WAD` and Freedoom.
+  - A build not patched for the pad runs with `VirtualPad=true`.
+  - Amiberry and OpenBOR keep **our branding** (splash screens, logos), as the 2019 ports had it.
+  - One repository at a time, the owner answering each port's detail questions first.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
