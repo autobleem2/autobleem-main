@@ -1,21 +1,38 @@
 # The AutoBleem 2 repositories, all under github.com/autobleem2, cloned by tools/workspace.sh next to this
-# file. One per line: <name>  <what it is>. Every one defaults to develop; master (main in retroarch-psc)
-# moves only with a release.
+# file. One per line: <name>  <what it is> (the first word of every non-comment line is a repository - keep
+# continuations in comments). Every one defaults to develop; master (main in retroarch-psc) moves only with
+# a release. Repositories named ext_<name> are extensions, app_<name> Apps, proc_<name> scanner processors.
+
+# the platform
 autobleem              the launcher (EvolutionUI, the rc scripts, the console and Linux payload skeletons, abpad)
 autobleem-core         the shared C++ SDK: lib_ableem, ab_core, ab_classic, ab_installer - a submodule of the programs
-autobleem-console-tools  PSC-Bios and ABFlashKit, the two tools the console runs from Apps/
-autobleem-pc-tools     AutoBleemInstaller, AutoBleemFlasher, AutoBleemWinSetup and UpdateRoms (Windows)
-ext_store              the AutoBleem Store, the first extension (a plugin of the launcher) - repositories
-                       named ext_<name> are extensions, app_<name> Apps
+autobleem-console-tools  PSC-Bios (an extension) and ABFlashKit (an App), the console's own tools
+autobleem-pc-tools     AutoBleemInstaller, AutoBleemFlasher, AutoBleemWinSetup, UpdateRoms, LAN Share, LastResortRecovery
 autobleem-appliance    assembles every platform's package and image from the components' releases
 autobleem-build        the Docker build image every component compiles in, and the site's RetroArch refresh
-autobleem-repo         the download site: its page generator, the publish tooling, Caddy
-autobleem-themes       the themes beyond the default
-autobleem-samples      the sample games pack
+autobleem-repo         the download site: its page generator, the publish tooling, Caddy, the admin panel
+autobleem-themes       the themes beyond the default (stale copies - see docs/todo.md D5)
+autobleem-samples      the sample games pack (tools only - see docs/todo.md D6)
 autobleem-manuals      the user manuals (Markdown -> HTML/PDF)
 pcsx-ab                the classic PS1 emulator (2017 upstream snapshot + Sony's and our patches)
-pcsx-abnxt             the next PS1 emulator (upstream r26 + our work)
+pcsx-abnxt             the next PS1 emulator (upstream r26 + our work) - the default
 libpicofe              pcsx-abnxt's front-end library (our fork)
 retroarch-psc          RetroArch built for the console
-psc-kernel             the console's Linux 4.4 kernel fork
+psc-kernel             the console's Linux 4.4 kernel fork (work on master - see docs/todo.md K6)
 psc-kernel-payload     the AutoBleem kernel payload ABFlashKit flashes (Buildroot)
+
+# extensions and scanner processors
+ext_store              the AutoBleem Store, the first extension, bundled with every package
+proc_unzip             the first scanner processor (zip, 7z, rar), bundled with every package
+proc_template          the skeleton to copy for a new processor
+
+# Apps (docs/app-ports.md)
+app_terminal           Terminal - bash on a pty, our own App on the SDK
+app_opentyrian         OpenTyrian - the port template
+app_sdlpop             SDLPoP (Prince of Persia)
+app_crispydoom         Crispy Doom - Doom shareware, Freedoom: Phase 1 and 2
+app_wolf4sdl           Wolf4SDL - Wolfenstein 3D shareware, Spear of Destiny demo
+app_jfsw               JFSW - Shadow Warrior shareware
+app_jfduke3d           JFDuke3D - Duke Nukem 3D shareware
+app_openbor            OpenBOR (the engine, no games yet)
+app_amiberry           Amiberry-Lite (Linux targets only)

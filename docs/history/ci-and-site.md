@@ -1,7 +1,7 @@
 # The org, the CI and the site's admin panel (2026-09-22/23)
 
-The last word of three plans, now in `docs/archive/`: `ci-public-migration-plan.md` (why go public),
-`ci-org-migration-plan.md` (how - its progress log is the detailed record) and `admin-panel-plan.md`.
+The last word of the org/CI plans: `docs/archive/ci-org-migration-plan.md` and `admin-panel-plan.md` (reduced
+summaries; the full texts - and the superseded `ci-public-migration-plan.md` - are in git history).
 
 ## What exists
 
@@ -28,5 +28,15 @@ The last word of three plans, now in `docs/archive/`: `ci-public-migration-plan.
   buttons (nightly all or per platform, promote alpha/beta/rc/release through `autobleem-main`'s
   `promote.yml` / `tools/release.py`, cancel / re-run, withdraw, republish the page), the audit log, browser
   and Telegram notifications, and the same as a JSON API with a GitHub token as the bearer.
+
+## The tools that left the launcher's tree
+
+- PSC-Bios (WiFi, timezone, pad mapping wizard - an extension now) and ABFlashKit (the kernel flasher, an App)
+  live in `autobleem2/autobleem-console-tools`; UpdateRoms, AutoBleemInstaller and AutoBleemWinSetup in
+  `autobleem2/autobleem-pc-tools` - each with its own CLAUDE.md, CI and release, assembled by autobleem-appliance.
+- The console tools' pattern stays: an SDL-free `<tool>_core` (tested) under the program, drawing with the
+  launcher's theme through `AppBase`, `EnvironmentSetup::forTool()`, and console-only work behind an interface
+  with a fake (`ConsoleBackend` -> `AbnetBackend` / `FakeBackend`) so a tool runs on Windows for a visual test.
+- UpdateRoms is a plain Win32 window, no SDL and no theme (the owner's call), linked `-static` into one exe.
 
 What is still open from these plans is in `docs/todo.md`.

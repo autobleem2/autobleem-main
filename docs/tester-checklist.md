@@ -158,9 +158,10 @@ the kernel's reason (`usb1 failed to suspend`).
 
 ## 10. Extensions and the AutoBleem Store - ready (nightly `v2.0.0-alpha2-149-g4edd7b0-n4ac996`, 2026-09-25)
 
-**You need:** that nightly on a console (AutoBleem kernel, WiFi set up in PSC-Bios), a Pi or the PC stick. You
-also need the extension packages the developers hand you: `hello` and `ext_store` for your system, each an
-`Extensions/<name>/` folder to copy onto the stick.
+**You need:** that nightly on a console (AutoBleem kernel, WiFi set up in PSC-Bios), a Pi or the PC stick. The
+Store is bundled with every package since 2026-09-25 (`Extensions/store/` is already there); `hello` is a
+development sample the developers hand you as an `Extensions/hello/` folder - it never ships. With the Store
+bundled, 10.1 shows the Store in the list rather than "No extensions installed".
 
 | # | Do | Expect |
 |---|---|---|
@@ -300,6 +301,29 @@ have; a real Kickstart (`kick13.rom`, `kick31.rom` into `Apps/amiberry/roms`) if
 | 12.18 | Windows: leave each App through its menu, as its readme says | Back in the launcher. |
 
 **Logs:** `autobleem.log`; on Linux `abpadd.log` (the virtual pad) in the logs folder.
+
+## 13. The quiet stick - ready (nightly `v2.0.0-alpha2-149-g4edd7b0-n4ac996` or later)
+
+Since 2026-09-24 AutoBleem writes to the stick only when your own state changes (a save, a memory card, a
+resume slot you keep, a setting you change, a game added or removed); logs and hand-over files live in RAM.
+It was measured on a Pi 400 and has **never run on a console**. Test it on the stock kernel and, if you
+have it, the AutoBleem kernel.
+
+**You need:** a console with the nightly, a PS1 game you can save in, a PC to look at the stick.
+
+| # | Do | Expect |
+|---|---|---|
+| 13.1 | Boot to the carousel, wait a minute, Power Off (L2+R2), put the stick in the PC | Nothing under `Games/`, `System/Databases/` or `Themes/` has a new modified time. `System/Logs/` has no `autobleem.log`, `AB_out.txt` or `launch.log` (they are in RAM now). |
+| 13.2 | Start a game in pcsx-abnxt (the default), save in-game to the memory card, leave through the emulator's menu -> Exit, **keep** the resume slot | The launcher shows the slot's picture. On the PC: the card in `Games/!SaveStates/<game>/` (or `Games/!MemCards/<set>/`) and the kept slot's state and picture have the new time. |
+| 13.3 | Start the same game and pick that resume slot | The game continues exactly where you left it (this is the `AB_LOAD_STATE` path - never exercised anywhere). |
+| 13.4 | Start the game again, leave through Exit, and this time do **not** keep the slot | Nothing under `Games/!SaveStates/<game>/sstates/` changed. |
+| 13.5 | Repeat 13.2-13.3 with Options -> PS1 Emulator = pcsx-ab | The same results. |
+| 13.6 | Start a RetroArch game, change a core option in RetroArch's menu, quit | Your change is kept next time. `RetroArch/bin/retroarch.cfg` still has AutoBleem's own settings (it was not overwritten with the launcher's temporary ones). |
+| 13.7 | Options -> Diagnostics -> Keep logs on the stick; play a game; Power Off | `System/Logs/` now has `autobleem.log`, `launch.log`, `pcsx.log`. Turn it off again afterwards. |
+| 13.8 | (For developers) `tools/stick_writes.sh start` before and `stop` after a boot + a game | The list of written files matches 13.1-13.4. |
+
+**Logs:** with 13.7 on: `System/Logs/autobleem.log`, `launch.log`, `pcsx.log`; a crash leaves
+`System/Logs/crash-<n>/`.
 
 ---
 

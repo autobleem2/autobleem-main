@@ -4,10 +4,12 @@ A step-by-step path from an empty SD card to a running AutoBleem Pi. For everyth
 partition, RetroArch, adding games, troubleshooting) see `payload_linux/README.md` - this page only gets you
 there.
 
-**64-bit note**: the 64-bit build is cross-compiled, packaged and verified on the PC (real aarch64
-binaries, a working tarball, the installer's architecture check exercised) but **has not been run on
-actual 64-bit Pi hardware yet** - there is no 64-bit Pi OS card to test it on at the time of writing. The
-32-bit build has been running on a Pi 400 since 2026-09-18. If you hit something odd on 64-bit, that is why.
+**Most people should not follow this page**: the Pi images are on the download site and flash straight
+from Raspberry Pi Imager (one list per channel - release, testing, nightly), and the first boot installs
+everything. The tarball path below is the developer's path: a blank Lite card, ssh and `install.sh` by hand.
+
+Both builds run on real hardware: the 32-bit one on a Pi 400 since 2026-09-18, the 64-bit one since
+2026-09-20 (the arm64 image's first boot went end to end on the Pi 400 - `history/raspberry-pi.md`).
 
 ## What you need
 

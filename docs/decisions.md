@@ -53,6 +53,16 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The PlayStation Classic's own storage is never written** - not the root file system, not `/data`,
   nothing on the eMMC (ABFlashKit flashing the kernel on the user's request is the one exception).
   Everything lives on the stick and in `/tmp`.
+- **The kernel stays at 4.4** (the owner, 2026-09-25): the GPU driver (PowerVR GE8300, DDK 1.9 blob) pins it;
+  newer drivers are backported to 4.4 instead (psc-kernel `feature/pad-drivers`). `docs/console.md`.
+- **The kernel payload's overlay only adds to the console, it never shadows a file of the stock root**
+  (2026-09-24, after a busybox `/bin/sh` over Sony's stopped AutoBleem from starting); `overlay.py
+  shape/check` enforces it.
+- **Every way out of a game leaves it as it is at that moment** (2026-09-24): the emulator's menu, the menu
+  button held 2 s, the console's Reset and Power buttons all save the live state; **every App can be left
+  with Reset** and, on Linux, a Start+Select hold (2026-09-25). `docs/emulator-contract.md`.
+- **The stick is written only when the user's state changes** (the quiet stick, 2026-09-24): logs, the
+  selection hand-over and RetroArch's appended config live in RAM (`/tmp/autobleem` on the console).
 - **The console's SDL2 is 2.0.14 at most**, Wayland video and ALSA audio only (Sony's Weston offers only
   `wl_shell`, which 2.0.16 removed; the console's libwayland is 1.12).
 - **No BIOS file in any repository or on the download site** - only lists of hashes and upstream URLs.
@@ -113,19 +123,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     owner's OK per port, the repository goes public in `autobleem2` with `AB_CI_ENABLED`, a
     `v<upstream>-<n>` tag makes the release, and the packages go to all five Store catalogs (replacing
     the RetroBoot App on psc).
-  - Done: OpenTyrian (`app_opentyrian`), SDLPoP (`app_sdlpop`), Crispy Doom (`app_crispydoom`: Doom
-    shareware, Freedoom: Phase 1 and 2 - the 2020 pad layout, a twin-stick layout dropped because the
-    console's pad has no sticks), Wolf4SDL (`app_wolf4sdl`: Wolfenstein 3D shareware and, the owner's
-    addition, the Spear of Destiny demo), JFSW (`app_jfsw`: Shadow Warrior shareware, the software renderer
-    everywhere; upstream's own Win32 build on Windows), JFDuke3D (`app_jfduke3d`: Duke Nukem 3D shareware -
-    JFDuke3D chosen over EDuke32, the 2020 engine; kept as `app/eduke32` to replace it in place), OpenBOR
-    (`app_openbor`: v7533, the last build for 32-bit machines, with the 2019 port's menu art and a clean
-    start-up logo - the 2019 logo was a collage of commercial characters; the 2019 pad layout; WebM and
-    Vorbis; **no games in the package** for now - nearly every OpenBOR game is built on commercial
-    characters, and none was named), Amiberry (`app_amiberry`: Amiberry-Lite 5.9.3 - psc, rpi, rpi64, pcusb;
-    AROS and WHDLoad only, no Kickstarts or games; it opens in its own GUI; the 2019 pad layout and "for
-    AutoBleem" logo; the console build is gcc-12 against the console's glibc 2.24 with libstdc++ linked in,
-    since Amiberry is C++17), all 2026-09-25. **Every Tier-2 port is done.**
+  - The ports, their releases and what is particular to each: `docs/app-ports.md` (the "Done" list that
+    stood here moved there on 2026-09-26). Amiberry and OpenBOR carry our branding; OpenBOR ships no
+    games until the owner names free ones; Doom is three Store items (Doom shareware, Freedoom 1 and 2).
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
@@ -191,6 +191,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   own code. *Why:* their code carries its own licence and authorship, and ours must stay GPLv3 and
   provably our own.
 - **Themes**: all five stay in the launcher repository; `ab2/ab.ogg` is the owner's own composition.
+  (`autobleem-themes` holds stale copies of four of them - archive it or make it the source: todo D5.)
 - **Images**: xz level 2 (`AB_XZ_LEVEL=2`) - speed over size; cache the base images between builds.
 
 ## Testing

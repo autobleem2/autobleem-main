@@ -15,6 +15,9 @@
 /retroarch-psc/
 /psc-kernel/
 /psc-kernel-payload/
+/ext_*/
+/proc_*/
+/app_*/
 
 # the machine-specific facts docs/infrastructure.md points to - addresses, accounts, local paths
 /infrastructure.local.md

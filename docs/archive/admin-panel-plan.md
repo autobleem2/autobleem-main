@@ -1,101 +1,34 @@
-# The admin panel - plan (2026-09-23)
+# The admin panel
 
-A page on the download site, behind a GitHub login, that shows what the builders are doing and lets the
-release team start builds and promotions. The owner's choices (2026-09-23): **login with GitHub, org members
-only**; **viewing** for every `autobleem2` member, **buttons** for the `release-managers` team; **gitflow-lite**
-promotions; notifications in the **browser** and by **Telegram**; first version = status, **channels +
-health**, **cancel / re-run / logs**, **withdraw + audit log**. Later: release notes drafted from commits,
-the tester checklist's pass/fail per build.
+Archived plan (done 2026-09-23). The full text is in git history: `git log -- docs/archive/admin-panel-plan.md`.
 
-## What it shows
+A page on the download site (`/admin`), behind a GitHub login for `autobleem2` members: everyone may look,
+the `release-managers` team may press buttons. It shows the **builds** (every queued or running workflow
+run of the org, its jobs, an ETA from the median of recent successful runs, the last finished), the
+**channels** (what release/testing/nightly hold, from the site's catalogs), **health** (the self-hosted
+runner, the server's free disk, the image's newest tag, the last nightly) and an **audit log**. Buttons:
+refresh nightly, promote (alpha/beta, rc, release), cancel/re-run a run, withdraw a testing or nightly build,
+republish the page. The logic lives in workflows - autobleem-main's `nightly.yml` and `promote.yml`
+(`tools/release.py`, dry run by default), autobleem-repo's `withdraw.yml` and `page.yml` - so everything the
+panel does can also be done with `gh workflow run`.
 
-- **Builds**: every workflow run of the org's repositories that is queued or in progress, with its jobs, how
-  long it has run and **about how long it has left** (the median of that workflow's and job's last successful
-  runs), and the last finished ones with their result. Links to each run's logs. A run finishing or failing
-  raises a browser notification while the page is open, and a Telegram message.
-- **Channels**: what `release`, `testing` and `nightly` hold on the site now (version, date, which platforms
-  and images), read from the site's own catalogs.
-- **Health**: the self-hosted runner (online, busy, which job), the build server's free disk, the build
-  image's newest tag and age, the nightly schedule's last run.
-- **Audit log**: who pressed what, when, and what it started.
+**The API**: every view and button is also JSON (`GET /admin/api/status|channels|health|audit`, `POST
+/admin/api/nightly|promote|runs/<repo>/<id>/cancel|rerun|withdraw|page`), for scripts and Claude sessions.
+It takes `Authorization: Bearer <GitHub token>`: the service asks GitHub whose token it is and applies the
+same member/release-manager rules - no separate API keys.
 
-## What it does (release team only; every action asks for confirmation, a promotion twice)
+**How it is built**: one GitHub App, **`autobleem-admin`**, installed on the org, does both the users' login
+(its OAuth flow) and the server's API calls (installation tokens); the orchestration workflows use it too
+(`actions/create-github-app-token` with `AB_ADMIN_APP_ID` / `AB_ADMIN_APP_KEY`), because the default
+`GITHUB_TOKEN` cannot start workflows in other repositories. oauth2-proxy does the browser login, the panel
+(autobleem-repo `admin/`, Python + FastAPI) checks team membership before any action, Caddy routes
+`/admin` and `/oauth2/`. Telegram and browser notifications when a run finishes or fails.
 
-| button | what runs |
-|---|---|
-| Refresh nightly - all / one platform | `autobleem-main`'s `nightly.yml`: each component's develop build (the ones that changed), then the appliance's nightly assembly for the platforms asked |
-| Promote develop to testing (alpha / beta) | `promote.yml kind=alpha\|beta`: the next `vX.Y.Z-alphaN`/`-betaN` tag on develop's head of every component, their releases awaited, then the appliance's tag (it assembles and publishes the testing channel) |
-| Promote to release candidate | `promote.yml kind=rc`: cut `release/vX.Y.Z` from develop in every component (the first rc), tag `vX.Y.Z-rcN` on it, as above |
-| Release | `promote.yml kind=release`: tag `vX.Y.Z` on the release branches, merge them into master and back into develop, then the appliance's tag (the release channel) |
-| Cancel / re-run a run | the GitHub API on that run |
-| Withdraw a testing or nightly build | `autobleem-repo`'s `withdraw.yml` (self-hosted): the build's folder removed from the site, the catalogs and page regenerated |
-| Republish the page | `autobleem-repo`'s `page.yml` |
+## Still open
 
-The version a promotion will make is computed and shown before the confirmation (the next alpha/beta/rc
-number of the current `X.Y.Z`; `X.Y.Z` itself is typed for the first pre-release of a new version).
-
-The logic lives in **workflows**, not in the panel: the panel only dispatches them and shows their runs.
-Everything it can do can also be done with `gh workflow run` from the command line, and every run is in
-the Actions log.
-
-## An API for scripts and Claude sessions (the owner's ask, 2026-09-23)
-
-Everything the page shows and every button it has is also a **JSON API**, the page being only one client of
-it: `GET /admin/api/status` (running and recent runs, ETA), `/channels`, `/health`, `/audit`; `POST
-/admin/api/nightly`, `/promote` (with `preview` = the tag it would make, no change), `/runs/<repo>/<id>/cancel`,
-`/rerun`, `/withdraw`, `/page`. A Claude session drives and monitors builds through it exactly as the owner
-does in the browser - one place that knows what is running, how long it has left and what finished, instead
-of polling each repository's Actions.
-
-A script cannot do the browser's login, so the API also takes **`Authorization: Bearer <GitHub token>`**
-(a user's own token - the `gh` CLI's, a fine-grained PAT): the service asks GitHub who the token belongs to
-and applies the same rules - an org member reads, a `release-managers` member acts - and the audit log
-records that user with "via API". No separate API keys to issue or leak; revoking the GitHub token revokes
-the access. Caddy passes `/admin/api/` requests that carry a bearer token straight to the service (oauth2-
-proxy handles only the browser's cookie sessions).
-
-## How it is built
-
-- **One GitHub App**, `autobleem-admin`, installed on the org: the users' login (its OAuth web flow) and the
-  server's API calls (installation tokens). Repository permissions: Actions read/write, Contents read/write,
-  Metadata read; organisation: Members read, Self-hosted runners read. The orchestration workflows use the
-  same App (`actions/create-github-app-token`) - the default `GITHUB_TOKEN` cannot reach other repositories.
-- **oauth2-proxy** (provider github, `--github-org=autobleem2`) does the login and the session cookie; the
-  panel reads the user it passes on and checks `release-managers` membership itself before any action.
-- **The panel service** (`autobleem-repo/admin/`, Python + FastAPI): the JSON API the page polls, the
-  actions, the audit log (JSON lines on the server's disk), and the watcher that sends Telegram messages;
-  unit tests over a fake GitHub API. The page follows autobleem-repo's page rules (the same bar, palette
-  and tables).
-- **Caddy** routes `/admin` and `/oauth2/` to oauth2-proxy; the public site is untouched. Three containers in
-  one compose file next to the site's.
-
-## Steps (one commit each)
-
-0. **The owner**: create the GitHub App (the settings in `admin/README.md`) and the `release-managers` team,
-   the Telegram bot and chat; put the secrets in the server's `admin/.env` and the App's id and key as org
-   secrets for the workflows. Nothing below can run for real before this.
-1. `autobleem-main`: `nightly.yml` and `promote.yml` (with `dry_run`, which only prints what it would tag,
-   branch and merge); `autobleem-repo`: `withdraw.yml`.
-2. `autobleem-repo/admin/`: the service - status, ETA, channels, health, actions, audit log - and its tests.
-3. The page.
-4. Telegram and browser notifications.
-5. compose + Caddy; deployed on the build server, tried end to end with a dry-run promotion and a
-   one-platform nightly.
-
-## Status (2026-09-23, evening)
-
-Steps 1-5 are written and pushed; nothing is deployed, because everything waits for step 0.
-- 1: autobleem-main `tools/release.py` (+ `tests/test_release.py`, 8 cases), `.github/workflows/nightly.yml`,
-  `promote.yml` (dry run by default); autobleem-repo `tools/repo_withdraw.sh` (moves to `.withdrawn/`, never
-  deletes; restore; a stable release refused) + `.github/workflows/withdraw.yml`.
-- 2-4: autobleem-repo `admin/` - the service, the page, Telegram and desktop notifications, 8 tests over a
-  fake GitHub; the page previewed locally over sample data.
-- 5: `admin/Dockerfile`, `docker/repo/compose.yml` (profile `admin`: the panel + oauth2-proxy), the
-  Caddyfile's `/admin` and `/oauth2/` routes - `caddy validate` and `docker compose config` pass on the build
-  server, with and without `admin/.env`. `admin/README.md` has step 0 for the owner, then the one command
-  that deploys it.
-
-## Open
-
-- Whether the masters that carry unreleased CI commits (see `decisions.md`) are reset before the first
-  `release` merge - the merge brings develop's history in either way.
+- Telegram: a bot and chat id into the server's `admin/.env` (`AB_TELEGRAM_TOKEN`, `AB_TELEGRAM_CHAT`), then
+  restart the panel (autobleem-repo `admin/README.md`).
+- Confirm the org variable `AB_ADMIN_APP_ID` and secret `AB_ADMIN_APP_KEY` are set - `nightly.yml` and
+  `promote.yml` cannot reach the other repositories without them.
+- Masters carrying unreleased CI commits: reset before the first `release` merge, or not.
+- Version 2: release notes drafted from the commits; the tester checklist's pass/fail per build.
