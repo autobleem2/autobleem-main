@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior, Duke Nukem 3D, OpenBOR) and the way out - ready from the next nightly (launcher `6e5b580`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior, Duke Nukem 3D, OpenBOR, Amiberry) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -278,6 +278,18 @@ into `Apps/openbor/Paks` first.
 | 12.29 | Add a pak, start it again, pick it with the D-pad, Start | The game starts; music plays; a game with an intro video plays it (WebM). |
 | 12.30 | Play on the console's own pad: D-pad, Cross, Circle, Square, Triangle, L1, R1, Start, Select, L2 | Move; attack 1-4; jump; special; start/pause; a screenshot in `ScreenShots/`; the menu. The same on any other pad; on Windows an Xbox-style pad the same way (L2 is the left trigger). |
 | 12.31 | Change a setting, leave, start again | The setting kept (`Apps/openbor/Saves/`). |
+
+**Amiberry** (the Amiga) - one Store item (v5.9.3-1, psc, rpi, rpi64, pcusb - there is no Windows one; it
+replaces the old RetroBoot Amiberry) or `github.com/autobleem2/app_amiberry` -> Releases. Bring an `.adf` you
+have; a real Kickstart (`kick13.rom`, `kick31.rom` into `Apps/amiberry/roms`) if you have one.
+
+| # | Do | Expect |
+|---|---|---|
+| 12.32 | Start it | Full screen, Amiberry's menu (Quickstart); the About page shows the Amiberry logo with the AutoBleem logo and a credits line for the port. |
+| 12.33 | With the pad only: choose A500, put an `.adf` from `floppies/` in DF0, start | The Amiga boots the disk (with AROS, or your Kickstart). Note the console's speed. |
+| 12.34 | Play: D-pad, Cross, Circle, Square, Triangle, Start, Select | Joystick; fire; Return; Space; left mouse button; the joystick ports swapped; Select opens the menu. |
+| 12.35 | A WHDLoad game (`.lha` in `lha/`, a real Kickstart in `roms/`): start it from the menu | It starts with no disk swapping. |
+| 12.36 | Save a state, leave (Select -> Quit), start again, load it | The state is in `Apps/amiberry/savestates/`. |
 
 **The way out, every App above** (launcher `6e5b580` or later):
 

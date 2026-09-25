@@ -94,7 +94,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     the PC stick), glibc, libstdc++/libgcc_s and the graphics driver stack. The RetroBoot libs pack is
     not used by the ports. Optional network libraries (SDL2_net) are built and bundled, not left out.
   - **Every target, Windows included**: psc, rpi, rpi64, pcusb and win packages for each port. On Windows
-    an App of the old kind (`Startup=` only) is not offered - there is no `sh` to run it.
+    an App of the old kind (`Startup=` only) is not offered - there is no `sh` to run it. **The one
+    exception is Amiberry** (2026-09-25): its SDL2 line, Amiberry-Lite, is Linux-only, and the current
+    Amiberry needs SDL3, which the console cannot run - Windows has WinUAE.
   - **Game data ships** with its App: shareware and freeware (DOOM1.WAD, Tyrian 2.1 - its 1995 licence
     file notwithstanding), and the data a port's upstream itself ships (SDLPoP's 1989 Prince of Persia).
     A file the build fetches is mirrored on our site (`mirror/<name>/`, autobleem-repo's
@@ -120,7 +122,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     (`app_openbor`: v7533, the last build for 32-bit machines, with the 2019 port's menu art and a clean
     start-up logo - the 2019 logo was a collage of commercial characters; the 2019 pad layout; WebM and
     Vorbis; **no games in the package** for now - nearly every OpenBOR game is built on commercial
-    characters, and none was named), all 2026-09-25.
+    characters, and none was named), Amiberry (`app_amiberry`: Amiberry-Lite 5.9.3 - psc, rpi, rpi64, pcusb;
+    AROS and WHDLoad only, no Kickstarts or games; it opens in its own GUI; the 2019 pad layout and "for
+    AutoBleem" logo; the console build is gcc-12 against the console's glibc 2.24 with libstdc++ linked in,
+    since Amiberry is C++17), all 2026-09-25. **Every Tier-2 port is done.**
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK

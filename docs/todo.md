@@ -81,8 +81,9 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     v20260105-1: Shadow Warrior shareware). **Duke Nukem 3D too** (`autobleem2/app_jfduke3d`, v20260105-1:
     JFDuke3D with the shareware episode, as `app/eduke32`). **OpenBOR too** (`autobleem2/app_openbor`,
     v7533-1: the engine with our branding and no games - the owner can name one or two free paks for a
-    `-2`). Left for all seven: the hardware pass (`tester-checklist.md` section 12), the Reset watch on a
-    console first. Next: Amiberry (with our branding), the last port.
+    `-2`). **Amiberry too** (`autobleem2/app_amiberry`, v5.9.3-1: Amiberry-Lite for psc, rpi, rpi64 and pcusb -
+    no Windows package, the owner's call). **The ports are done.** Left for all eight: the hardware pass
+    (`tester-checklist.md` section 12), the Reset watch on a console first; OpenBOR's games, when named.
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).
