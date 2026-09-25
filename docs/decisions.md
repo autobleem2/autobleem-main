@@ -88,14 +88,30 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     `autobleem2`, built like `app_terminal` for every target. The shape is **our patches over a pinned
     upstream submodule**, not a fork.
   - **A package carries its own libraries** in `lib/<key>/` (`Lib=lib/{key}`, which `app_env.sh` and the
-    App's `run.sh` put first on the library path). Not bundled: the **SDL2 family** (the launcher's 2.0.14
-    in `/tmp/lib` on the console, the system's elsewhere - shared, and known to be stable), glibc,
-    libstdc++/libgcc_s and the graphics driver stack. The RetroBoot libs pack is not used by the ports.
-  - **Shareware and freeware game data ships** with its App. Doom is two packages: the shareware
-    `DOOM1.WAD` and Freedoom.
-  - A build not patched for the pad runs with `VirtualPad=true`.
+    App's `run.sh` put first on the library path). Not bundled: the **SDL2 family** (SDL2, SDL2_image,
+    _mixer, _ttf - shared, and known to be stable: the launcher's 2.0.14 in `/tmp/lib` on the console, the
+    launcher's own DLLs on Windows - its folder is on an App's `PATH` - and the system's on the Pis and
+    the PC stick), glibc, libstdc++/libgcc_s and the graphics driver stack. The RetroBoot libs pack is
+    not used by the ports. Optional network libraries (SDL2_net) are built and bundled, not left out.
+  - **Every target, Windows included**: psc, rpi, rpi64, pcusb and win packages for each port. On Windows
+    an App of the old kind (`Startup=` only) is not offered - there is no `sh` to run it.
+  - **Game data ships** with its App: shareware and freeware (DOOM1.WAD, Tyrian 2.1 - its 1995 licence
+    file notwithstanding), and the data a port's upstream itself ships (SDLPoP's 1989 Prince of Persia).
+    A file the build fetches is mirrored on our site (`mirror/<name>/`, autobleem-repo's
+    `repo_publish.sh mirror`) and pinned by sha256. Doom is three Store items from one repository: Doom
+    (shareware), Freedoom: Phase 1 and Freedoom: Phase 2 - crispy-doom only, no Heretic/Hexen/Strife.
+  - **A way out of every App** (2026-09-25): the console's **Reset** button ends any App (`abpadd`
+    watches it, for `VirtualPad=false` Apps too), and the **controller** does on the Linux targets (hold
+    Start+Select). On **Windows** an App is left through its own menu, which its readme names.
+  - A build not patched for the pad runs with `VirtualPad=true`; the port's own settings (a pad layout,
+    full screen) ship as a patch to its default config file, or as the defaults its command line points
+    at - never as a separate tool to run.
   - Amiberry and OpenBOR keep **our branding** (splash screens, logos), as the 2019 ports had it.
-  - One repository at a time, the owner answering each port's detail questions first.
+  - One repository at a time, the owner answering each port's detail questions first; then, with the
+    owner's OK per port, the repository goes public in `autobleem2` with `AB_CI_ENABLED`, a
+    `v<upstream>-<n>` tag makes the release, and the packages go to all five Store catalogs (replacing
+    the RetroBoot App on psc).
+  - Done: OpenTyrian (`app_opentyrian`), SDLPoP (`app_sdlpop`), 2026-09-25.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
