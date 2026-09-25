@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. OpenTyrian, the first App built for every platform - ready from the next nightly (launcher `bf3bfa7`)
+## 12. The ported Apps (OpenTyrian, SDLPoP) on every platform - ready from the next nightly (launcher `bf3bfa7`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -220,6 +220,16 @@ or from the Store (v2.1.20260913-1, all five catalogs). A pad; on Windows an Xbo
 | 12.5 | Save a game, leave, start it again, load it | The save is there (console/Pi/PC stick: `Home/.config/opentyrian/` on the stick; Windows: `%APPDATA%\OpenTyrian`). |
 | 12.6 | The console only: sound, and does it run smoothly | Music and effects; note any slowdown. |
 | 12.7 | Windows: the launcher's L2+R2 menu is fine afterwards; a `Startup=run.sh` App copied from a stick | That old-style App is **not** listed on Windows (it could not start there). |
+
+**Prince of Persia (SDLPoP)** - the same way, from the Store (v1.24-RC-1, all five catalogs) or
+`github.com/autobleem2/app_sdlpop` -> Releases:
+
+| # | Do | Expect |
+|---|---|---|
+| 12.8 | Install it (the Store, or unpack over the root - `Apps/sdlpop/`) and start it | Full screen, 4:3 in the middle, no info screen; the intro, then the game. The old RetroBoot SDLPoP is replaced. |
+| 12.9 | Play: D-pad/stick, Triangle, Cross, Square, Start, Select | Move; jump/climb; duck; step/grab/sword; Start and Select both open the pause menu. |
+| 12.10 | Pause menu -> save; leave (hold Start + Select); start again; load | The save is there - in `Apps/sdlpop/` (`PRINCE.SAV`, `QUICKSAVE.SAV`). |
+| 12.11 | Change a setting in the pause menu, update the App from the Store (when a newer one is there) | The setting and the saves survive the update (`SDLPoP.cfg` stays). |
 
 **Logs:** `autobleem.log`; on Linux `abpadd.log` (the virtual pad) in the logs folder.
 

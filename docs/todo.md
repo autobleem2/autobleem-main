@@ -73,7 +73,9 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     EDuke32, OpenBOR, Amiberry. Each replaces the RetroBoot binary in the psc catalog.
     **OpenTyrian is built** (`autobleem2/app_opentyrian`, 2026-09-25: psc, rpi, rpi64, pcusb, win from its CI;
     the Windows build ran on the dev PC; release v2.1.20260913-1 in all five Store catalogs, replacing the
-    RetroBoot build on psc). Left for it: the hardware pass (`tester-checklist.md` section 12). Next: SDLPoP.
+    RetroBoot build on psc). **SDLPoP too** (`autobleem2/app_sdlpop`, v1.24-RC-1, the same day and the same way;
+    it ships the 1989 data as upstream does - the owner's call). Left for both: the hardware pass
+    (`tester-checklist.md` section 12). Next: Crispy Doom (shareware and Freedoom packages).
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).
