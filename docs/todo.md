@@ -27,6 +27,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
 
 - **`docs/tester-checklist.md`** - the flasher, the installer's channel box, the console, the Pi, the PC
   stick and Windows updating themselves, the Imager lists, the download page.
+- **A Pi updating itself to the refreshed nightly** (`docs/tester-checklist.md` section 4; appliance run
+  36078337098, 2026-09-25): `v2.0.0-alpha2-149-g4edd7b0-n4ac996` is on the nightly channel - a Pi 400 on an
+  older nightly, 32-bit and 64-bit, offered it, updated, games and settings kept. The same build is the
+  nightly sections 10 and 11 were waiting for.
 - **The PC stick beyond the BIOS VM**: 32- and 64-bit UEFI and real hardware, with a pad.
 - **The AutoBleem Store on hardware** (the launcher's `docs/store-plan.md`, step 8 - a TODO, the owner
   2026-09-25): the console on the AutoBleem kernel's WiFi (an App from the catalog - the eight console Apps

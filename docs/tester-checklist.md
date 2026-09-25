@@ -156,7 +156,7 @@ setup asked for the graphical or text screen; the update must draw with the same
 **Logs:** `System/Logs/standby.log`. A power-port setup ends each Power Off with "powering off instead" and
 the kernel's reason (`usb1 failed to suspend`).
 
-## 10. Extensions and the AutoBleem Store - ready once a nightly from launcher `develop` after 2026-09-24 is out
+## 10. Extensions and the AutoBleem Store - ready (nightly `v2.0.0-alpha2-149-g4edd7b0-n4ac996`, 2026-09-25)
 
 **You need:** that nightly on a console (AutoBleem kernel, WiFi set up in PSC-Bios), a Pi or the PC stick. You
 also need the extension packages the developers hand you: `hello` and `ext_store` for your system, each an
@@ -180,7 +180,7 @@ files are in `System/Extensions/store/`.
 
 ---
 
-## 11. Scanner processors - ready once a nightly from launcher `develop` after 2026-09-25 is out
+## 11. Scanner processors - ready (nightly `v2.0.0-alpha2-149-g4edd7b0-n4ac996`, 2026-09-25)
 
 **You need:** that nightly on a console, a Pi or the PC stick - Unzip comes with it
 (`System/Processors/unzip/`). A zipped PS1 game (a `.cue` + `.bin` in a `.zip`) and a zipped ROM (one Mega
