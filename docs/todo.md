@@ -117,4 +117,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   (`archive/rpi-image-and-update-plan.md`, Part 1, entry point 2).
 - Game Manager: "Move to folder..." - after the Game Manager's rework (`archive/legacy-1x-analysis.md`, item 6).
 - The virtual gamepad through uinput (non-SDL and static apps), and `Apps/` on the Pi and the PC stick.
+- A newer SDL2 on the console (2.26 or later) - to plan. 2.0.14 is the ceiling today: the console's Weston 1.11
+  offers only `wl_shell`, which SDL removed in 2.0.16, and 2.0.20+ also want libwayland >= 1.18 (the console has
+  1.12). It needs `wl_shell` ported back into the newer SDL as a fallback (as retroarch-psc's
+  `wl_shell_fallback.patch` did for RetroArch 1.22) and the newer libwayland symbols made optional. It would bring
+  `SDL_RenderGeometry`, current HIDAPI pad drivers, and the CRC16 GUIDs `tools/update_gamecontrollerdb.py` leaves
+  out today (the launcher's "SDL2 on the console" section has the details).
 - The launcher's `docs/IDEAS.md`.
