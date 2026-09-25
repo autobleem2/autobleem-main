@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear) and the way out - ready from the next nightly (launcher `6e5b580`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear, Shadow Warrior) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -249,6 +249,15 @@ catalogs) or `github.com/autobleem2/app_wolf4sdl` -> Releases:
 | 12.19 | Install both and start each | Full screen, the picture 4:3 and the full height of the screen (black bars at the sides), nothing cut off or stretched. The old RetroBoot Wolf4SDL is replaced. |
 | 12.20 | Play on the console's own pad: D-pad, Cross, Circle, Square, Triangle, Select, L1/R1, L2, R2, Start | Move and turn; fire; run; open; next/previous weapon; strafe; pause; menu. The same on any other pad (the virtual pad shows it as the console's). |
 | 12.21 | Windows, an Xbox-style pad: the D-pad, the buttons | The D-pad moves; Start opens the menu (the triggers do nothing there). |
+
+**Shadow Warrior (Shareware) (JFSW)** - one Store item (v20260105-1, all five catalogs) or
+`github.com/autobleem2/app_jfsw` -> Releases:
+
+| # | Do | Expect |
+|---|---|---|
+| 12.22 | Install it and start it (on Windows too) | Straight into the game, full screen, 4:3 - no setup window, not even for a moment. The old RetroBoot Shadow Warrior is replaced. |
+| 12.23 | Play on the console's own pad: D-pad, Square, Cross, Circle, Triangle, L1, R1, L2/R2, Select, Start | Move and turn; fire; crouch; open; jump; next item; next weapon; strafe; use item; menu (Start twice: the map). |
+| 12.24 | The console: sound and music; does it run smoothly | Effects and music; note any slowdown (the software renderer at 640x480). |
 
 **The way out, every App above** (launcher `6e5b580` or later):
 
