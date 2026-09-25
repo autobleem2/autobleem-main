@@ -63,13 +63,17 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   `emu/<name>/nightly/<version>/`), keep the newest per channel (release / testing / nightly) with a catalog
   each next to `latest.json`, and draw the panel with the channel pills the other tabs use.
 - **Multi-platform Apps** (the launcher's `docs/app-format-plan.md`). The format, `AppManifest`, the launcher
-  and the three rc scripts are in `develop` (2026-09-24). Left:
-  - the Windows product's `Apps/` folder;
+  and the three rc scripts are in `develop` (2026-09-24); the Windows product has its `Apps/` folder, an App
+  there uses the launcher's `SDL2.dll`, and an old-style `Startup=` App is not offered there (2026-09-25).
+  Left:
   - the eight console Apps converted to `bin/psc/` (the owner's `F:/Apps`; `pack_psc_apps.py --per-app`
     packs them for the Store as they are);
   - the third-party Apps ported from source, one `app_<name>` repository each (`decisions.md`, "Third-party
     App ports"), in this order: OpenTyrian, SDLPoP, Crispy Doom (shareware and Freedoom), Wolf4SDL, JFSW,
     EDuke32, OpenBOR, Amiberry. Each replaces the RetroBoot binary in the psc catalog.
+    **OpenTyrian is built** (`autobleem2/app_opentyrian`, 2026-09-25: psc, rpi, rpi64, pcusb, win from its CI;
+    the Windows build ran on the dev PC). Left for it: the hardware pass (`tester-checklist.md` section 12)
+    and publishing it to the Store's five catalogs. Next: SDLPoP.
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).

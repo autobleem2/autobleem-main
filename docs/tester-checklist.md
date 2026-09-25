@@ -205,6 +205,26 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
+## 12. OpenTyrian, the first App built for every platform - ready from the next nightly (launcher `bf3bfa7`)
+
+**You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
+`github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
+or from the Store once it is published there. A pad; on Windows an Xbox-style (XInput) pad.
+
+| # | Do | Expect |
+|---|---|---|
+| 12.1 | Unpack the zip over the stick's (or Windows' data folder's) root - it makes `Apps/opentyrian/` | Tyrian (OpenTyrian) in the Apps set, with its picture. On a stick that had the old RetroBoot OpenTyrian, the new one replaces it. |
+| 12.2 | Start it | Full screen; the intro plays, then the title menu. No window, no black screen. |
+| 12.3 | Play: D-pad/stick, Cross/Triangle, Square/Circle, L1/L2, R1/R2, Start, Select | Move; fire; rear weapon mode; left and right sidekicks; pause; menu - as in the App's readme. |
+| 12.4 | Hold Start + Select (console, Pi, PC stick) | The game closes after about 1.5 s and the launcher comes back. |
+| 12.5 | Save a game, leave, start it again, load it | The save is there (console/Pi/PC stick: `Home/.config/opentyrian/` on the stick; Windows: `%APPDATA%\OpenTyrian`). |
+| 12.6 | The console only: sound, and does it run smoothly | Music and effects; note any slowdown. |
+| 12.7 | Windows: the launcher's L2+R2 menu is fine afterwards; a `Startup=run.sh` App copied from a stick | That old-style App is **not** listed on Windows (it could not start there). |
+
+**Logs:** `autobleem.log`; on Linux `abpadd.log` (the virtual pad) in the logs folder.
+
+---
+
 ### Reporting
 
 Send per item: pass/fail/blocked, the version, the logs named for it, and screenshots or photos of anything
