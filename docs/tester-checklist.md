@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP) on every platform - ready from the next nightly (launcher `bf3bfa7`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -230,6 +230,24 @@ or from the Store (v2.1.20260913-1, all five catalogs). A pad; on Windows an Xbo
 | 12.9 | Play: D-pad/stick, Triangle, Cross, Square, Start, Select | Move; jump/climb; duck; step/grab/sword; Start and Select both open the pause menu. |
 | 12.10 | Pause menu -> save; leave (hold Start + Select); start again; load | The save is there - in `Apps/sdlpop/` (`PRINCE.SAV`, `QUICKSAVE.SAV`). |
 | 12.11 | Change a setting in the pause menu, update the App from the Store (when a newer one is there) | The setting and the saves survive the update (`SDLPoP.cfg` stays). |
+
+**Doom (Shareware), Freedoom: Phase 1, Freedoom: Phase 2 (Crispy Doom)** - three Store items (v7.1-1, all five
+catalogs) or `github.com/autobleem2/app_crispydoom` -> Releases:
+
+| # | Do | Expect |
+|---|---|---|
+| 12.12 | Install all three and start each | Full screen, the game's title screen and demo; three icons from each game's title picture. The old RetroBoot Doom is replaced. |
+| 12.13 | Play on the console's own pad: D-pad, Cross, Circle, Square, L1/R1, L2/R2, Start, Select | Move and turn; fire; use (doors); run; strafe; previous/next weapon; menu; automap. |
+| 12.14 | The same on a dual-stick pad (a Pi, the PC stick, Windows): the left stick, the right stick | Left stick moves and turns, right stick strafes; on Windows the D-pad moves too. |
+| 12.15 | Save a game, leave, start again, load | The save is in the App's `savegames/`. |
+
+**The way out, every App above** (launcher `6e5b580` or later):
+
+| # | Do | Expect |
+|---|---|---|
+| 12.16 | The console: in each App, press **Reset** once | The App closes within about 1.5 s and the launcher comes back (`abpadd.log`: "Reset was pressed"). |
+| 12.17 | The console: start the Terminal App, press Reset | It closes too (`abpadd --exit-only`). |
+| 12.18 | Windows: leave each App through its menu, as its readme says | Back in the launcher. |
 
 **Logs:** `autobleem.log`; on Linux `abpadd.log` (the virtual pad) in the logs folder.
 

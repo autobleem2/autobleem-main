@@ -111,7 +111,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     owner's OK per port, the repository goes public in `autobleem2` with `AB_CI_ENABLED`, a
     `v<upstream>-<n>` tag makes the release, and the packages go to all five Store catalogs (replacing
     the RetroBoot App on psc).
-  - Done: OpenTyrian (`app_opentyrian`), SDLPoP (`app_sdlpop`), 2026-09-25.
+  - Done: OpenTyrian (`app_opentyrian`), SDLPoP (`app_sdlpop`), Crispy Doom (`app_crispydoom`: Doom
+    shareware, Freedoom: Phase 1 and 2 - the 2020 pad layout, a twin-stick layout dropped because the
+    console's pad has no sticks), all 2026-09-25.
 - **Extensions** (2026-09-24, the launcher's `docs/extensions-plan.md`) are our "mods":
   - An extension is a **plugin**: a `.so`/`.dll` loaded into the launcher, built on the AutoBleem SDK
     (autobleem-core: `ab_core`, `ab_classic`, `lib_ableem`). It uses the launcher's own copy of the SDK
