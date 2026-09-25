@@ -76,8 +76,9 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     RetroBoot build on psc). **SDLPoP too** (`autobleem2/app_sdlpop`, v1.24-RC-1, the same day and the same way;
     it ships the 1989 data as upstream does - the owner's call). **Crispy Doom too** (`autobleem2/app_crispydoom`,
     v7.1-1: three Store items - Doom shareware, Freedoom: Phase 1 and 2). The console's **Reset button ends
-    any App** since launcher `6e5b580` (abpadd's Reset watch). Left for all three: the hardware pass
-    (`tester-checklist.md` section 12), the Reset watch on a console first. Next: Wolf4SDL.
+    any App** since launcher `6e5b580` (abpadd's Reset watch). **Wolf4SDL too** (`autobleem2/app_wolf4sdl`,
+    v20260504-1: Wolfenstein 3D shareware and the Spear of Destiny demo). Left for all four: the hardware pass
+    (`tester-checklist.md` section 12), the Reset watch on a console first. Next: JFSW (Shadow Warrior).
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).

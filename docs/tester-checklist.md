@@ -205,7 +205,7 @@ Drive or SNES ROM in a `.zip`).
 
 ---
 
-## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom) and the way out - ready from the next nightly (launcher `6e5b580`)
+## 12. The ported Apps (OpenTyrian, SDLPoP, Doom and Freedoom, Wolfenstein and Spear) and the way out - ready from the next nightly (launcher `6e5b580`)
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
@@ -240,6 +240,15 @@ catalogs) or `github.com/autobleem2/app_crispydoom` -> Releases:
 | 12.13 | Play on the console's own pad: D-pad, Cross, Circle, Square, L1/R1, L2/R2, Start, Select | Move and turn; fire; use (doors); run; strafe; previous/next weapon; menu; automap. |
 | 12.14 | The same on a dual-stick pad (a Pi, the PC stick, Windows): the left stick, the right stick | Left stick moves and turns, right stick strafes; on Windows the D-pad moves too. |
 | 12.15 | Save a game, leave, start again, load | The save is in the App's `savegames/`. |
+
+**Wolfenstein 3D (Shareware), Spear of Destiny (Demo) (Wolf4SDL)** - two Store items (v20260504-1, all five
+catalogs) or `github.com/autobleem2/app_wolf4sdl` -> Releases:
+
+| # | Do | Expect |
+|---|---|---|
+| 12.19 | Install both and start each | Full screen, the picture 4:3 and the full height of the screen (black bars at the sides), nothing cut off or stretched. The old RetroBoot Wolf4SDL is replaced. |
+| 12.20 | Play on the console's own pad: D-pad, Cross, Circle, Square, Triangle, Select, L1/R1, L2, R2, Start | Move and turn; fire; run; open; next/previous weapon; strafe; pause; menu. The same on any other pad (the virtual pad shows it as the console's). |
+| 12.21 | Windows, an Xbox-style pad: the D-pad, the buttons | The D-pad moves; Start opens the menu (the triggers do nothing there). |
 
 **The way out, every App above** (launcher `6e5b580` or later):
 
