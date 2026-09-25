@@ -128,6 +128,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - They **always run on the automatic scan**, heavy ones too - revisited if testing shows problems.
   - The built-in ECM decoding stays as it is (no `proc_unecm` for now).
   - `proc_unzip` is the first processor and the example; `tools/proc_check.py` checks one before publishing.
+  - **Unzip ships with every package** (2026-09-25): a processor is bundled, unlike an extension. The
+    appliance takes its nightly for a development build and its latest release for a release; an update
+    replaces its program and keeps the user's order and on/off.
   - The installers make `System/Processors/` (and `Extensions/`), each with a README, written once.
 - **No Project Eris code, ever** (2026-09-24): nothing from Project Eris or its mods (PSC Store included)
   is used in any repository. That covers sources, binaries, scripts, databases, samples, artwork and text.

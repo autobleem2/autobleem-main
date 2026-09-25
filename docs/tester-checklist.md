@@ -182,21 +182,22 @@ files are in `System/Extensions/store/`.
 
 ## 11. Scanner processors - ready once a nightly from launcher `develop` after 2026-09-25 is out
 
-**You need:** that nightly on a console, a Pi or the PC stick, and `proc_unzip`'s `nightly` package
-(`github.com/autobleem2/proc_unzip/releases`) - its `unzip/` folder goes to `System/Processors/unzip/`.
-A zipped PS1 game (a `.cue` + `.bin` in a `.zip`) and a zipped ROM (one Mega Drive or SNES ROM in a `.zip`).
+**You need:** that nightly on a console, a Pi or the PC stick - Unzip comes with it
+(`System/Processors/unzip/`). A zipped PS1 game (a `.cue` + `.bin` in a `.zip`) and a zipped ROM (one Mega
+Drive or SNES ROM in a `.zip`).
 
 | # | Do | Expect |
 |---|---|---|
-| 11.1 | Install fresh (or update) | `System/Processors/` and `Extensions/` exist, each with a `README.txt`. |
-| 11.2 | L2+R2 -> Scanner processors, no processor installed | "No processors for these games" and where they go. |
-| 11.3 | Copy `unzip/` in; drop the zipped game into `Games/` | Within a minute a scan starts on its own; the bubble shows "Unzip V1.0.0" with a bar; the game is on the shelf afterwards, in its own folder; the `.zip` is gone. |
+| 11.1 | Install fresh (or update) | `System/Processors/` (with `unzip/` in it) and `Extensions/` exist, each with a `README.txt`. |
+| 11.2 | L2+R2 -> Scanner processors | Unzip on both tabs, switched on; only this machine's binary in `unzip/bin/`. |
+| 11.3 | Drop the zipped game into `Games/` | Within a minute a scan starts on its own; the bubble shows "Unzip V1.0.0" with a bar; the game is on the shelf afterwards, in its own folder; the `.zip` is gone. |
 | 11.4 | Drop the zipped ROM into its `RetroArch/roms/<system>/` folder | The ROM is unpacked next to where the zip was, the zip is gone, and the game is in its playlist. |
 | 11.5 | Re-Scan Games with nothing new | No processor bubble; nothing on the stick changes. |
 | 11.6 | Drop a large zipped game (several hundred MB), start a game while Unzip is working, play a minute, come back | Unzip stopped for the game; the next scan finishes it; no `*.part` file is left in the game's folder. |
 | 11.7 | Power Off while Unzip is working; power on | The next scan finishes the game; no `*.part` left. |
 | 11.8 | L2+R2 -> Scanner processors: Cross on Unzip, Circle; drop another zipped game | "Switched off": the zip stays zipped. Switch it on again and the next scan unpacks it. |
 | 11.9 | The console only: how long 11.6's game takes, and is the launcher smooth meanwhile | Note the time and anything that stutters - this decides whether heavy processors need a "run on request" switch. |
+| 11.10 | Switch Unzip off, then update AutoBleem (a newer nightly) | Unzip is still there and still switched off. |
 
 **Logs:** `processors.log` in the logs folder (every run, with its output); `autobleem.log` for the scan.
 
