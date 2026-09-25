@@ -107,6 +107,10 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
   - more Apps, one by one (each a porting session of its own - the `app_<name>` ports above);
   - the TSV format written up for source owners;
   - the other manual languages when they come.
+- **Homebrew in the Store** (`docs/store-homebrew-plan.md`, the owner 2026-09-25 - researched, not started):
+  a TSV of 34 free PS1 homebrew games on the site, binaries on their original hosts (archive.org, GitHub),
+  covers hosted by us and installed with the game (`<disc>.png` + a locked Game.ini), and an admin-panel
+  tab to add, edit and remove entries. Four questions for the owner in its section 5.
 - **Scanner processors - next** (the launcher's `docs/scanner-processors-next-plan.md`, the owner
   2026-09-25: later, after the hardware pass): `proc_unzip`'s first release (a `v*` tag; `.7z` and `.rar` went
   in as 1.1.0 on 2026-09-25), processors as a Store item kind, launch-time processors, signatures or a
