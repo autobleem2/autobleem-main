@@ -209,7 +209,7 @@ Drive or SNES ROM in a `.zip`).
 
 **You need:** a nightly with launcher `bf3bfa7` or later, and the package for your machine from
 `github.com/autobleem2/app_opentyrian` -> Releases -> `nightly` (`opentyrian-<psc|rpi|rpi64|pcusb|win>-<v>.zip`) -
-or from the Store once it is published there. A pad; on Windows an Xbox-style (XInput) pad.
+or from the Store (v2.1.20260913-1, all five catalogs). A pad; on Windows an Xbox-style (XInput) pad.
 
 | # | Do | Expect |
 |---|---|---|
