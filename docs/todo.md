@@ -82,8 +82,16 @@ its own plan in `docs/` (see `CLAUDE.md`, "Where to find things").
     JFDuke3D with the shareware episode, as `app/eduke32`). **OpenBOR too** (`autobleem2/app_openbor`,
     v7533-1: the engine with our branding and no games - the owner can name one or two free paks for a
     `-2`). **Amiberry too** (`autobleem2/app_amiberry`, v5.9.3-1: Amiberry-Lite for psc, rpi, rpi64 and pcusb -
-    no Windows package, the owner's call). **The ports are done.** Left for all eight: the hardware pass
-    (`tester-checklist.md` section 12), the Reset watch on a console first; OpenBOR's games, when named.
+    no Windows package, the owner's call). **The ports are done.** The owner's first console pass
+    (2026-09-25/26, a stick at launcher `bf3bfa7`) brought a `-2` of six: OpenTyrian fills the screen at 4:3,
+    Wolf4SDL's menus take Cross/Circle, Crispy Doom opens the pad at all (`joystick_guid` was empty), Shadow
+    Warrior and Duke turn at 0.1 on the console, OpenBOR's pad works (`7533-2`); SDLPoP, Tyrian's mapping
+    and Amiberry were right. The Store now replaces a RetroBoot App whole (core `ba39f2d`, launcher `b593f24`).
+    Left: the rest of the hardware pass (`tester-checklist.md` section 12) and the Reset watch (the stick's
+    launcher predates it); OpenBOR's games, when named; `rc/app_env.sh` - a log dir the daemon cannot write
+    to must not stop it (a read-only stick left every App without a pad), and the daemon should use the
+    launcher's SDL2 and our `gamecontrollerdb.txt` whatever library path the App has (a RetroBoot App's
+    SDL2 did not know the console's pad and the daemon guessed its layout).
 - **The themes pack** (`screemerpl/autobleem-themes-pack`, archived): 51 community themes in the old
   format, with Sony's SST fonts and firmware images, franchise art and commercial music. A plan of its own,
   later (the owner, 2026-09-25).
