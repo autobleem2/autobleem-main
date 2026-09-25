@@ -91,7 +91,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - It lives in `Extensions/<name>/` with an `extension.ini`, and runs from **one central place**: the
     System menu's Extensions list.
   - It is **installed by hand** onto the stick and is **a separate download**: none is bundled with a
-    release, **PSC-Bios excepted** (below). Nothing downloads or installs an extension, the Store included.
+    release, **PSC-Bios and the Store excepted** (below). Nothing downloads or installs an extension - the
+    Store never offers one.
   - It is built for every target.
   - Its `extension.ini` says whether it needs the network (`Network=required|optional|none`). The
     launcher **refuses to run one that requires it while the network is unreachable**: offline mode on the
@@ -116,6 +117,13 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     how legal games from private sources get distributed. We ship no source but our own catalog.
   - A static notice sits on the Sources tab ("You are responsible for what your sources contain"). It is
     not a gate, and there is no dead-link checking.
+  - **It ships with every platform's installer** (the owner, 2026-09-25 - it was a separate download,
+    installed by hand): the appliance's assemble scripts put ext_store's package into every package (the
+    stick's `Extensions/store/`, a Linux package's `extensions/` for `install.sh`, the Windows program
+    folder's `Extensions/` for AutoBleemWinSetup), and every install and update replaces the shipped folder
+    whole. The Store's own state (`System/Extensions/store/`, `disabled.txt`) and any extension the user
+    unpacked by hand are never touched. A development build takes ext_store's nightly, a release its latest
+    release (its nightly while there is none); the plugin's SDK stamp must match the launcher's.
 - **Scanner processors** (2026-09-24, the launcher's `docs/scanner-processors-plan.md`): community console
   programs in `System/Processors/<name>/` that the scan runs over the games before it reads them.
   - The folder processors ("preprocessors") are the **first thing every scan does**, whoever asked for it
