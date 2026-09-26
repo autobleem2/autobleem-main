@@ -30,6 +30,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | R13 | A nightly's UpdateRoms comes from the testing release (observed in the online-update work, never said fixed) - check. | appliance | S | dev | a2 |
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
 | R17 | A push of the autobleem-build image to develop rebuilds no component, so a toolchain change reaches the nightly only with the next unrelated commit (found by the build-times batch). Team: infrastructure. | autobleem-build, appliance | S-M | dev | b1 |
+| R19 | **The manuals are published by CI**: a merge to develop of the manuals repo (autobleem-manuals, after D4) builds the HTML/PDFs for every language and publishes them to the site - today the publish is a manual `repo_publish.sh manuals` run. Needed by the 2026-09-26 rule that a Team Manager merges a Haiku's manual update and CI puts it on the site (decisions.md). Team: infrastructure. | manuals, site | M | dev | a2 |
 
 ## C - Console (launcher side)
 

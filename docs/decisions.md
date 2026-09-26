@@ -280,3 +280,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   now on goes entirely. Only your own: another session's files are theirs to delete - ask it (`ListAgents`,
   `SendMessage`) or the owner, never remove them yourself; the site (`~/autobleem-repo`), the runner and the
   shared build images are never "leftovers".
+- **The Haiku Docs + Tester owns the user manuals** (the owner, 2026-09-26): the team's Developer decides when a
+  change needs the manual and tells the Haiku; the Haiku updates the manual text (and asks the Developer for new
+  screenshots - building and `tools/manual_shots.py` runs stay with the Developer), **translates it into every
+  language the launcher supports** by default (not only English and Polish), and reports it to the Team Manager.
+  The Team Manager reviews and merges it so that CI publishes it to the site - the Haiku no longer runs
+  `repo_publish.sh manuals` itself (replaces the "Haiku publishes the manuals" rule of the same day).
