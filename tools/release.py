@@ -10,8 +10,11 @@
       alpha/beta: the next vX.Y.Z-alphaN / -betaN tag on develop's head of every component
       rc:         release/vX.Y.Z cut from develop in every component (first rc), vX.Y.Z-rcN tagged on it
       release:    vX.Y.Z tagged on the release branches, merged into master and back into develop
-      Components are tagged in dependency order and each stage's tag builds are awaited before the next; the
-      appliance's tag comes last - its build assembles the components' releases and publishes the channel.
+      Before the first tag: autobleem-build's master is moved to develop's head when it is behind (every v*
+      tag - alpha/beta/rc/release alike - compiles against its :latest), and that move's image.yml build is
+      awaited when it actually touches what the image rebuilds for (R2). Components are then tagged in
+      dependency order and each stage's tag builds are awaited before the next; the appliance's tag comes
+      last - its build assembles the components' releases and publishes the channel.
       Refuses to start (even with --dry-run) unless proc_unzip and ext_store already have a released v*
       version of their own - they keep their own versioning and are never tagged by this script.
   release.py next {alpha|beta|rc|release} [--version X.Y.Z]
@@ -42,6 +45,14 @@ STAGES = [
     ["autobleem-console-tools"],
 ]
 APPLIANCE = "autobleem-appliance"
+# the build image: every v* tag (alpha/beta/rc/release alike, docs/decisions.md "two channels") compiles in
+# its master's :latest, never its develop's :develop - so promote() moves master to develop's head, and waits
+# for image.yml's push build to publish the new :latest, before the first STAGES tag is created. Not a
+# component of the release itself (it gets no vX.Y.Z tag), so it is not in STAGES or repos().
+BUILD_IMAGE = "autobleem-build"
+# image.yml's own paths-filter (its `on: push: paths:`) - a merge that touches neither means no rebuild ever
+# starts, so promote() must not wait for one
+BUILD_IMAGE_WATCHED_PATHS = ("docker/**", ".github/workflows/image.yml")
 # proc_unzip and ext_store keep versions of their own (docs/decisions.md, Eleanor's call on R3, 2026-09-26):
 # a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in STAGES. promote()
 # only checks each already has a released (non-prerelease) v* version of its own - tagged by hand in its own
@@ -62,6 +73,7 @@ WORKFLOWS = {
     "ext_store": "build.yml",
     "proc_unzip": "build.yml",
     "autobleem-appliance": "assemble.yml",
+    "autobleem-build": "image.yml",
 }
 # the components whose develop feeds the nightly (the kernel payload reaches it through its releases) - the
 # same list as the appliance's fingerprint (assemble.yml's plan)
@@ -377,6 +389,60 @@ def check_existing_build(gh, repo, tag, log=print):
     return False
 
 
+def image_rebuild_needed(files):
+    """whether autobleem-build's image.yml would run a build for a diff touching `files` - its own
+    `on: push: paths:` filter (docker/**, its own workflow file). A diff of 300+ files (the API's page limit,
+    so the real list is unknown) is taken as yes - safer to wait for a build that turns out unneeded than to
+    skip one that was."""
+    return len(files) >= 300 or any(path_ignored(f, BUILD_IMAGE_WATCHED_PATHS) for f in files)
+
+
+def sync_build_image_master(gh, log=print):
+    """R2: autobleem-build's master is what every v* tag compiles in (:latest) - a tag created while master
+    is still behind develop would build its component against a stale toolchain image, exactly the drift
+    this step exists to close. Called once, before promote() creates the first STAGES tag (any kind: alpha/
+    beta/rc/release are all v* tags, docs/decisions.md's "two channels").
+
+    Whether master needs moving is an ahead/behind **compare**, never a plain sha equality check: a merge
+    of develop into master gives master a brand new sha even though it now contains every commit develop
+    has, so "master's sha != develop's sha" alone would call an already-caught-up master "still behind" and
+    try to merge it again on every single promotion from then on (found the hard way against the real repo
+    while building this - master's own catch-up merge commit differs from develop's head, and GitHub's
+    compare correctly answers "behind" for that pair, not "identical"). `compare(master, develop).status`
+    of `identical` or `behind` means master already has develop's head; `ahead` or `diverged` means it does
+    not.
+
+    A no-op - reads only, no merge, no wait - when master already has develop's head; that includes a dry
+    run of an already-caught-up train, so `promote --dry-run` still moves nothing when there is nothing to
+    move. Otherwise it merges develop into master (GitHub.merge - skipped under dry_run, GitHub.write's own
+    rule) and, only when that diff actually touches what image.yml's paths-filter watches
+    (image_rebuild_needed - a merge of unrelated files never starts a build, so waiting for one would just
+    time out), waits for the resulting push build to publish the new :latest before returning."""
+    develop_sha = gh.branch_sha(BUILD_IMAGE, "develop")
+    if not develop_sha:
+        raise RuntimeError("%s: no develop branch" % BUILD_IMAGE)
+    master_sha = gh.branch_sha(BUILD_IMAGE, "master")
+    if master_sha == develop_sha:
+        log("%s: master already matches develop %s - nothing to move" % (BUILD_IMAGE, develop_sha[:7]))
+        return
+    c = gh.compare(BUILD_IMAGE, master_sha, develop_sha) if master_sha else {"status": "ahead", "files": []}
+    if c.get("status") in ("identical", "behind"):
+        log("%s: master %s already has develop %s (compare: %s) - nothing to move"
+            % (BUILD_IMAGE, master_sha[:7], develop_sha[:7], c.get("status")))
+        return
+    files = [f["filename"] for f in (c.get("files") or [])]
+    rebuild = image_rebuild_needed(files)
+    log("%s: master %s is behind develop %s (compare: %s) - moving it before any v* tag compiles%s"
+        % (BUILD_IMAGE, (master_sha or "none")[:7], develop_sha[:7], c.get("status"),
+           "" if rebuild else " (no docker/image.yml change in the diff - no rebuild expected)"))
+    since = utc_now()
+    gh.merge(BUILD_IMAGE, "master", "develop", "Move autobleem-build's master to develop for a promotion")
+    if rebuild:
+        wait_for_runs(gh, {BUILD_IMAGE: ("event=push&branch=master", since)}, log=log)
+    else:
+        log("%s: master moved, no image rebuild to wait for" % BUILD_IMAGE)
+
+
 def promote(gh, kind, version=None, log=print):
     check_own_version_repos(gh, log=log)
     tag = next_tag(gh.tags("autobleem"), kind, version)
@@ -398,6 +464,9 @@ def promote(gh, kind, version=None, log=print):
             raise RuntimeError("%s: no commit to tag" % repo)
     # pre-check every repo's target tag before creating anything (R1 step 4) - see precheck_tags()
     reuse = precheck_tags(gh, tag, source, repos, log=log)
+    # R2: move autobleem-build's master (and let :latest rebuild) before the first STAGES tag below - every
+    # v* tag compiles against it
+    sync_build_image_master(gh, log=log)
     for stage in STAGES + [[APPLIANCE]]:
         since = utc_now()
         for repo in stage:
