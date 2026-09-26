@@ -224,6 +224,12 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - **the team sessions**: she decides whether a team has work, and may create a team (a new team manager's
     session, named per the naming rule) and close or clear one when it has no work or needs a fresh start
     (its state saved first - a REPORT.md, nothing uncommitted lost).
+- **The owner is the hardware tester** (2026-09-26): every test that needs hands on a device (a pad, a
+  keyboard, a button, a stick swapped, a sound judged by ear, a screen judged by eye) is done by him. Teams
+  never schedule such a test themselves: they send it to the Program Manager as a test item - device,
+  build/stick needed, exact steps, the expected result per step - and she runs it with the owner step by
+  step, then returns the results (and any todo rows) to the team. What the DebugDriver can drive
+  automatically stays with the teams' testers, on a machine the owner has said is free.
 - **The 5-hour stop line is 90%** for every team (the owner, 2026-09-26): above it a team stops its agents,
   saves its state and waits for the window's reset.
 
