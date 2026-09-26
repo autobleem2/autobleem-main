@@ -178,7 +178,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     whole. The Store's own state (`System/Extensions/store/`, `disabled.txt`) and any extension the user
     unpacked by hand are never touched. A development build takes ext_store's nightly, a release its latest
     release (its nightly while there is none); the plugin's SDK stamp must match the launcher's.
-- **Scanner processors** (2026-09-24, the launcher's `docs/scanner-processors-plan.md`): community console
+- **Scanner processors** (2026-09-24, `docs/archive/scanner-processors-plan.md`): community console
   programs in `System/Processors/<name>/` that the scan runs over the games before it reads them.
   - The folder processors ("preprocessors") are the **first thing every scan does**, whoever asked for it
     (the user, the watcher, the start-up check); then each game folder and ROM file through its chain.
