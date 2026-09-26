@@ -58,10 +58,14 @@ class IgnoredPaths(unittest.TestCase):
 class FakeGitHub(release.GitHub):
     """reads from a table; a dry run never writes"""
 
-    def __init__(self, branches, tags, log, changed=None):
+    def __init__(self, branches, tags, log, changed=None, latest_releases=None):
         super().__init__("token", dry_run=True, log=log)
         self.branches, self.tag_list = branches, tags
         self.changed = changed or {}  # {repo: [files between the nightly and develop]}
+        # OWN_VERSION_REPOS's latest release tag, defaulted so a promote() in an unrelated test still passes
+        # check_own_version_repos(); {repo: None} in a test means "no release yet"
+        self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1"}
+        self.latest_releases.update(latest_releases or {})
 
     def compare(self, repo, base, head):
         return {"status": "ahead", "files": [{"filename": f} for f in self.changed.get(repo, ["src/x.cpp"])]}
@@ -74,6 +78,9 @@ class FakeGitHub(release.GitHub):
 
     def tag_commit(self, repo, tag):
         return self.branches.get((repo, "nightly"))
+
+    def latest_release_tag(self, repo):
+        return self.latest_releases.get(repo)
 
     def call(self, *args, **kwargs):
         raise AssertionError("a dry run called the API: %r" % (args,))
@@ -157,6 +164,52 @@ class DryRuns(unittest.TestCase):
         dispatched = [l for l in self.lines if ": run " in l]
         self.assertEqual(len(dispatched), len(release.NIGHTLY_REPOS) + 1)
         self.assertIn('"skip_unchanged": "false"', dispatched[-1])
+
+
+class OwnVersionRepos(unittest.TestCase):
+    """proc_unzip and ext_store keep their own version numbers: promote() must refuse to start (dry run
+    included, since the check is read-only) unless each already has a released v* version - it is never one
+    of the vX.Y.Z tags this script makes."""
+
+    def setUp(self):
+        self.lines = []
+        self.branches = {(r, "develop"): "%040d" % i for i, r in enumerate(repos())}
+
+    def test_present_passes_and_is_logged(self):
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        latest_releases={"proc_unzip": "v1.1.0", "ext_store": "v1.0.1"})
+        release.check_own_version_repos(gh, log=self.lines.append)
+        self.assertTrue(any("proc_unzip: keeps its own version, latest release v1.1.0" in l for l in self.lines))
+        self.assertTrue(any("ext_store: keeps its own version, latest release v1.0.1" in l for l in self.lines))
+
+    def test_no_release_raises(self):
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        latest_releases={"proc_unzip": None})
+        with self.assertRaises(RuntimeError):
+            release.check_own_version_repos(gh, log=self.lines.append)
+
+    def test_a_non_v_tagged_release_raises(self):
+        # GitHub's own "latest release" would never be `nightly` (that release is always marked prerelease,
+        # so /releases/latest skips it) - this covers a release renamed or tagged oddly by hand
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        latest_releases={"ext_store": "release-1"})
+        with self.assertRaises(RuntimeError):
+            release.check_own_version_repos(gh, log=self.lines.append)
+
+    def test_promote_refuses_before_tagging_anything_even_dry_run(self):
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        latest_releases={"proc_unzip": None})
+        with self.assertRaises(RuntimeError):
+            release.promote(gh, "alpha")
+        # nothing was tagged - the check ran before promote() touched anything
+        self.assertFalse([l for l in self.lines if " tag v" in l])
+
+    def test_promote_never_tags_the_own_version_repos(self):
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append)
+        release.promote(gh, "alpha")
+        for repo in release.OWN_VERSION_REPOS:
+            self.assertFalse([l for l in self.lines if l.startswith("[dry run] %s: tag " % repo)],
+                             "%s must not be tagged by promote()" % repo)
 
 
 class Waiting(unittest.TestCase):

@@ -12,6 +12,8 @@
       release:    vX.Y.Z tagged on the release branches, merged into master and back into develop
       Components are tagged in dependency order and each stage's tag builds are awaited before the next; the
       appliance's tag comes last - its build assembles the components' releases and publishes the channel.
+      Refuses to start (even with --dry-run) unless proc_unzip and ext_store already have a released v*
+      version of their own - they keep their own versioning and are never tagged by this script.
   release.py next {alpha|beta|rc|release} [--version X.Y.Z]
       only prints the tag a promotion would make (what the admin panel shows before its confirmation)
 
@@ -34,16 +36,19 @@ API = "https://api.github.com"
 # the components of a release, in stages: a stage's tag builds must succeed before the next stage is tagged
 # (console-tools' tag build takes the kernel payload released under the same tag). autobleem-core has no
 # release of its own; it is tagged with the rest so every version names the core it was built with.
-# proc_unzip is a stand-alone protocol processor (no launcher checkout in its build) and tags with the first
-# stage; ext_store is an extension - a plugin loaded into autobleem-gui, built against its SDK ABI exactly as
-# autobleem-console-tools' PSC-Bios is - so it tags alongside console-tools, after autobleem's own tag has
-# built (2026-09-26, R3: both used to have only a rolling `nightly`, so a release fell back to bundling that).
 STAGES = [
-    ["psc-kernel-payload", "autobleem-core", "proc_unzip"],
+    ["psc-kernel-payload", "autobleem-core"],
     ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-pc-tools"],
-    ["autobleem-console-tools", "ext_store"],
+    ["autobleem-console-tools"],
 ]
 APPLIANCE = "autobleem-appliance"
+# proc_unzip and ext_store keep versions of their own (docs/decisions.md, Eleanor's call on R3, 2026-09-26):
+# a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in STAGES. promote()
+# only checks each already has a released (non-prerelease) v* version of its own - tagged by hand in its own
+# repository, not by this script - so the appliance's release build has something other than a nightly to
+# bundle (autobleem-appliance's release_assets.sh errors otherwise). Both were tagged for the first time on
+# 2026-09-26: proc_unzip v1.1.0, ext_store v1.0.0.
+OWN_VERSION_REPOS = ["proc_unzip", "ext_store"]
 # the workflow that builds a component - its develop into the rolling `nightly` release, a tag into that
 # tag's release. A tag push may start other workflows too (the launcher's test gate); this is the one
 # awaited. autobleem-core has none (no release of its own).
@@ -177,6 +182,13 @@ class GitHub:
             obj = self.call("GET", "/repos/%s/%s/git/tags/%s" % (ORG, repo, obj["sha"]))["object"]
         return obj["sha"]
 
+    def latest_release_tag(self, repo):
+        """the repository's latest release's tag - GitHub's own idea of "latest": the most recent release
+        that is neither a draft nor a prerelease. None when there is no such release (a 404, or every
+        release so far is a prerelease)."""
+        rel = self.call("GET", "/repos/%s/%s/releases/latest" % (ORG, repo), ok404=True)
+        return rel["tag_name"] if rel else None
+
     def compare(self, repo, base, head):
         """GitHub's comparison of two commits: status (ahead, behind, diverged, identical) and the files"""
         return self.call("GET", "/repos/%s/%s/compare/%s...%s" % (ORG, repo, base, head))
@@ -297,7 +309,21 @@ def nightly(gh, platforms, rebuild_all=False, log=print):
 
 
 # ---------------------------------------------------------------------------------------------- promote
+def check_own_version_repos(gh, log=print):
+    """OWN_VERSION_REPOS never get the unified tag - they must already have a released v* version of their
+    own, or a release build has nothing but a nightly to bundle (autobleem-appliance's release_assets.sh
+    now refuses that). Read-only, so it runs in a dry run too, before promote() creates or tags anything."""
+    for repo in OWN_VERSION_REPOS:
+        tag = gh.latest_release_tag(repo)
+        if not tag or not tag.startswith("v"):
+            raise RuntimeError("%s: no released v* version yet - it keeps its own version (docs/decisions.md) "
+                               "and is not tagged by this script; tag a v* release in %s by hand first"
+                               % (repo, repo))
+        log("%s: keeps its own version, latest release %s" % (repo, tag))
+
+
 def promote(gh, kind, version=None, log=print):
+    check_own_version_repos(gh, log=log)
     tag = next_tag(gh.tags("autobleem"), kind, version)
     branch = release_branch(tag)
     log("promotion: %s -> %s" % (kind, tag))
