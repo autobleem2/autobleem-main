@@ -290,3 +290,6 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **Nothing runs visibly on the owner's PC** (the owner, 2026-09-26): no team starts an app in a window or full
   screen on his PC; every UI test there - the dev build, the installed Windows instance, screenshots - goes through
   the DebugDriver (`tools/ab_drive.py`, window hidden, never `--show` unless he asks to watch).
+- **Team sessions are quiet** (the owner, 2026-09-26): a Team Manager writes no progress updates or reports to the
+  owner in its own session window; it talks only with its agents and the Program Manager, who is the owner's one
+  channel. Status lines in `_team/status/<team>.md` stay current.
