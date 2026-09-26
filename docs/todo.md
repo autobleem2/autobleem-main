@@ -28,7 +28,6 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 | R9 | Code signing through SignPath (`docs/code-signing.md`): apply, publish the policy (privacy statement vs the update check), five projects, `SIGNPATH_ORGANIZATION_ID` + `SIGNPATH_API_TOKEN`, then `AB_SIGNING_ENABLED=true`. Parked by the owner. | pc-tools, launcher | M | owner | rc |
 | R10 | Telegram for the admin panel: `AB_TELEGRAM_TOKEN`/`AB_TELEGRAM_CHAT` in the server's `admin/.env`, restart (autobleem-repo `admin/README.md` step 3). | autobleem-repo | S | owner | any |
 | R11 | Versioning leftovers: the `upstream` field in `manifest.json` (§3); collapse `repo_index.py`'s four version keys into one semver sort (§6). | several, autobleem-repo | S-M | dev | later |
-| R12 | retroarch-psc's `build.yml` gates on `CI_ENABLED`; every other repository uses `AB_CI_ENABLED`. | retroarch-psc | S | dev | a3 |
 | R13 | A nightly's UpdateRoms comes from the testing release (observed in the online-update work, never said fixed) - check. | appliance | S | dev | a3 |
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
 
