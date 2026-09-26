@@ -38,6 +38,13 @@ class NextTag(unittest.TestCase):
         self.assertEqual(release.release_branch("v2.0.0-rc2"), "release/v2.0.0")
         self.assertEqual(release.release_branch("v2.0.0"), "release/v2.0.0")
 
+    def test_r1_deleting_the_old_alpha2_tag_makes_alpha2_next_again(self):
+        # R1: today's live tags (v2.0.0-alpha1, v2.0.0-alpha2) propose alpha3 - the withdrawn-and-reissued
+        # promotion needs alpha2 deleted from every repo in the train (steps 7-10, not this script) first,
+        # after which next_tag (reading only what still exists) yields alpha2 again on its own
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1", "v2.0.0-alpha2"], "alpha"), "v2.0.0-alpha3")
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1"], "alpha"), "v2.0.0-alpha2")
+
 
 class IgnoredPaths(unittest.TestCase):
     PATTERNS = release.IGNORED_PATHS["autobleem"]
@@ -210,6 +217,84 @@ class OwnVersionRepos(unittest.TestCase):
         for repo in release.OWN_VERSION_REPOS:
             self.assertFalse([l for l in self.lines if l.startswith("[dry run] %s: tag " % repo)],
                              "%s must not be tagged by promote()" % repo)
+
+
+class TagPrecheckGitHub(FakeGitHub):
+    """FakeGitHub's own tag_commit ignores its `tag` argument (it only ever needed to answer for "nightly"
+    in the existing nightly-refresh tests) - this one answers per (repo, tag) from a table, and lets a
+    build's completion be scripted too, for precheck_tags()/check_existing_build()."""
+
+    def __init__(self, branches, tags, log, existing_tags=None, runs_by_repo_tag=None, **kwargs):
+        super().__init__(branches, tags, log, **kwargs)
+        self.existing_tags = existing_tags or {}  # {(repo, tag): sha}
+        self.runs_by_repo_tag = runs_by_repo_tag or {}  # {(repo, tag): [run, ...]}
+
+    def tag_commit(self, repo, tag):
+        return self.existing_tags.get((repo, tag))
+
+    def runs(self, repo, query):
+        # promote()/check_existing_build() only ever query "event=push&branch=<tag>"
+        tag = query.split("branch=", 1)[1]
+        return self.runs_by_repo_tag.get((repo, tag), [])
+
+
+class TagPrecheck(unittest.TestCase):
+    """R1 step 4: a tag left over from an old, withdrawn promotion (the v2.0.0-alpha2/alpha3 story) must
+    never be silently re-pointed or collided with - reused only at the exact intended commit, else refused
+    before anything is created."""
+
+    def setUp(self):
+        self.lines = []
+        self.branches = {(r, "develop"): "%040d" % i for i, r in enumerate(repos())}
+
+    def test_precheck_tags_reuses_a_tag_already_on_the_intended_commit(self):
+        source = {r: self.branches[(r, "develop")] for r in repos()}
+        gh = TagPrecheckGitHub(self.branches, [], self.lines.append,
+                               existing_tags={("autobleem", "v2.0.0-alpha2"): source["autobleem"]})
+        reuse = release.precheck_tags(gh, "v2.0.0-alpha2", source, repos(), log=self.lines.append)
+        self.assertTrue(reuse["autobleem"])
+        self.assertFalse(reuse["autobleem-appliance"])  # untouched repo: nothing to reuse, will be created
+        self.assertTrue(any("autobleem: v2.0.0-alpha2 already exists on" in l for l in self.lines))
+
+    def test_precheck_tags_stops_on_a_conflicting_commit(self):
+        source = {r: self.branches[(r, "develop")] for r in repos()}
+        gh = TagPrecheckGitHub(self.branches, [], self.lines.append,
+                               existing_tags={("pcsx-ab", "v2.0.0-alpha2"): "f" * 40})  # not source["pcsx-ab"]
+        with self.assertRaises(RuntimeError):
+            release.precheck_tags(gh, "v2.0.0-alpha2", source, repos(), log=self.lines.append)
+
+    def test_promote_stops_before_tagging_anything_on_a_conflicting_tag(self):
+        # the exact R1 danger: v2.0.0-alpha2 already exists (the old, still-live tag) on a commit that is
+        # not this promotion's develop head - promote() must refuse before create_tag runs for any repo
+        gh = TagPrecheckGitHub(self.branches, ["v2.0.0-alpha1"], self.lines.append,
+                               existing_tags={("autobleem", "v2.0.0-alpha2"): "f" * 40})
+        with self.assertRaises(RuntimeError):
+            release.promote(gh, "alpha", log=self.lines.append)
+        self.assertFalse([l for l in self.lines if " tag v2.0.0-alpha2 " in l])
+
+    def test_promote_reuses_a_tag_at_the_right_commit_without_recreating_it(self):
+        gh = TagPrecheckGitHub(self.branches, ["v2.0.0-alpha1"], self.lines.append,
+                               existing_tags={("autobleem", "v2.0.0-alpha2"): self.branches[("autobleem", "develop")]},
+                               runs_by_repo_tag={("autobleem", "v2.0.0-alpha2"):
+                                                 [{"status": "completed", "conclusion": "success"}]})
+        release.promote(gh, "alpha", log=self.lines.append)
+        self.assertFalse([l for l in self.lines if l.startswith("[dry run] autobleem: tag ")])
+        self.assertTrue(any("autobleem: v2.0.0-alpha2 already exists on" in l for l in self.lines))
+        # every other repo in autobleem's stage is still tagged normally
+        self.assertTrue(any(l.startswith("[dry run] autobleem-pc-tools: tag v2.0.0-alpha2 ") for l in self.lines))
+
+    def test_check_existing_build_skips_waiting_for_an_already_successful_build(self):
+        gh = TagPrecheckGitHub(self.branches, [], self.lines.append,
+                               runs_by_repo_tag={("autobleem", "v2.0.0-alpha2"):
+                                                 [{"status": "completed", "conclusion": "success"}]})
+        self.assertTrue(release.check_existing_build(gh, "autobleem", "v2.0.0-alpha2", log=self.lines.append))
+
+    def test_check_existing_build_waits_again_for_a_failed_or_missing_build(self):
+        gh = TagPrecheckGitHub(self.branches, [], self.lines.append,
+                               runs_by_repo_tag={("autobleem", "v2.0.0-alpha2"):
+                                                 [{"status": "completed", "conclusion": "failure"}]})
+        self.assertFalse(release.check_existing_build(gh, "autobleem", "v2.0.0-alpha2", log=self.lines.append))
+        self.assertFalse(release.check_existing_build(gh, "autobleem", "v2.0.0-alpha3", log=self.lines.append))
 
 
 class Waiting(unittest.TestCase):
