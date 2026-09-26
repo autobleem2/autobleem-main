@@ -3,7 +3,9 @@
 
   release.py nightly [--platforms "rpi-armhf psc ..."] [--all] [--dry-run]
       each component whose develop moved past its rolling `nightly` release is rebuilt on develop (--all:
-      every one), those builds are awaited, then autobleem-appliance assembles the nightly for the platforms
+      every one), those builds are awaited, then autobleem-appliance assembles the nightly for the platforms -
+      a no-op when the site's nightly was built from these same components already (each component's nightly
+      starts that assembly itself since 2026-09-26); --all always assembles
   release.py promote {alpha|beta|rc|release} [--version X.Y.Z] [--dry-run]
       alpha/beta: the next vX.Y.Z-alphaN / -betaN tag on develop's head of every component
       rc:         release/vX.Y.Z cut from develop in every component (first rc), vX.Y.Z-rcN tagged on it
@@ -48,10 +50,17 @@ WORKFLOWS = {
     "autobleem": "publish-launcher.yml",
     "autobleem-console-tools": "build.yml",
     "autobleem-pc-tools": "build.yml",
+    "ext_store": "build.yml",
+    "proc_unzip": "build.yml",
     "autobleem-appliance": "assemble.yml",
 }
-# the components whose develop feeds the nightly (the kernel payload reaches it through its releases)
-NIGHTLY_REPOS = ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools"]
+# the components whose develop feeds the nightly (the kernel payload reaches it through its releases) - the
+# same list as the appliance's fingerprint (assemble.yml's plan)
+NIGHTLY_REPOS = ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools",
+                 "ext_store", "proc_unzip"]
+# what a component's develop build does not run for (its workflow's paths-ignore): a commit touching only these
+# publishes no nightly, so develop's head stays past the `nightly` tag - and is no reason to rebuild
+IGNORED_PATHS = {"autobleem": ("docs/**", "**.md", "manuals/**")}
 ALL_PLATFORMS = "rpi-armhf rpi-arm64 pcusb psc win"
 KINDS = ("alpha", "beta", "rc", "release")
 # -alpha3 is the scheme (docs/versioning.md); -alpha.3 is read too, should one ever be made by hand
@@ -91,6 +100,25 @@ def next_tag(tags, kind, version=None):
         return name
     n = max([p[2] for _, p in parsed if p[0] == base and p[1] == kind] or [0]) + 1
     return "%s-%s%d" % (name, kind, n)
+
+
+def glob_regex(pattern):
+    """a paths-ignore glob as GitHub reads it: ** any characters, * and ? none of them a /"""
+    out, i = "", 0
+    while i < len(pattern):
+        if pattern.startswith("**", i):
+            out, i = out + ".*", i + 2
+        elif pattern[i] == "*":
+            out, i = out + "[^/]*", i + 1
+        elif pattern[i] == "?":
+            out, i = out + "[^/]", i + 1
+        else:
+            out, i = out + re.escape(pattern[i]), i + 1
+    return re.compile(out + r"\Z")
+
+
+def path_ignored(path, patterns):
+    return any(glob_regex(p).match(path) for p in patterns)
 
 
 def release_branch(tag):
@@ -145,6 +173,10 @@ class GitHub:
             obj = self.call("GET", "/repos/%s/%s/git/tags/%s" % (ORG, repo, obj["sha"]))["object"]
         return obj["sha"]
 
+    def compare(self, repo, base, head):
+        """GitHub's comparison of two commits: status (ahead, behind, diverged, identical) and the files"""
+        return self.call("GET", "/repos/%s/%s/compare/%s...%s" % (ORG, repo, base, head))
+
     def runs(self, repo, query):
         """the runs of the repository's release workflow (WORKFLOWS) the query selects, newest first"""
         return self.call("GET", "/repos/%s/%s/actions/workflows/%s/runs?per_page=30&%s"
@@ -175,13 +207,17 @@ class GitHub:
 
 
 # ---------------------------------------------------------------------------------------------- waiting
-def wait_for_runs(gh, wanted, timeout=5 * 3600, poll=30, log=print):
+def wait_for_runs(gh, wanted, timeout=5 * 3600, poll=30, log=print, superseded=None):
     """wanted: {repo: (query, since)} - the newest run each query finds created at or after `since` (UTC ISO),
-    followed until it completes. Fails when one does not succeed or none turns up in 10 minutes."""
+    followed until it completes. Fails when one does not succeed or none turns up in 10 minutes.
+    superseded: {repo: query} - a run of that repository cancelled with a newer run of the query created after
+    it was replaced in its concurrency group (the appliance's assemble keeps one pending run, the newest), and
+    the newer one is followed instead."""
     if gh.dry_run:
         for repo in wanted:
             log("[dry run] %s: would wait for its run" % repo)
         return
+    wanted, superseded = dict(wanted), superseded or {}
     start, found, done = time.time(), {}, {}
     while len(done) < len(wanted):
         for repo, (query, since) in wanted.items():
@@ -193,9 +229,15 @@ def wait_for_runs(gh, wanted, timeout=5 * 3600, poll=30, log=print):
                     raise RuntimeError("%s: no run started for %s" % (repo, query))
                 continue
             run = max(runs, key=lambda r: r["created_at"])
-            if repo not in found:
+            if found.get(repo) != run["id"]:
                 found[repo] = run["id"]
                 log("%s: %s %s" % (repo, run["name"], run["html_url"]))
+            if run["status"] == "completed" and run["conclusion"] == "cancelled" and repo in superseded:
+                newer = [r for r in gh.runs(repo, superseded[repo]) if r["created_at"] > run["created_at"]]
+                if newer:
+                    log("%s: %s was replaced by a newer run - following that" % (repo, run["html_url"]))
+                    wanted[repo] = (superseded[repo], min(r["created_at"] for r in newer))
+                    continue
             if run["status"] == "completed":
                 done[repo] = run["conclusion"]
                 log("%s: %s" % (repo, run["conclusion"]))
@@ -212,22 +254,41 @@ def utc_now():
 
 
 # ---------------------------------------------------------------------------------------------- nightly
+def only_ignored_changes(gh, repo, built, head):
+    """develop moved past the nightly with commits its build does not run for (IGNORED_PATHS) only"""
+    patterns = IGNORED_PATHS.get(repo)
+    if not patterns or not built or not head:
+        return False
+    c = gh.compare(repo, built, head)
+    files = [f["filename"] for f in (c.get("files") or [])]
+    # the API lists at most 300 files: a longer list is taken for a real change
+    return c.get("status") == "ahead" and 0 < len(files) < 300 and all(path_ignored(f, patterns) for f in files)
+
+
 def nightly(gh, platforms, rebuild_all=False, log=print):
     stale = []
     for repo in NIGHTLY_REPOS:
         head, built = gh.branch_sha(repo, "develop"), gh.tag_commit(repo, "nightly")
-        if rebuild_all or head != built:
+        if not rebuild_all and head and head == built:
+            log("%s: nightly is develop's head %s" % (repo, head[:7]))
+        elif not rebuild_all and only_ignored_changes(gh, repo, built, head):
+            log("%s: develop %s is past nightly %s by documentation only - up to date"
+                % (repo, head[:7], built[:7]))
+        else:
             stale.append(repo)
             log("%s: develop %s, nightly %s - rebuilding" % (repo, (head or "?")[:7], (built or "none")[:7]))
-        else:
-            log("%s: nightly is develop's head %s" % (repo, head[:7]))
     since = utc_now()
     for repo in stale:
         gh.dispatch(repo, WORKFLOWS[repo], "develop")
     wait_for_runs(gh, {r: ("event=workflow_dispatch&branch=develop", since) for r in stale}, log=log)
+    # each rebuilt component's nightly has started an assembly of its own (repository_dispatch); this one queues
+    # behind it and does nothing when that one already published these components (skip_unchanged). --all asks
+    # for an assembly whatever the site has.
     since = utc_now()
-    gh.dispatch(APPLIANCE, WORKFLOWS[APPLIANCE], "develop", {"channel": "nightly", "platforms": platforms})
-    wait_for_runs(gh, {APPLIANCE: ("event=workflow_dispatch&branch=develop", since)}, log=log)
+    gh.dispatch(APPLIANCE, WORKFLOWS[APPLIANCE], "develop",
+                {"channel": "nightly", "platforms": platforms, "skip_unchanged": "false" if rebuild_all else "true"})
+    wait_for_runs(gh, {APPLIANCE: ("event=workflow_dispatch&branch=develop", since)}, log=log,
+                  superseded={APPLIANCE: "branch=develop"})
     log("nightly refreshed for: " + platforms)
 
 
