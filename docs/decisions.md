@@ -55,6 +55,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 
 ## Platforms
 
+- **The platforms are the owner's call** (2026-09-26): the PlayStation Classic, the Raspberry Pis, the PC
+  stick and Windows (plus the Windows/Linux dev hosts). **macOS is not supported** - no work, rows or fixes
+  for it. A new platform, or dropping one, is decided by the owner only.
 - **Full screen on every real target** (launcher, pcsx-ab, RetroArch); only the dev build has a window.
 - **The PlayStation Classic's own storage is never written** - not the root file system, not `/data`,
   nothing on the eMMC (ABFlashKit flashing the kernel on the user's request is the one exception).

@@ -115,7 +115,6 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | S8 | Homebrew PS1 games in the Store (`docs/store-homebrew-plan.md`, researched): four questions for the owner in its section 5. | ext_store, repo | M | owner then dev | later |
 | S9 | Scanner processors, next (the launcher's `docs/scanner-processors-next-plan.md`): processors as a Store item kind, launch-time processors (`--prepare`/`--cleanup`), signatures or a trusted list, `Heavy=`. | core, ext_store | L | dev | later |
 | S10 | Remove the memcard `backup/` + `restoreAll` recovery path "in a later release" (the quiet stick made it unnecessary). | core | S | dev | later |
-| S11 | `MSG_NOSIGNAL` in core's `debug_driver.cpp` and `lanserver/*.cpp` does not exist on macOS, so `make_sys.sh` there would not compile (no shipped target): an `#ifdef` with `SO_NOSIGPIPE` as the fallback. Team: hardware. | core | S | dev | later |
 
 ## A - Apps and the virtual gamepad
 
