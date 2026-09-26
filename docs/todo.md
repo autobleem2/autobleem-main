@@ -30,7 +30,6 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | R11 | Versioning leftovers: the `upstream` field in `manifest.json` (§3); collapse `repo_index.py`'s four version keys into one semver sort (§6). | several, autobleem-repo | S-M | dev | later |
 | R13 | A nightly's UpdateRoms comes from the testing release (observed in the online-update work, never said fixed) - check. | appliance | S | dev | a2 |
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
-| R16 | **Flaky `test_update_service`** (autobleem-core): "the download lands in Updates/ verified, with pending.json for the installer" failed once in a full `make_win.sh` run on 2026-09-26 (rename errors, missing downloaded files) and passed in the next full run and 4/4 alone. Likely suites in parallel under `ctest -j` sharing a path (a fixed port, a temp/Updates dir, a pid-less name) or another process on the PC - find the shared resource and make the test's paths/ports its own. Team: infrastructure. | core | S | dev | a2 |
 | R17 | A push of the autobleem-build image to develop rebuilds no component, so a toolchain change reaches the nightly only with the next unrelated commit (found by the build-times batch). Team: infrastructure. | autobleem-build, appliance | S-M | dev | b1 |
 
 ## C - Console (launcher side)
