@@ -31,7 +31,6 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 | R12 | retroarch-psc's `build.yml` gates on `CI_ENABLED`; every other repository uses `AB_CI_ENABLED`. | retroarch-psc | S | dev | a3 |
 | R13 | A nightly's UpdateRoms comes from the testing release (observed in the online-update work, never said fixed) - check. | appliance | S | dev | a3 |
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
-| R15 | **The build server's clock does not sync** (the owner asked, 2026-09-26): `timedatectl` says "System clock synchronized: no" with systemd-timesyncd active, and it runs ~5 min behind the PCs (RTC 01:35:01 vs system 01:30:07; a tree sent from the PC unpacked "in the future" and ninja stopped with "build.ninja still dirty after 100 tries"). The `claude` user cannot read timesyncd's journal. With root: `journalctl -u systemd-timesyncd`, check UDP 123 outbound (a firewall or the router), `timedatectl set-ntp true`, an `NTP=` line in `/etc/systemd/timesyncd.conf` (e.g. `pool.ntp.org`) if the default servers are unreachable, then `timedatectl timesync-status`/`status` until synchronized. Workaround meanwhile: unpack with `tar -m`. | psc-build | S | owner | a3 |
 
 ## C - Console (launcher side)
 
