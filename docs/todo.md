@@ -26,7 +26,6 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | R7 | The download page's PS1 emulators tab has no channels: pcsx-ab/abnxt publish only for `v*` tags, and `index_pcsx()` keeps one version. Publish develop pushes (`emu/<name>/nightly/<v>/`), keep the newest per channel, draw the channel pills. | pcsx-ab, pcsx-abnxt, autobleem-repo | M | dev | b1 |
 | R8 | CI hardening: pin `actions/*` to hashes, Dependabot for workflows, "require approval for outside collaborators", read-only default token - per repo. | all | S | dev+owner | rc |
 | R9 | Code signing through SignPath (`docs/code-signing.md`): apply, publish the policy (privacy statement vs the update check), five projects, `SIGNPATH_ORGANIZATION_ID` + `SIGNPATH_API_TOKEN`, then `AB_SIGNING_ENABLED=true`. Parked by the owner. | pc-tools, launcher | M | owner | rc |
-| R10 | Telegram for the admin panel: `AB_TELEGRAM_TOKEN`/`AB_TELEGRAM_CHAT` in the server's `admin/.env`, restart (autobleem-repo `admin/README.md` step 3). | autobleem-repo | S | owner | any |
 | R11 | Versioning leftovers: the `upstream` field in `manifest.json` (§3); collapse `repo_index.py`'s four version keys into one semver sort (§6). | several, autobleem-repo | S-M | dev | later |
 | R13 | A nightly's UpdateRoms comes from the testing release (observed in the online-update work, never said fixed) - check. | appliance | S | dev | a2 |
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
