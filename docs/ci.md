@@ -17,7 +17,12 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   server's disk or needs its Docker: site publishes, the image build, the appliance's disk images, the page,
   cleanup. Pull requests never reach it.
 - **Nightlies**: each component's develop build refreshes its rolling GitHub `nightly` pre-release through
-  autobleem-build's `.github/actions/nightly-release` (used `@develop`): the tag moved, the assets replaced.
+  autobleem-build's `.github/actions/nightly-release` (used `@develop`): the tag moved, the assets replaced,
+  then (2026-09-26) a `component-nightly` repository_dispatch starts autobleem-appliance's assembly - the
+  nightly follows a push within ~30 min instead of waiting for the schedule. The seven feeding components
+  (launcher, pcsx-ab, pcsx-abnxt, console-tools, pc-tools, ext_store, proc_unzip) mint the `autobleem-admin`
+  App's token for it; a repository without `AB_ADMIN_APP_ID` publishes its nightly and leaves the assembly
+  to the schedule. Only a build of every target publishes a nightly (a partial manual run does not).
   A `v*` tag makes a GitHub release (a hyphenated tag is a pre-release). `signpath-sign` is wired and off
   (`AB_SIGNING_ENABLED`, `docs/code-signing.md`).
 - sccache runs from a local `SCCACHE_DIR` persisted with `actions/cache` (its GHA backend is broken).
@@ -38,16 +43,17 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 | `retroarch-psc` | `upstream.yml` | daily 04:41, dispatch | a new upstream RetroArch release built for the console, tagged, published to `psc/retroarch/` |
 | | `build.yml` | push, `v*`, PR, dispatch | the full RetroArch + sharded cores build (gated by `CI_ENABLED` - see below) |
 | `psc-kernel-payload` | `build.yml` | push, `v*`, PR, dispatch | boot.img + abrootfs, reusing the last release when nothing changed |
-| `autobleem-appliance` | `assemble.yml` | `v*` tags; daily 03:17 UTC (nightly); dispatch (channel, version, platforms) | fetches the components' release or nightly assets, assembles every platform's package, publishes to the site; the `image` job (self-hosted, `AB_IMAGE_BUILD_ENABLED`) builds the Pi and PC stick images; a scheduled night with no changed component (`sources.json`) is skipped |
+| `autobleem-appliance` | `assemble.yml` | `v*` tags; a component's nightly (repository_dispatch `component-nightly`); daily 03:17 UTC as the safety net; dispatch (channel, version, platforms, images, skip_unchanged) | fetches the components' release or nightly assets, assembles every platform's package, publishes to the site; the `image` job (self-hosted, `AB_IMAGE_BUILD_ENABLED`) builds the Pi and PC stick images, skipped with `images: false` (packages only); an automatic run waits `AB_NIGHTLY_SETTLE_SECONDS` (180) for sibling builds and is skipped when the site's nightly has the same components, platforms and images (`sources.json`); the concurrency group never cancels - one run and one pending, so a burst gives at most two assemblies |
 | `autobleem-repo` | `page.yml` | develop pushes touching the page generator; dispatch | regenerates the download page (self-hosted) |
 | | `cleanup.yml` | daily 01:30, dispatch | the server's Docker and old nightlies pruned, before the assembly |
 | | `withdraw.yml` | dispatch | removes (or restores) a testing or nightly build from the site |
-| `autobleem-main` | `nightly.yml` | dispatch | `tools/release.py nightly`: rebuild the components whose develop moved, then assemble |
+| `autobleem-main` | `nightly.yml` | dispatch | `tools/release.py nightly`: rebuild the components whose develop moved (not by documentation only), then assemble unless the chain already did (`--all`: always) |
 | | `promote.yml` | dispatch (kind, version, dry run) | `tools/release.py promote`: alpha/beta/rc/release tags across the components, the appliance last |
 
 `nightly.yml` and `promote.yml` start workflows in other repositories, so they need the `autobleem-admin`
 GitHub App (`AB_ADMIN_APP_ID`, `AB_ADMIN_APP_KEY`); the admin panel (`archive/admin-panel-plan.md`) is
-their front end.
+their front end. The components' `nightly` jobs use the same App, with the same two names in each of the
+seven repositories, for the dispatch to the appliance (the App needs Contents: write on autobleem-appliance).
 
 ## By hand
 
