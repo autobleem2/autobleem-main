@@ -50,6 +50,7 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 | H4 | The launcher's own ROM scan on a console (only UpdateRoms' playlists have run there). | launcher | S | tester | a4 |
 | H5 | Power Off on both kernels (checklist §9). | checklist §9 | S | tester | a4 |
 | H6 | Re-check the owner's console notes 1-3 (see C5). | - | S | tester | a4 |
+| H7 | **The DebugDriver over the LAN on a device** (feature/debug-driver-lan, 2026-09-26 - tested on the PC only): the Pi 400 (a systemd drop-in with `AB_DEBUG_PORT`, `AB_DEBUG_BIND=<its IP>`, `AB_DEBUG_TOKEN`, then `ab_drive.py run "..." --host 192.168.68.144 --port ... --token ...`, `grab` a screenshot) and the PSC (the same exports in the stick's `run.sh`); remove the test settings afterwards. Only when the owner says the machine is free. | Pi 400, PSC | S | owner+tester | a4 |
 
 ## K - Kernel and kernel payload
 
