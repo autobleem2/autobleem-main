@@ -1,6 +1,6 @@
 # Scanner processors
 
-Archived plan (done 2026-09-24). The full text is in git history: `git log -- docs/archive/scanner-processors-plan.md`.
+Archived plan (done 2026-09-24). The full text is in the launcher's git history (autobleem2/autobleem): `git log -- docs/scanner-processors-plan.md`.
 
 A processor is a console program the scan runs over the games before it reads them: it can turn a format the launcher does not read into one it does (a zipped `.bin/.cue`, `.7z`, `.rvz`, a future disc format), or change a game's data (a translation patch, a texture or audio mod, a region fix). Separate process, not a plugin; can be written in anything and crash without taking the launcher down.
 

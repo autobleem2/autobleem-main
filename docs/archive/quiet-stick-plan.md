@@ -1,6 +1,6 @@
 # A quiet stick
 
-Archived plan (done 2026-09-24). The full text is in git history: `git log -- docs/archive/quiet-stick-plan.md`.
+Archived plan (done 2026-09-24). The full text is in the launcher's git history (autobleem2/autobleem): `git log -- docs/quiet-stick-plan.md`.
 
 The stick is written only when the user's state changes — a save, a card, a kept resume slot, a setting the player changed, a game added or removed. Everything else is in RAM or not written at all. Logs, intermediate files and rewrites of unchanged data go to RAM or nowhere.
 
