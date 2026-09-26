@@ -238,8 +238,12 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   Program Manager checks it every 15 minutes and sets the **agent slots** (how many agents may run at once)
   per team: above the line, fewer slots; well below it, more. Team managers keep to their slots and pause
   the lowest-priority work first (state saved). The other levers: a team manager's session stays under
-  ~300k tokens of context (every turn re-reads all of it) - above that it saves its state to a file and
-  the Program Manager clears and restarts it; progress jobs every 15 minutes and status through files, no
+  ~300k tokens of context (every turn re-reads all of it). **No manual /clear** (the owner, 2026-09-26 -
+  typing it interrupted the agents): every session auto-compacts at ~300k (`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=30`
+  in the owner's `~/.claude/settings.json`), and after a larger task (a batch merged, no agent running) a team
+  manager writes `_team/status/<team>-STATE.md`, commits, tells the Program Manager in one line and clears
+  itself (`clear_session` with `self`); the Program Manager waits until it is idle and restarts it with "read
+  `<team>-STATE.md` and continue" when it has work. Never clear while an agent runs; progress jobs every 15 minutes and status through files, no
   acknowledgement messages; Opus only where a rule asks for it (it weighs ~3 Sonnet slots); a fresh agent
   per task; teams start their batches staggered after a window reset.
 - **The 5-hour stop line is 98%** for every team (the owner, 2026-09-26 - was 90% earlier the same day): above it a team stops its agents,
