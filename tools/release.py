@@ -89,7 +89,18 @@ def next_tag(tags, kind, version=None):
     """The tag a promotion of `kind` makes, given the launcher's existing tags.
 
     The base X.Y.Z is `version` when given, else the newest pre-release's base (the release being prepared)
-    - a stable tag's base is done, so without a pre-release after it a version must be given."""
+    - a stable tag's base is done, so without a pre-release after it a version must be given.
+
+    How it counts (R1 step 4 - this was read wrong once, proposing v2.0.0-alpha3 while alpha2 was still the
+    live testing tag): for a base already in `tags`, the next number for `kind` is one past the highest
+    existing `-<kind><N>` tag of that base *in the "autobleem" repository's own tag list* - the only list
+    this function is ever called with (see promote() and `next`'s cmd). It does not know or care whether an
+    alpha2/alpha3 tag was ever withdrawn from the download site or deleted from GitHub; it only reads tags
+    that still exist. So: while v2.0.0-alpha1 and v2.0.0-alpha2 both exist on "autobleem", the next alpha is
+    v2.0.0-alpha3 - correct today, and exactly why R1's plan deletes the old alpha2 (and psc-kernel-payload's
+    alpha3) tags before the new-alpha2 promote runs. Once v2.0.0-alpha2 is deleted from every repository in
+    the train (R1 steps 7-10, not this script's job), leaving only v2.0.0-alpha1 on "autobleem", this same
+    logic yields v2.0.0-alpha2 again on its own - no change needed here for that half of R1."""
     parsed = [(t, p) for t, p in ((t, parse_tag(t)) for t in tags) if p]
     if version:
         m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)$", version)
@@ -322,6 +333,50 @@ def check_own_version_repos(gh, log=print):
         log("%s: keeps its own version, latest release %s" % (repo, tag))
 
 
+EPOCH = "1970-01-01T00:00:00Z"
+
+
+def precheck_tags(gh, tag, source, repos, log=print):
+    """R1 step 4: refuse to promote if `tag` already exists in any repository of the train on a commit other
+    than the one this promotion is about to tag - a leftover from an earlier, withdrawn promotion (the old
+    v2.0.0-alpha2/alpha3 tags, R1) must be deleted by hand first, never silently re-pointed or collided with
+    (create_tag has no existence check of its own, so without this a stale tag would fail the API call
+    mid-promote - after some repos were already tagged). Read-only (every call is a GET), so it runs the
+    same way on a dry run: `promote --dry-run` shows exactly which repos would be reused and which created,
+    and still stops before anything is created if a real conflict exists.
+
+    Returns {repo: bool} - True where `tag` already sits on the intended commit in that repository (reuse
+    it, do not recreate it), False where it does not exist yet (create it)."""
+    reuse = {}
+    for repo in repos:
+        existing = gh.tag_commit(repo, tag)
+        if existing is None:
+            log("%s: %s does not exist yet - will create it on %s" % (repo, tag, source[repo][:7]))
+            reuse[repo] = False
+            continue
+        if existing != source[repo]:
+            raise RuntimeError(
+                "%s: tag %s already exists on %s, not on %s - this promotion cannot re-issue it; delete the "
+                "stale tag (and its release, if any) in %s first, then promote again"
+                % (repo, tag, existing[:7], source[repo][:7], repo))
+        log("%s: %s already exists on %s - reusing it, not recreating" % (repo, tag, existing[:7]))
+        reuse[repo] = True
+    return reuse
+
+
+def check_existing_build(gh, repo, tag, log=print):
+    """True if `repo`'s build of `tag` already completed successfully - a reused tag (precheck_tags) from an
+    earlier, interrupted promote run may already have one, and promote() should not wait for a second."""
+    if repo not in WORKFLOWS:
+        return True
+    for run in gh.runs(repo, "event=push&branch=" + tag):
+        if run["status"] == "completed":
+            done = run["conclusion"] == "success"
+            log("%s: %s's existing build for %s %s" % (repo, tag, tag, "succeeded" if done else "did not succeed"))
+            return done
+    return False
+
+
 def promote(gh, kind, version=None, log=print):
     check_own_version_repos(gh, log=log)
     tag = next_tag(gh.tags("autobleem"), kind, version)
@@ -341,11 +396,23 @@ def promote(gh, kind, version=None, log=print):
             source[repo] = sha
         if not source[repo]:
             raise RuntimeError("%s: no commit to tag" % repo)
+    # pre-check every repo's target tag before creating anything (R1 step 4) - see precheck_tags()
+    reuse = precheck_tags(gh, tag, source, repos, log=log)
     for stage in STAGES + [[APPLIANCE]]:
         since = utc_now()
         for repo in stage:
-            gh.create_tag(repo, tag, source[repo], "AutoBleem %s" % tag)
-        waiting = {r: ("event=push&branch=" + tag, since) for r in stage if r != "autobleem-core"}
+            if not reuse[repo]:
+                gh.create_tag(repo, tag, source[repo], "AutoBleem %s" % tag)
+        waiting = {}
+        for repo in stage:
+            if repo == "autobleem-core":
+                continue
+            if reuse[repo]:
+                if check_existing_build(gh, repo, tag, log=log):
+                    continue
+                waiting[repo] = ("event=push&branch=" + tag, EPOCH)  # an older, not-yet-finished run
+            else:
+                waiting[repo] = ("event=push&branch=" + tag, since)
         wait_for_runs(gh, waiting, log=log)
     if kind == "release":
         for repo in repos:
