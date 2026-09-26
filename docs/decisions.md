@@ -234,7 +234,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   step, then returns the results (and any todo rows) to the team. What the DebugDriver can drive
   automatically stays with the teams' testers, on a machine the owner has said is free.
 - **The 5-hour window is spent evenly** (the owner, 2026-09-26): usage should follow a straight line from
-  the window's start to 90% at its reset - the target at any moment is `90 x minutes elapsed / 300`. The
+  the window's start to 98% at its reset - the target at any moment is `98 x minutes elapsed / 300`. The
   Program Manager checks it every 15 minutes and sets the **agent slots** (how many agents may run at once)
   per team: above the line, fewer slots; well below it, more. Team managers keep to their slots and pause
   the lowest-priority work first (state saved). The other levers: a team manager's session stays under
@@ -242,7 +242,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   the Program Manager clears and restarts it; progress jobs every 15 minutes and status through files, no
   acknowledgement messages; Opus only where a rule asks for it (it weighs ~3 Sonnet slots); a fresh agent
   per task; teams start their batches staggered after a window reset.
-- **The 5-hour stop line is 90%** for every team (the owner, 2026-09-26): above it a team stops its agents,
+- **The 5-hour stop line is 98%** for every team (the owner, 2026-09-26 - was 90% earlier the same day): above it a team stops its agents,
   saves its state and waits for the window's reset.
 - **An idle team helps the others** (the owner, 2026-09-26): a team with free slots and nothing of its own
   may take *simple* rows from another team's list in `docs/todo.md` (tell the Program Manager and the owning
