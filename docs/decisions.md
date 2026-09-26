@@ -249,6 +249,20 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   team's manager which row, so nobody does it twice), within its slots. The moment work of its own kind
   arrives, it stops the borrowed row - committed on its branch with a short HANDOFF note, the owning team
   told - and turns to its own.
+- **A team is three** (the owner, 2026-09-26, replacing the earlier multi-agent teams): the **Team Manager**
+  (Opus, the session), **one Developer** (Sonnet) and **one Docs + Tester** (Haiku). No Opus developers, no
+  separate reviewer agent, no Fable.
+  - The **Team Manager reviews** the code and the test screenshots, **merges** to develop (fetch first; no
+    rebase or force; core before its dependants) and closes the todo rows. He does not write code; hard code
+    is the Developer's, with the manager's design help and review.
+  - The **Developer** builds, prepares the test environment (build, staged binaries, test trees, servers, the
+    DebugDriver) and writes each test as a script the Tester can run alone: exact commands and the expected
+    result of every step. He also updates the owner's Windows instance at the end of a batch.
+  - The **Tester** (Haiku) only runs the tests - asking the Developer who wrote them when stuck - and
+    updates the documentation and, after a merge, the user manuals (screenshots, build, publish).
+  - **Questions** that need research or a decision go to the Program Manager, the team's expert; she answers
+    or puts them to the owner.
+  - The slots, the ~300k-token rule for manager sessions and device tests through the Program Manager stay.
 
 - Several sessions work at once, sometimes in the same checkout: before pushing a shared branch look for
   commits that are not yours (`git log origin/<b>..<b>`), merge rather than rebase, never delete a branch
