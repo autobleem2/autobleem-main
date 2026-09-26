@@ -177,7 +177,9 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     folder's `Extensions/` for AutoBleemWinSetup), and every install and update replaces the shipped folder
     whole. The Store's own state (`System/Extensions/store/`, `disabled.txt`) and any extension the user
     unpacked by hand are never touched. A development build takes ext_store's nightly, a release its latest
-    release (its nightly while there is none); the plugin's SDK stamp must match the launcher's.
+    `v*` release - `release.py`'s STAGES tags it with every promotion (R3, 2026-09-26), so a release build
+    with no tagged ext_store release is now an error rather than a silent nightly fallback; the plugin's
+    SDK stamp must match the launcher's.
 - **Scanner processors** (2026-09-24, `docs/archive/scanner-processors-plan.md`): community console
   programs in `System/Processors/<name>/` that the scan runs over the games before it reads them.
   - The folder processors ("preprocessors") are the **first thing every scan does**, whoever asked for it
@@ -191,8 +193,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - The built-in ECM decoding stays as it is (no `proc_unecm` for now).
   - `proc_unzip` is the first processor and the example; `tools/proc_check.py` checks one before publishing.
   - **Unzip ships with every package** (2026-09-25): a processor is bundled, unlike an extension. The
-    appliance takes its nightly for a development build and its latest release for a release; an update
-    replaces its program and keeps the user's order and on/off.
+    appliance takes its nightly for a development build and its latest `v*` release for a release -
+    tagged v1.1.0 and staged in `release.py` with every promotion since R3 (2026-09-26), so a release build
+    with no tagged proc_unzip release is now an error, not a silent nightly fallback; an update replaces its
+    program and keeps the user's order and on/off.
   - The installers make `System/Processors/` (and `Extensions/`), each with a README, written once.
 - **No Project Eris code, ever** (2026-09-24): nothing from Project Eris or its mods (PSC Store included)
   is used in any repository. That covers sources, binaries, scripts, databases, samples, artwork and text.

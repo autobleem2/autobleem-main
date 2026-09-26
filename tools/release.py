@@ -34,10 +34,14 @@ API = "https://api.github.com"
 # the components of a release, in stages: a stage's tag builds must succeed before the next stage is tagged
 # (console-tools' tag build takes the kernel payload released under the same tag). autobleem-core has no
 # release of its own; it is tagged with the rest so every version names the core it was built with.
+# proc_unzip is a stand-alone protocol processor (no launcher checkout in its build) and tags with the first
+# stage; ext_store is an extension - a plugin loaded into autobleem-gui, built against its SDK ABI exactly as
+# autobleem-console-tools' PSC-Bios is - so it tags alongside console-tools, after autobleem's own tag has
+# built (2026-09-26, R3: both used to have only a rolling `nightly`, so a release fell back to bundling that).
 STAGES = [
-    ["psc-kernel-payload", "autobleem-core"],
+    ["psc-kernel-payload", "autobleem-core", "proc_unzip"],
     ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-pc-tools"],
-    ["autobleem-console-tools"],
+    ["autobleem-console-tools", "ext_store"],
 ]
 APPLIANCE = "autobleem-appliance"
 # the workflow that builds a component - its develop into the rolling `nightly` release, a tag into that
