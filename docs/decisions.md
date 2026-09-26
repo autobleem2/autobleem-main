@@ -287,3 +287,6 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   language the launcher supports** by default (not only English and Polish), and reports it to the Team Manager.
   The Team Manager reviews and merges it so that CI publishes it to the site - the Haiku no longer runs
   `repo_publish.sh manuals` itself (replaces the "Haiku publishes the manuals" rule of the same day).
+- **Nothing runs visibly on the owner's PC** (the owner, 2026-09-26): no team starts an app in a window or full
+  screen on his PC; every UI test there - the dev build, the installed Windows instance, screenshots - goes through
+  the DebugDriver (`tools/ab_drive.py`, window hidden, never `--show` unless he asks to watch).
