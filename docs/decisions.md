@@ -237,7 +237,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   the window's start to 90% at its reset - the target at any moment is `90 x minutes elapsed / 300`. The
   Program Manager checks it every 15 minutes and sets the **agent slots** (how many agents may run at once)
   per team: above the line, fewer slots; well below it, more. Team managers keep to their slots and pause
-  the lowest-priority work first (state saved).
+  the lowest-priority work first (state saved). The other levers: a team manager's session stays under
+  ~300k tokens of context (every turn re-reads all of it) - above that it saves its state to a file and
+  the Program Manager clears and restarts it; progress jobs every 15 minutes and status through files, no
+  acknowledgement messages; Opus only where a rule asks for it (it weighs ~3 Sonnet slots); a fresh agent
+  per task; teams start their batches staggered after a window reset.
 - **The 5-hour stop line is 90%** for every team (the owner, 2026-09-26): above it a team stops its agents,
   saves its state and waits for the window's reset.
 
