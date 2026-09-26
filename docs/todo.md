@@ -51,6 +51,13 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 | H5 | Power Off on both kernels (checklist §9). | checklist §9 | S | tester | a4 |
 | H6 | Re-check the owner's console notes 1-3 (see C5). | - | S | tester | a4 |
 | H7 | **The DebugDriver over the LAN on a device** (feature/debug-driver-lan, 2026-09-26 - tested on the PC only): the Pi 400 (a systemd drop-in with `AB_DEBUG_PORT`, `AB_DEBUG_BIND=<its IP>`, `AB_DEBUG_TOKEN`, then `ab_drive.py run "..." --host 192.168.68.144 --port ... --token ...`, `grab` a screenshot) and the PSC (the same exports in the stick's `run.sh`); remove the test settings afterwards. Only when the owner says the machine is free. | Pi 400, PSC | S | owner+tester | a4 |
+| H8 | **Keyboard control on real hardware** (software/ui's owner-bugs batch, 2026-09-26): a USB keyboard on the PSC (Esc = Circle now, not power off; the console's power button unchanged), the Pi 400 and the PC stick - the PC-style map, sysfs keyboard detection (the Button Guide's Keyboard column appears only then), hot-plug. Team: hardware runs it, software/ui fixes. | launcher, core (`Input`, `KeyboardPresence`) | S-M | tester | a4 |
+| H9 | **PSC-Bios Network & Controllers on the Pi 400 and the PC stick, as root** (the nmcli/bluetoothctl backend, `NmBackend`): Wi-Fi scan/connect (never the Pi's own ssh Wi-Fi), time zone via timedatectl, BT scan/pair/remove, rfkill unblock. Team: hardware, software/ui fixes. | console-tools | M | tester+owner | a4 |
+| H10 | **The PSC-Bios pad-mapping wizard with a real pad** on the console and a Pi: holding Circle 2 s exits (bar + hint), a short press still maps, Esc exits. Team: hardware, software/ui fixes. | console-tools | S | tester | a4 |
+| H11 | **The Network & Controllers hub and the "greyed provider" item on the console**: a PSC-Bios disabled by the crash guard shows greyed with its reason, and Cross opens Extensions at it. Team: hardware, software/ui fixes. | launcher | S | tester | a4 |
+| H12 | **Large files with `-D_FILE_OFFSET_BITS=64`** (psc/rpi builds): a Store download over 2 GB on the console and on a 32-bit Pi. Team: hardware, software/ui fixes. | launcher, console-tools | S | tester | a4 |
+| H13 | **The Store's source icons over a real network on the console** (abfetch): a root page with `<link rel=icon>`, the retry after a failed fetch (Refresh), a corrupt cached icon healed. Team: hardware, software/ui fixes. | ext_store | S | tester | a4 |
+| H14 | **The L1/R1 scroll sound at the d-pad's volume**, judged by ear on the console. | launcher | S | owner | a4 |
 
 ## K - Kernel and kernel payload
 
