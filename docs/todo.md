@@ -42,6 +42,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | C5 | The owner's console note: "the emulator starts into a partially cut menu" - reproduce on the current nightly. (The other three notes - Power Off on a custom kernel, the `roms/<system>` folders, UpdateRoms lost on reinstall - were fixed on 2026-09-23; re-check them in H6.) | pcsx-abnxt/pcsx-ab | S | tester | a3 |
 | C6 | A stock console with a RetroBoot 1.1 tree and a later KMFD build wants GLIBC_2.28, so RetroArch never starts: an installer check or a clear message. | installer, manual | S | dev | b1 |
 | C8 | **Pad battery in the launcher** (the owner, 2026-09-26, after K3): a small battery indicator per wireless pad (today only PSC-Bios's pairing screen shows it), plus a notification when a pad runs low. The level comes from the kernel's `power_supply` / BlueZ `Battery1` - a core service, shared with E15. Team: software/ui (the data source with hardware). | core, launcher | M | dev | b1 |
+| C9 | **Which pad is which PS1 port** (the owner, 2026-09-26): nothing shows which connected pad is player 1 / player 2 in the emulator - today the connection order decides. Show the assignment (Hardware Information / PSC-Bios pads list, and ideally a "P1/P2" hint in the launcher), later let the user swap it. Team: software/ui. | launcher, console-tools, emulators | M | dev | b1 |
 
 ## H - Hardware proofs (the tester checklist)
 
@@ -72,6 +73,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | K6 | psc-kernel's default branch `develop` is frozen at 2020; all current work is on `master`. Bring it in line with the "develop is default" rule (or record the exception in decisions.md); delete the 2020 branches. | psc-kernel | S | owner | a2 |
 | K7 | The rear/micro-USB (OTG) port on the AutoBleem kernel: hot-plugging there drops the USB stack (`-71`), cause unproven. Interim advice - plug in only with the console off, the stick on a front port - into the manual. (After a *standby* its host session is not restarted either - fixed in the launcher's `selection.sh`, AutoBleem2 `f18583b`, through `mt_usb/swmode`; a kernel fix in MediaTek's musb resume would be the proper one.) | payload, manual | S/M | dev | b1 |
 | K8 | `ntpget` in the overlay is a prebuilt binary whose source was never found. | psc-kernel-payload | S | dev | later |
+| K10 | **Bug: the mouse cursor is back after a Bluetooth pad reconnects** (the owner, K3.1 step 7, 2026-09-26: DualSense + DS4 re-paired, power-cycled, PS pressed - the pads work, but a mouse pointer shows on screen). Likely the pad's touchpad/motion input nodes appearing on reconnect and escaping payload db4fc89's no-pointer rule (a udev rule applied at pairing, not on a later hot-plug?). Reproduce, fix in the payload (and the launcher's `SDL_ShowCursor` if it is the launcher's). Team: hardware. | psc-kernel-payload, launcher | S | dev | a2 |
 
 ## E - Emulators and RetroArch
 
