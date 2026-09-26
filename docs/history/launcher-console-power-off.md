@@ -81,3 +81,14 @@ System/.session`. A session that ended any other way - the stick pulled while th
 - leaves the marker, the flag stays, and Windows gets to repair real damage. `standby()` clears an owned
 flag after its umount and forgets the ownership after the fresh mount (the kernel owns it again).
 Nothing in any of this writes to the console's own storage (the owner's rule: `/data` included).
+
+
+## Fragment kept verbatim from CLAUDE.md pass 1 (task D19 pass 2 cleanup)
+
+These two sentence-fragment lead-ins were left dangling in the launcher's `CLAUDE.md` by task D19's first
+pass (their antecedents were in the text that pass 1 already moved here); moved here verbatim rather than
+left attached to unrelated rule sentences:
+
+day, from the OTG hub and from a front port.
+
+kernel, an empty rear port or a device that came back: nothing, no wait.
