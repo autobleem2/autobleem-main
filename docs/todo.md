@@ -118,7 +118,7 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 
 | ID | What | Where | Size | Who | Ms |
 |---|---|---|---|---|---|
-| A1 | The App ports' console pass, the rest of checklist §12 (the owner's first pass gave six `-2`/`-3` releases), on a stick whose launcher has the Reset watch (>= `6e5b580`). | checklist §12 | M | tester | a4 |
+| A1 | The App ports' console pass, the rest of checklist §12 (the owner's first pass gave six `-2`/`-3` releases), on a stick whose launcher has the Reset watch (>= `6e5b580`). 2026-09-26: OpenBOR `7533-4` starts and plays, Amiberry `5.9.3-2` takes one menu step per D-pad press (its `pad.ini`, `movement = as-is`) - both had failed on nightly 157, whose `app_env.sh` predated `bf3bfa7` and gave the Apps the firmware's SDL 2.0.4; any nightly >= `169-ge22d771` has the fix. | checklist §12 | M | tester | a4 |
 | A2 | OpenBOR's games: the owner names one or two free paks for the next `v7533-n`. | app_openbor | S | owner | any |
 | A3 | abpad: keyboard mode (written, never exercised with a keyboard-only App); a launcher page showing which pads the daemon sees; does a stock kernel have uinput. | launcher | M | dev | later |
 | A4 | The Terminal App on the PC stick (untested); on Windows the first character after a resize can be lost (ConPTY). | app_terminal | S | tester, dev | a5 |
