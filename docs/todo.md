@@ -41,6 +41,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | C4 | RetroBoot leftovers on a migrated stick: `RetroArch/bin/retroboot/` (~600 MB, EmulationStation) and `RetroArch/bin/apps/`. The installer offers to remove them (check what the system menu's "RetroArch/EmulationStation" then starts). | core installer | M | dev | b1 |
 | C5 | The owner's console note: "the emulator starts into a partially cut menu" - reproduce on the current nightly. (The other three notes - Power Off on a custom kernel, the `roms/<system>` folders, UpdateRoms lost on reinstall - were fixed on 2026-09-23; re-check them in H6.) | pcsx-abnxt/pcsx-ab | S | tester | a3 |
 | C6 | A stock console with a RetroBoot 1.1 tree and a later KMFD build wants GLIBC_2.28, so RetroArch never starts: an installer check or a clear message. | installer, manual | S | dev | b1 |
+| C8 | **Pad battery in the launcher** (the owner, 2026-09-26, after K3): a small battery indicator per wireless pad (today only PSC-Bios's pairing screen shows it), plus a notification when a pad runs low. The level comes from the kernel's `power_supply` / BlueZ `Battery1` - a core service, shared with E15. Team: software/ui (the data source with hardware). | core, launcher | M | dev | b1 |
 
 ## H - Hardware proofs (the tester checklist)
 
@@ -90,6 +91,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | E12 | N64 in RetroArch has never been tested with a real game (the homebrew RSP tests crash GLupeN64 inside the core). | retroarch-psc | S | tester | later |
 | E13 | picodrive's Cyclone core segfaults on the Pi 400 (worked around in `rpi.cores.cfg` with Genesis Plus GX) - unexplained. | launcher platform ini | M | dev | later |
 | E14 | No i386 build of either PS1 emulator: the PC stick plays PS1 through RetroArch's pcsx_rearmed core until pcsx-abnxt gets one. | pcsx-abnxt | M | dev | later |
+| E15 | **Pad battery overlay in the emulators** (the owner, 2026-09-26): a tiny battery icon in a corner while a game runs (pcsx-abnxt, pcsx-ab, RetroArch if feasible - its own overlay/notification), shown only for a wireless pad and when low or on a button hold; reads the same level as C8. Team: software/ui. | pcsx-abnxt, pcsx-ab, retroarch-psc | M | dev | b1 |
 
 ## X - Console tools and PC tools
 
