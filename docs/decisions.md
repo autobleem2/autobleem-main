@@ -15,6 +15,12 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   releases of that tag. A nightly is named after the launcher's `git describe`
   (`v2.0.0-alpha2-17-g1760cc8`) - the name the launcher's update check compares with, so it must never be
   renamed by hand. `docs/versioning.md`.
+- **alpha2 is withdrawn** (the owner, 2026-09-26): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` tags and
+  releases are deleted; what the teams do now is still the road to the next pre-release, which is called
+  **alpha2** again. alpha1 stays (todo R1).
+- **`AB_SDK_ABI` moves only with a release** (the owner, 2026-09-26): within a development cycle the ABI may
+  change once, and the release carries that one number. ABI 4 (`Extension::runEntry()`) is the next
+  release's.
 - **Every program shows the package's version** (2026-09-23), exactly as the package's `VERSION` writes it -
   never a component's own describe. `Env::productVersion()` / `$AB_VERSION`; RetroArch is the one exception.
 - **The build image has two channels** (2026-09-23): develop builds compile in `autobleem-build:develop`,
@@ -190,8 +196,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   A feature inspired by theirs is a clean implementation from an analysis of what it does, written on our
   own code. *Why:* their code carries its own licence and authorship, and ours must stay GPLv3 and
   provably our own.
-- **Themes**: all five stay in the launcher repository; `ab2/ab.ogg` is the owner's own composition.
-  (`autobleem-themes` holds stale copies of four of them - archive it or make it the source: todo D5.)
+- **Themes and samples have their own source repositories** (the owner, 2026-09-26 - until then all five
+  themes stayed in the launcher): `autobleem-themes` becomes the themes' source and `autobleem-samples` the
+  sample pack's; the launcher's copies go once the build takes them from there (todo D5, D6).
+  `ab2/ab.ogg` is the owner's own composition.
 - **Images**: xz level 2 (`AB_XZ_LEVEL=2`) - speed over size; cache the base images between builds.
 
 ## Testing
@@ -204,6 +212,20 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   suite and by testers).
 
 ## Working with Claude sessions
+
+- **One Program Manager over the teams** (the owner - the CEO - 2026-09-26): **Eleanor Voss - Program
+  Manager (roadmap)** writes no code. She keeps `docs/roadmap.md` and `docs/todo.md`, reports how far the
+  next milestone or release is, plans user stories with the owner, and owns:
+  - **the questions for the owner**: a team manager sends her any question that needs his decision; she
+    queues them (`_team/ceo-questions.md` next to the checkouts), puts them to him together and relays the
+    answers. A decision he gives directly in a team's session is cc'd to her in one line;
+  - **todo intake**: teams send her new items instead of adding rows; she writes the row and decides which
+    team does it (`Team:` in the row). The commit that finishes the work still deletes its row;
+  - **the team sessions**: she decides whether a team has work, and may create a team (a new team manager's
+    session, named per the naming rule) and close or clear one when it has no work or needs a fresh start
+    (its state saved first - a REPORT.md, nothing uncommitted lost).
+- **The 5-hour stop line is 90%** for every team (the owner, 2026-09-26): above it a team stops its agents,
+  saves its state and waits for the window's reset.
 
 - Several sessions work at once, sometimes in the same checkout: before pushing a shared branch look for
   commits that are not yours (`git log origin/<b>..<b>`), merge rather than rebase, never delete a branch
