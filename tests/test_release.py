@@ -39,12 +39,32 @@ class NextTag(unittest.TestCase):
         self.assertEqual(release.release_branch("v2.0.0"), "release/v2.0.0")
 
 
+class IgnoredPaths(unittest.TestCase):
+    PATTERNS = release.IGNORED_PATHS["autobleem"]
+
+    def test_the_launchers_paths_ignore(self):
+        for path in ("docs/ci.md", "docs/a/b.png", "README.md", "src/code/NOTES.md", "manuals/pl/x.md",
+                     "manuals/images/pl/a.jpg"):
+            self.assertTrue(release.path_ignored(path, self.PATTERNS), path)
+        for path in ("src/code/app.cpp", "CMakeLists.txt", "payload/Docs/readme.txt", "tools/docs/x.py",
+                     "a.mdx", "docs"):
+            self.assertFalse(release.path_ignored(path, self.PATTERNS), path)
+
+    def test_single_star_stays_in_its_folder(self):
+        self.assertTrue(release.path_ignored("a/x.txt", ("a/*.txt",)))
+        self.assertFalse(release.path_ignored("a/b/x.txt", ("a/*.txt",)))
+
+
 class FakeGitHub(release.GitHub):
     """reads from a table; a dry run never writes"""
 
-    def __init__(self, branches, tags, log):
+    def __init__(self, branches, tags, log, changed=None):
         super().__init__("token", dry_run=True, log=log)
         self.branches, self.tag_list = branches, tags
+        self.changed = changed or {}  # {repo: [files between the nightly and develop]}
+
+    def compare(self, repo, base, head):
+        return {"status": "ahead", "files": [{"filename": f} for f in self.changed.get(repo, ["src/x.cpp"])]}
 
     def tags(self, repo):
         return self.tag_list
@@ -102,7 +122,70 @@ class DryRuns(unittest.TestCase):
         dispatched = [l for l in self.lines if ": run " in l]
         self.assertEqual(len(dispatched), 2)
         self.assertIn("autobleem: run publish-launcher.yml on develop", dispatched[0])
-        self.assertIn('assemble.yml on develop {"channel": "nightly", "platforms": "psc win"}', dispatched[1])
+        self.assertIn('assemble.yml on develop {"channel": "nightly", "platforms": "psc win", '
+                      '"skip_unchanged": "true"}', dispatched[1])
+
+    def test_nightly_takes_a_documentation_only_change_for_up_to_date(self):
+        branches = {(r, "develop"): "a" * 40 for r in release.NIGHTLY_REPOS}
+        branches.update({(r, "nightly"): "a" * 40 for r in release.NIGHTLY_REPOS})
+        branches[("autobleem", "develop")] = "b" * 40
+        branches[("ext_store", "develop")] = "c" * 40
+
+        class Moved(FakeGitHub):
+            def tag_commit(self, repo, tag):
+                return branches[(repo, "nightly")]
+
+        # the launcher moved by docs only; the Store (no paths-ignore) moved by a readme and is rebuilt
+        gh = Moved(branches, [], self.lines.append,
+                   changed={"autobleem": ["docs/ci.md", "CLAUDE.md"], "ext_store": ["README.md"]})
+        release.nightly(gh, "psc", log=self.lines.append)
+        dispatched = [l for l in self.lines if ": run " in l]
+        self.assertEqual(len(dispatched), 2)
+        self.assertIn("ext_store: run build.yml on develop", dispatched[0])
+        self.assertTrue(any("autobleem: develop bbbbbbb is past nightly aaaaaaa by documentation only" in l
+                            for l in self.lines))
+        # a code change among them is a rebuild
+        self.lines.clear()
+        gh.changed["autobleem"] = ["docs/ci.md", "src/code/app.cpp"]
+        release.nightly(gh, "psc", log=self.lines.append)
+        self.assertTrue(any("autobleem: run publish-launcher.yml" in l for l in self.lines))
+
+    def test_nightly_all_assembles_whatever_the_site_has(self):
+        branches = {(r, "develop"): "a" * 40 for r in release.NIGHTLY_REPOS}
+        gh = FakeGitHub(branches, [], self.lines.append)
+        release.nightly(gh, "psc", rebuild_all=True)
+        dispatched = [l for l in self.lines if ": run " in l]
+        self.assertEqual(len(dispatched), len(release.NIGHTLY_REPOS) + 1)
+        self.assertIn('"skip_unchanged": "false"', dispatched[-1])
+
+
+class Waiting(unittest.TestCase):
+    """wait_for_runs over a scripted run list (not a dry run - the reads are faked, nothing is written)"""
+
+    class Runs(release.GitHub):
+        def __init__(self, runs):
+            super().__init__("token", log=lambda *_: None)
+            self.all = runs
+
+        def runs(self, repo, query):
+            return [r for r in self.all if query == "branch=develop" or r["event"] in query]
+
+    @staticmethod
+    def make(i, event, created, conclusion):
+        return {"id": i, "name": "assemble", "html_url": "u%d" % i, "event": event, "created_at": created,
+                "status": "completed", "conclusion": conclusion}
+
+    def test_a_run_replaced_in_its_concurrency_group_is_followed(self):
+        gh = self.Runs([self.make(1, "workflow_dispatch", "2026-09-26T10:00:00Z", "cancelled"),
+                        self.make(2, "repository_dispatch", "2026-09-26T10:01:00Z", "success")])
+        release.wait_for_runs(gh, {"autobleem-appliance": ("event=workflow_dispatch", "2026-09-26T09:59:00Z")},
+                              poll=0, log=lambda *_: None, superseded={"autobleem-appliance": "branch=develop"})
+
+    def test_a_cancelled_run_nothing_replaced_fails(self):
+        gh = self.Runs([self.make(1, "workflow_dispatch", "2026-09-26T10:00:00Z", "cancelled")])
+        with self.assertRaises(RuntimeError):
+            release.wait_for_runs(gh, {"autobleem-appliance": ("event=workflow_dispatch", "2026-09-26T09:59:00Z")},
+                                  poll=0, log=lambda *_: None, superseded={"autobleem-appliance": "branch=develop"})
 
 
 if __name__ == "__main__":
