@@ -96,6 +96,7 @@ Milestone: **a3 a4 a5 b1 rc** = alpha3, alpha4, alpha5, beta1, rc/2.0.0; **later
 | X3 | ABFlashKit never checks `abrootfs.md5` (only `boot.md5`); its `payload/` holds a checked-in binary and an old readme. | console-tools | S | dev | b1 |
 | X4 | LastResortRecovery has never run against a console, and its driver install (self-signed catalogue) was never exercised - both need the owner's OK. Point `docs/kernel-flash-recovery.md` at it. | pc-tools | M | owner+tester | b1 |
 | X5 | UpdateRoms passes no ROM scan-state file (the digest is portable) - rescans are slower than they need be. | pc-tools | S | dev | later |
+| X6 | **Drop PSC-Bios's "Driver mode" (wext/nl80211) row** (the owner asked, 2026-09-26). Every WiFi driver the payload's kernel carries is mac80211 (rt2800usb, ath9k_htc, carl9170, rtl8192cu, ...), so nl80211; wext matters only for out-of-tree vendor drivers, and wpa_supplicant falls back by itself given `-Dnl80211,wext` (or no `-D`: the owner's console ran without one and joined). Also both `etc/autobleem/dhcpcd.conf.{wext,nl80211}` hang it off `interface wlan0`, so a dongle named otherwise never got it. Proposal: the payload ships one `dhcpcd.conf` with `env wpa_supplicant_driver=nl80211,wext` for every interface (keep the rndis0 block), PSC-Bios loses the row and `NativeBackend`'s dhcpcd.conf copy (keep the two files a release for older extensions). Verify on the console with the RT5370 and, if at hand, a wext-only dongle. | psc-kernel-payload, console-tools | S | dev | a4 |
 
 ## S - SDK, extensions, the Store, processors
 
