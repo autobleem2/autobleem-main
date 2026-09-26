@@ -65,17 +65,25 @@ class IgnoredPaths(unittest.TestCase):
 class FakeGitHub(release.GitHub):
     """reads from a table; a dry run never writes"""
 
-    def __init__(self, branches, tags, log, changed=None, latest_releases=None):
+    def __init__(self, branches, tags, log, changed=None, latest_releases=None, compare_status=None):
         super().__init__("token", dry_run=True, log=log)
         self.branches, self.tag_list = branches, tags
+        # R2: autobleem-build's master already caught up with develop by default, so a test that does not
+        # care about this step sees promote() do nothing for it. setdefault (not a copy - some tests mutate
+        # `branches` again after construction and expect this same gh to see it, e.g. the rc/release test)
+        # only fills in the two keys when the caller did not already set them.
+        self.branches.setdefault((release.BUILD_IMAGE, "develop"), "b" * 40)
+        self.branches.setdefault((release.BUILD_IMAGE, "master"), self.branches[(release.BUILD_IMAGE, "develop")])
         self.changed = changed or {}  # {repo: [files between the nightly and develop]}
+        self.compare_status = compare_status or {}  # {repo: "ahead"|"behind"|"identical"|"diverged"}
         # OWN_VERSION_REPOS's latest release tag, defaulted so a promote() in an unrelated test still passes
         # check_own_version_repos(); {repo: None} in a test means "no release yet"
         self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1"}
         self.latest_releases.update(latest_releases or {})
 
     def compare(self, repo, base, head):
-        return {"status": "ahead", "files": [{"filename": f} for f in self.changed.get(repo, ["src/x.cpp"])]}
+        return {"status": self.compare_status.get(repo, "ahead"),
+                "files": [{"filename": f} for f in self.changed.get(repo, ["src/x.cpp"])]}
 
     def tags(self, repo):
         return self.tag_list
@@ -171,6 +179,120 @@ class DryRuns(unittest.TestCase):
         dispatched = [l for l in self.lines if ": run " in l]
         self.assertEqual(len(dispatched), len(release.NIGHTLY_REPOS) + 1)
         self.assertIn('"skip_unchanged": "false"', dispatched[-1])
+
+
+class ImageRebuildNeeded(unittest.TestCase):
+    """image_rebuild_needed() mirrors autobleem-build's image.yml `on: push: paths:` filter - a pure function
+    over a file list, no reads of its own (sync_build_image_master is what fetches the compare)."""
+
+    def test_a_docker_file_triggers_it(self):
+        self.assertTrue(release.image_rebuild_needed(["docker/Dockerfile"]))
+
+    def test_the_workflow_file_itself_triggers_it(self):
+        self.assertTrue(release.image_rebuild_needed([".github/workflows/image.yml"]))
+
+    def test_an_unrelated_diff_does_not(self):
+        self.assertFalse(release.image_rebuild_needed(["ci/build.sh", "toolchains/psc/PSCtoolchainV8.cmake"]))
+
+    def test_no_files_does_not(self):
+        self.assertFalse(release.image_rebuild_needed([]))
+
+    def test_a_300_file_diff_is_assumed_to_need_a_rebuild(self):
+        self.assertTrue(release.image_rebuild_needed(["x%d.txt" % i for i in range(300)]))
+
+
+class BuildImageMaster(unittest.TestCase):
+    """R2: autobleem-build's master is what every v* tag (alpha/beta/rc/release alike) compiles against
+    (:latest) - promote() moves it to develop's head before tagging anything, and waits for the image build
+    only when the move actually touches what image.yml rebuilds for."""
+
+    def setUp(self):
+        self.lines = []
+        self.branches = {(r, "develop"): "%040d" % i for i, r in enumerate(repos())}
+
+    def test_noop_when_master_already_matches_develop(self):
+        # FakeGitHub defaults autobleem-build's master and develop to the same sha unless a test overrides -
+        # this is what every unrelated test above relies on
+        gh = FakeGitHub(self.branches, [], self.lines.append)
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertTrue(any("autobleem-build: master already matches develop" in l for l in self.lines))
+        self.assertFalse([l for l in self.lines if "merge" in l])
+
+    def test_no_develop_branch_raises(self):
+        gh = FakeGitHub(self.branches, [], self.lines.append)
+        del gh.branches[(release.BUILD_IMAGE, "develop")]
+        with self.assertRaises(RuntimeError):
+            release.sync_build_image_master(gh, log=self.lines.append)
+
+    def test_a_merge_commit_makes_master_a_different_sha_but_already_caught_up(self):
+        # found against the real repo while building this: master's own earlier catch-up merge gives it a
+        # sha develop never has, even though it contains every commit develop does - compare() says "behind"
+        # (develop is behind master) or "identical", never "ahead"/"diverged", and that - not sha equality -
+        # is what must decide there is nothing to move; a plain sha check would merge on every promotion
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, [], self.lines.append,
+                        compare_status={release.BUILD_IMAGE: "behind"})
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertTrue(any("already has develop" in l for l in self.lines))
+        self.assertFalse([l for l in self.lines if "merge" in l or "would wait" in l])
+
+    def test_identical_content_under_a_different_sha_is_also_a_noop(self):
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, [], self.lines.append,
+                        compare_status={release.BUILD_IMAGE: "identical"})
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertTrue(any("already has develop" in l for l in self.lines))
+        self.assertFalse([l for l in self.lines if "merge" in l or "would wait" in l])
+
+    def test_diverged_still_moves_it(self):
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, [], self.lines.append,
+                        compare_status={release.BUILD_IMAGE: "diverged"},
+                        changed={release.BUILD_IMAGE: ["docker/Dockerfile"]})
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertIn("[dry run] autobleem-build: merge develop into master", self.lines)
+
+    def test_moves_and_waits_when_the_diff_touches_docker(self):
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, [], self.lines.append,
+                        changed={release.BUILD_IMAGE: ["docker/Dockerfile"]})
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertTrue(any("autobleem-build: master mmmmmmm is behind develop ddddddd" in l for l in self.lines))
+        self.assertIn("[dry run] autobleem-build: merge develop into master", self.lines)
+        self.assertTrue(any("autobleem-build: would wait for its run" in l for l in self.lines))
+
+    def test_moves_but_does_not_wait_when_the_diff_is_unrelated(self):
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, [], self.lines.append,
+                        changed={release.BUILD_IMAGE: ["ci/build.sh"]})
+        release.sync_build_image_master(gh, log=self.lines.append)
+        self.assertIn("[dry run] autobleem-build: merge develop into master", self.lines)
+        self.assertTrue(any("no docker/image.yml change in the diff" in l for l in self.lines))
+        self.assertFalse([l for l in self.lines if "would wait" in l])
+
+    def test_promote_dry_run_moves_nothing_when_already_in_sync(self):
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append)
+        release.promote(gh, "alpha", log=self.lines.append)
+        self.assertFalse([l for l in self.lines if "autobleem-build: merge" in l])
+        self.assertTrue(any("autobleem-build: master already matches develop" in l for l in self.lines))
+
+    def test_promote_moves_the_build_image_before_the_first_stages_tag(self):
+        self.branches[(release.BUILD_IMAGE, "develop")] = "d" * 40
+        self.branches[(release.BUILD_IMAGE, "master")] = "m" * 40
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        changed={release.BUILD_IMAGE: ["docker/Dockerfile"]})
+        release.promote(gh, "alpha", log=self.lines.append)
+        wait_index = next(i for i, l in enumerate(self.lines)
+                          if l == "[dry run] autobleem-build: would wait for its run")
+        first_tag_index = next(i for i, l in enumerate(self.lines) if " tag v2.0.0-alpha3 " in l)
+        self.assertLess(wait_index, first_tag_index)
+        # never one of the STAGES/appliance repos itself - it gets no vX.Y.Z tag of its own
+        self.assertFalse([l for l in self.lines if l.startswith("[dry run] autobleem-build: tag ")])
 
 
 class OwnVersionRepos(unittest.TestCase):

@@ -26,6 +26,13 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The build image has two channels** (2026-09-23): develop builds compile in `autobleem-build:develop`,
   `v*` releases in `:latest` (master's). A nightly is develop all the way down, the compilers and SDL
   included; a toolchain change reaches releases only when autobleem-build's master moves.
+- **`promote` moves the build image's master itself** (R2, 2026-09-26): every `v*` tag - alpha/beta/rc/
+  release alike - compiles against `autobleem-build:latest`, so `release.py promote` merges its develop into
+  master (when it is behind) before the first `STAGES` tag is created, and waits for the resulting
+  `image.yml` push build to publish the new `:latest` when the merge actually touches what that workflow's
+  `paths:` filter watches (`docker/**`, its own workflow file) - an unrelated diff is merged but not waited
+  on, since no build would start for it. `autobleem-build` is not itself in `STAGES`: it gets no `vX.Y.Z` tag
+  of its own. A no-op, under `--dry-run` too, when master already matches develop.
 - **No Windows exe is UPX-packed** (2026-09-23), and Authenticode signing through SignPath is wired into CI
   but **switched off** per repository (`AB_SIGNING_ENABLED` unset, 2026-09-24) until the owner sets it up. *Why:* Defender quarantined the packed, unsigned installer as
   Trojan:Win32/Wacatac.C!ml; the unpacked one scanned clean. `docs/code-signing.md`.
