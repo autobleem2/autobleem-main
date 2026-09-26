@@ -92,7 +92,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | E12 | N64 in RetroArch has never been tested with a real game (the homebrew RSP tests crash GLupeN64 inside the core). | retroarch-psc | S | tester | later |
 | E13 | picodrive's Cyclone core segfaults on the Pi 400 (worked around in `rpi.cores.cfg` with Genesis Plus GX) - unexplained. | launcher platform ini | M | dev | later |
 | E14 | No i386 build of either PS1 emulator: the PC stick plays PS1 through RetroArch's pcsx_rearmed core until pcsx-abnxt gets one. | pcsx-abnxt | M | dev | later |
-| E15 | **Pad battery overlay in the emulators** (the owner, 2026-09-26): a tiny battery icon in a corner while a game runs (pcsx-abnxt, pcsx-ab, RetroArch if feasible - its own overlay/notification), shown only for a wireless pad and when low or on a button hold; reads the same level as C8. Team: software/ui. | pcsx-abnxt, pcsx-ab, retroarch-psc | M | dev | b1 |
+| E15 | **Pad battery overlay in the emulators** (the owner, 2026-09-26): a tiny battery icon in a corner while a game runs (~~pcsx-abnxt~~ done 2026-09-26, develop fc9eaeb3 - the reader is a C copy of core's PadBatteryService, `frontend/ab/ab_pad_battery.c`; left: pcsx-ab the same way, RetroArch if feasible - its own overlay/notification), shown only for a wireless pad and when low or on a button hold; reads the same level as C8. Team: software/ui. | pcsx-abnxt, pcsx-ab, retroarch-psc | M | dev | b1 |
 
 ## X - Console tools and PC tools
 
