@@ -29,6 +29,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | R14 | The doctest suites under wine for the `win` target. | autobleem-build | M | dev | later |
 | R17 | A push of the autobleem-build image to develop rebuilds no component, so a toolchain change reaches the nightly only with the next unrelated commit (found by the build-times batch). Team: infrastructure. | autobleem-build, appliance | S-M | dev | b1 |
 | R19 | **The manuals are published by CI**: a merge to develop of the manuals repo (autobleem-manuals, after D4) builds the HTML/PDFs for every language and publishes them to the site - today the publish is a manual `repo_publish.sh manuals` run. Needed by the 2026-09-26 rule that a Team Manager merges a Haiku's manual update and CI puts it on the site (decisions.md). Team: infrastructure. | manuals, site | M | dev | a2 |
+| R21 | **A PC test machine + a second CI runner** (the owner, 2026-09-26): `192.168.68.148`, a fresh PC-USB install - inventory, a how-to for the teams (DebugDriver over an ssh tunnel, installing a nightly, logs), and an org self-hosted runner there with its own label (no overlap with the build server's `self-hosted,linux,x64`), as a service under its own user. Team: task force (Nora Whitfield + Leo Hartmann), workflows with infrastructure. | PC-USB box, CI | M | dev | a2 |
 
 ## C - Console (launcher side)
 
