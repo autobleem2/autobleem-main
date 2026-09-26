@@ -244,6 +244,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   per task; teams start their batches staggered after a window reset.
 - **The 5-hour stop line is 90%** for every team (the owner, 2026-09-26): above it a team stops its agents,
   saves its state and waits for the window's reset.
+- **An idle team helps the others** (the owner, 2026-09-26): a team with free slots and nothing of its own
+  may take *simple* rows from another team's list in `docs/todo.md` (tell the Program Manager and the owning
+  team's manager which row, so nobody does it twice), within its slots. The moment work of its own kind
+  arrives, it stops the borrowed row - committed on its branch with a short HANDOFF note, the owning team
+  told - and turns to its own.
 
 - Several sessions work at once, sometimes in the same checkout: before pushing a shared branch look for
   commits that are not yours (`git log origin/<b>..<b>`), merge rather than rebase, never delete a branch
