@@ -40,6 +40,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | C6 | A stock console with a RetroBoot 1.1 tree and a later KMFD build wants GLIBC_2.28, so RetroArch never starts: an installer check or a clear message. | installer, manual | S | dev | b1 |
 | C8 | **Pad battery in the launcher** (the owner, 2026-09-26, after K3): a small battery indicator per wireless pad (today only PSC-Bios's pairing screen shows it), plus a notification when a pad runs low. The level comes from the kernel's `power_supply` / BlueZ `Battery1` - a core service, shared with E15. Team: software/ui (the data source with hardware). | core, launcher | M | dev | b1 |
 | C9 | **Which pad is which PS1 port** (the owner, 2026-09-26): nothing shows which connected pad is player 1 / player 2 in the emulator - today the connection order decides. Show the assignment (Hardware Information / PSC-Bios pads list, and ideally a "P1/P2" hint in the launcher), later let the user swap it. Team: software/ui. | launcher, console-tools, emulators | M | dev | b1 |
+| C10 | **SSH keys from the stick**: `rc/boot.sh` installs `System/ssh/authorized_keys` for the AutoBleem kernel's dropbear when the file exists (copy /home/root to /tmp, add the key 700/600, bind-mount - nothing on the eMMC), so a key survives a launcher reinstall. Today it is a hand-made block on the owner's stick (the owner, 2026-09-26: permanent SSH access for the team). Team: hardware. | launcher rc | S | dev | a2 |
 
 ## H - Hardware proofs (the tester checklist)
 
