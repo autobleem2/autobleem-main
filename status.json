@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:42:20+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T07:45:09+01:00",
+  "written_by": "Victor Lane - Team Manager (infrastructure)",
   "usage": {
     "five_hour_percent": 42,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -17,15 +17,15 @@
       "items": [
         {
           "id": "D21",
-          "what": "ci/build.sh stops dirtying the tracked tree (Ivy)"
+          "what": "ci/build.sh stops dirtying the tracked tree - fix in review, proof build on the build server"
         },
         {
           "id": "D4",
-          "what": "the English manual PDF in the console package's Docs/ (next)"
+          "what": "last part: the console package carries the English manual PDF in Docs/ (after D21)"
         },
         {
           "id": "D22",
-          "what": "the Danish and Finnish manuals get their screenshots (after D4)"
+          "what": "Danish and Finnish manuals get their screenshots (after D4)"
         }
       ],
       "note": "R22 done (launcher d92030f)"
