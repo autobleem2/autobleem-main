@@ -168,18 +168,22 @@ it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-
 
 - **Workspace 1** (the working monitor, `$work` = `eDP-1`, the laptop's screen): a full-screen foot with tmux
   session `main` - `tmux attach -t main` over ssh joins the same shell.
-- **Workspace 2** (the standby monitor, `$panel`): four quadrants, laid out by `tools/abpanel/layout.sh`:
-  `abpanel status` (logo, host, runners, VM) | the VM's **live** view (`virt-viewer --attach`: through libvirt,
-  no port of its own; the VM's VNC listens on 127.0.0.1 only) / `abpanel teams` (autobleem-main's
-  `status.json` on develop, every 60 s, no token) | `abpanel load` (htop-like: a bar per core, memory, swap,
-  load average, top processes by CPU and by memory).
+- **Workspace 2** (the standby monitor, `$panel`): four quadrants, laid out by `tools/abpanel/layout.sh`
+  (the owner's layout, 2026-09-27; launcher branch `feature/r24-panel-merge` until it is merged):
+  - top-left, `abpanel overview`: the logo, host, runners and VM, then the htop-like load view (a bar per
+    core, memory, swap, load average, disk, the top processes by CPU and by memory side by side);
+  - top-right: the VM's **live** view (`virt-viewer --attach`: through libvirt, no port of its own; the VM's
+    VNC listens on 127.0.0.1 only);
+  - bottom-left, `abpanel teams`: autobleem-main's `status.json` on develop (every 60 s, no token) - usage,
+    the teams, Needs the owner;
+  - bottom-right, `abpanel empty`: reserved, blank until its use is decided.
 - Until the second monitor is seen, both workspaces are on the laptop's screen: **Super+1** the shell,
   **Super+2** the panel. Super+Return a new terminal, Super+Shift+E leaves sway.
 - The code is the launcher repo's `tools/abpanel/` (abpanel.py, layout.sh, sway.config); `install.sh` puts it
   in place for the current user (`~/.local/share/abpanel`, `~/.config/sway/config`, the `~/.profile` block),
   `install.sh --uninstall` takes it away. After an update: `git pull` in `~/src/autobleem`, run `install.sh`,
   then log the tty1 session out (`loginctl terminate-session <tty1's session>`) to restart sway.
-- One-frame checks over ssh: `abpanel status --once`, `teams --once`, `load --once`.
+- One-frame checks over ssh: `abpanel overview --once`, `teams --once` (also `status`, `load`).
 - Screenshots (what the PM shows the owner): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
   and `WAYLAND_DISPLAY=wayland-1`; `swaymsg workspace 2; grim ws2.png`.
 
