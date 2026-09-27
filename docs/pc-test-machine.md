@@ -223,10 +223,13 @@ the installer tarball; win: `AutoBleemSetup-*.exe` + the product zip). Getting i
 ```bash
 scp screemer@<laptop>:src/autobleem/dist/<target>/* .
 ```
-**A local build stamps its version `-dirty`**: for the appliance and console targets `ci/build.sh` writes the
-freshly built emulators over the checked-in ones in `payload*/Autobleem/bin/emu*` (tracked files) before the
-launcher's version header is generated, so git sees a modified tree. Harmless for a test build; restore with
-`git checkout -- payload payload_linux` before the next pull.
+**A local build no longer dirties the tree** (D21, 2026-09-27): for the appliance and console targets
+`ci/build.sh` used to write the freshly built emulators straight over the checked-in ones in
+`payload*/Autobleem/bin/emu*` (tracked files) before the launcher's version header was generated, so git saw
+a modified tree and the version stamped `-dirty`. It now stages them into `build_<t>/emu-stage/` instead and
+packages from there - `payload/` and `payload_linux/` stay exactly as checked out, `git status --porcelain`
+is empty after a build, and the version is clean. If an older build (from before D21) left the tree dirty,
+`git checkout -- payload payload_linux` still restores it.
 
 ## CI runner
 
