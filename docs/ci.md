@@ -16,6 +16,10 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64`) only does what writes the
   server's disk or needs its Docker: site publishes, the image build, the appliance's disk images, the page,
   cleanup. Pull requests never reach it.
+  A second runner group, **`pcusb-test`** (group id 3, owner-approved 2026-09-27), holds the PC-USB test
+  laptop's runner (single label `pcusb-test`, R21) and is limited to `autobleem2/autobleem` and
+  `autobleem2/autobleem-appliance`. A job that targets it runs on push / workflow_dispatch / schedule only,
+  never `pull_request` (the repos are public). Which jobs run there is a proposal to the Program Manager first.
 - **Nightlies**: each component's develop build refreshes its rolling GitHub `nightly` pre-release through
   autobleem-build's `.github/actions/nightly-release` (used `@develop`): the tag moved, the assets replaced,
   then (2026-09-26) a `component-nightly` repository_dispatch starts autobleem-appliance's assembly - the
