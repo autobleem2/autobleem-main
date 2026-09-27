@@ -159,6 +159,40 @@ to rule out these additions as the cause of something:
 None of this touches the exFAT data partition (`Games/`, `System/`, the launcher's own tree) - a reimage of
 just the pendrive, or a fresh VM disk, clears it all in one step.
 
+## The two monitors: shell and status panel (R24)
+
+The laptop boots straight into **sway** (a Wayland compositor): `screemer` logs in on tty1 by itself
+(`/etc/systemd/system/getty@tty1.service.d/autologin.conf`) and `~/.profile` starts sway there - on tty1
+only, never over ssh. If sway exits, tty1 stays at a plain shell (`~/.cache/sway.log`); logging out starts
+it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-install-recommends`).
+
+- **Workspace 1** (the working monitor, `$work` = `eDP-1`, the laptop's screen): a full-screen foot with tmux
+  session `main` - `tmux attach -t main` over ssh joins the same shell.
+- **Workspace 2** (the standby monitor, `$panel`): four quadrants, laid out by `tools/abpanel/layout.sh`:
+  `abpanel status` (logo, host, runners, VM) | the VM's **live** view (`virt-viewer --attach`: through libvirt,
+  no port of its own; the VM's VNC listens on 127.0.0.1 only) / `abpanel teams` (autobleem-main's
+  `status.json` on develop, every 60 s, no token) | `abpanel load` (htop-like: a bar per core, memory, swap,
+  load average, top processes by CPU and by memory).
+- Until the second monitor is seen, both workspaces are on the laptop's screen: **Super+1** the shell,
+  **Super+2** the panel. Super+Return a new terminal, Super+Shift+E leaves sway.
+- The code is the launcher repo's `tools/abpanel/` (abpanel.py, layout.sh, sway.config); `install.sh` puts it
+  in place for the current user (`~/.local/share/abpanel`, `~/.config/sway/config`, the `~/.profile` block),
+  `install.sh --uninstall` takes it away. After an update: `git pull` in `~/src/autobleem`, run `install.sh`,
+  then log the tty1 session out (`loginctl terminate-session <tty1's session>`) to restart sway.
+- One-frame checks over ssh: `abpanel status --once`, `teams --once`, `load --once`.
+- Screenshots (what the PM shows the owner): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
+  and `WAYLAND_DISPLAY=wayland-1`; `swaymsg workspace 2; grim ws2.png`.
+
+**The second monitor is on the ThinkPad Hybrid USB-C dock, which is DisplayLink** (`lsusb` 17e9:6015): its
+video goes over USB, so the Intel GPU never sees it (`DP-*`/`HDMI-*` stay "disconnected"). It needs the
+DisplayLink driver from **Synaptics' own APT repository** (`synaptics-repository-keyring.deb` from
+synaptics.com, adding `/etc/apt/sources.list.d/synaptics.list`, key scoped with `signed-by`), package
+`displaylink-driver` (the proprietary DisplayLinkManager daemon) with Synaptics' `evdi` DKMS module. Secure
+Boot is off, so the module needs no signing. **DKMS rebuilds evdi on every kernel update** - that needs
+`linux-headers-<new kernel>` installed with it (`linux-headers-amd64` pulls them); if the second monitor is
+gone after an update, check `dkms status` first. Once the monitor shows up (`swaymsg -t get_outputs`, likely
+`DVI-I-1`), `$panel` in `~/.config/sway/config` names it.
+
 ## Building every target on the laptop (R23)
 
 Every toolchain is in the build image, so the laptop needs nothing but Docker (`screemer` is in the `docker`
