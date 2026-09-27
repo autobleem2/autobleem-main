@@ -252,3 +252,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **Debug by root cause, report by evidence** (the owner, 2026-09-27): every session follows
   `docs/debugging.md` - no fix before the root cause is found, three failed fixes stop the work for a design
   question, and no "done/green/fixed" without the proving command run and read in that turn.
+- **A known bug goes in `docs/bugs.md` the same day** (the owner, 2026-09-27): whoever finds a real defect -
+  in a build, a test, a review, or on a device - records it there and keeps its state current. An entry is
+  not approval to fix it: only the owner adds a `docs/todo.md` row for that. And a fix is never closed by
+  whoever made it - only a check by someone else closes the bug.
