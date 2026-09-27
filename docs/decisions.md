@@ -229,6 +229,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 
 ## Working with Claude sessions
 
+- **Only the owner adds user stories to the queue** (2026-09-27). The teams implement nothing he has not approved: no
+  new row in `docs/todo.md` and no work on an idea until he says yes. A follow-up or an idea found along the way goes
+  to the Program Manager as a proposal, who puts it to him. Plugins (beyond the approved extensions) and macOS are
+  outside his plans.
+
 - **One Program Manager over the teams** (the owner - the CEO - 2026-09-26): **Eleanor Voss - Program
   Manager (roadmap)** writes no code. She keeps `docs/roadmap.md` and `docs/todo.md`, reports how far the
   next milestone or release is, plans user stories with the owner, and owns:
