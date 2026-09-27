@@ -58,7 +58,7 @@ Size as in todo.md.
 | Idea | Size | Value | Notes |
 |---|---|---|---|
 | A Pi update without a network: a package dropped on the data partition, applied at the next boot | M | med | `archive/rpi-image-and-update-plan.md`, Part 1 |
-| A `pcusb64` target key (a 64-bit PC stick) | M | low-med | app-format-plan |
+| A `pcusb64` target key (a 64-bit PC stick) | M | low-med | `archive/app-format-plan.md` |
 | The Atari VCS 800 port | L | low-med | The launcher's `docs/atari-vcs-plan.md`; blocked on one hardware probe (todo PLATFORM-7) |
 | The appliance fetches the emulators' binaries from their releases instead of keeping them in `payload_linux/Autobleem/bin/emu*` | M | low | Compile once, assemble many |
 | LAN Share: CHD output for a read disc; HTTPS or a password (only if ever reachable from outside); drive read offset and audio correction for redump-exact dumps | L | low | autobleem-pc-tools `docs/lan-share-plan.md` |

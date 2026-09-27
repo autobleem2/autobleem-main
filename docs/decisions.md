@@ -113,8 +113,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The console's update never relies on a tool in the kernel payload** (2026-09-23): it downloads with
   `abfetch`, the launcher's own HTTPS client shipped on the stick, so every AutoBleem kernel - the 1.x one
   included - updates the same way.
-- **Apps and extensions are multi-platform folders** (2026-09-24, the launcher's
-  `docs/app-format-plan.md`):
+- **Apps and extensions are multi-platform folders** (2026-09-24,
+  `docs/archive/app-format-plan.md`):
   - One `Apps/<name>/` (or `Extensions/<name>/`) holds a binary for every platform we build for, now or
     later, side by side in `bin/<key>/`, with its data shared.
   - The ini says which binary is for which platform key (`Exec.<key>=`, or `Exec=bin/{key}/...`; an
