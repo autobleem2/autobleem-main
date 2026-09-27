@@ -334,6 +334,23 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   team's manager which row, so nobody does it twice), within its slots. The moment work of its own kind
   arrives, it stops the borrowed row - committed on its branch with a short HANDOFF note, the owning team
   told - and turns to its own.
+- **The company is leads plus one shared pool** (the owner, 2026-09-27; replaces "A team is three" below
+  step by step, as the laptop bridge takes the workers):
+  - **Eleanor Voss, Program Manager (Opus), is the dispatcher**: one queue, the priorities, and the slot budget
+    for each 5-hour window, taken from the 5-hour and weekly usage. She starts and stops every worker.
+  - **Three leads**, standing Opus sessions that review, merge and make the technical calls in their areas:
+    **Marcus Hale, Lead Software** (CONSOLE, EMU, SDK, APPS, TOOLS); **Victor Lane, Lead Platform** (RELEASE,
+    KERNEL, PLATFORM, DOCS, CI); **Harriet Cole, Lead QA** (HWTEST, the console sessions, and the volunteers'
+    test plans with their forms that the promotion rule needs). A lead with nothing to review sleeps.
+  - **One pool of workers, not bound to a team**: Developers (Sonnet), Testers + Docs (Haiku) and **Interns**
+    (Haiku - simple tasks on another agent's request, e.g. a small blocker; no merges, no pushes to
+    develop/master, no publishing). A lead asks the PM for a worker for a row ("a developer for CONSOLE-3"),
+    the PM gives the slot where the work is and starts the worker - on the laptop through the bridge
+    (`tools/bridge.py`, user `abagents`) once it runs; the worker reports to that area's lead and is stopped
+    when the row is done.
+  - **Wren Aldercroft stays the System Administrator** (service desk for the leads).
+  - The move: the Intern on the laptop first (the bridge's test), then the pool, then the leads and Wren.
+    Until a lead's workers move, the rules below hold for them.
 - **A team is three** (the owner, 2026-09-26, replacing the earlier multi-agent teams): the **Team Manager**
   (Opus, the session), **one Developer** (Sonnet) and **one Docs + Tester** (Haiku). No Opus developers, no
   separate reviewer agent, no Fable.
