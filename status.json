@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:42:44+01:00",
-  "written_by": "Eleanor Voss",
+  "written_at": "2026-09-27T12:44:49+01:00",
+  "written_by": "Victor Lane - Lead Platform",
   "usage": {
     "five_hour_percent": 5,
     "five_hour_resets_at": "17:00",
@@ -20,7 +20,7 @@
           "what": "the last manual figures (PSC-Bios x2, ABFlashKit, Store source menu) for pl/da/fi - Ivy's capture run"
         }
       ],
-      "note": "DOCS-2, DOCS-15, DOCS-16 done today"
+      "note": "now Lead Platform: RELEASE, KERNEL, PLATFORM, DOCS, CI"
     },
     {
       "name": "Marcus Hale",
@@ -32,7 +32,7 @@
           "what": "Store rig up on the laptop (:8127, :8128) until Harriet's console session"
         }
       ],
-      "note": "queue empty; task IDs now AREA-N (hub bacac47)"
+      "note": "now Lead Software (CONSOLE, EMU, SDK, APPS, TOOLS); queue empty"
     },
     {
       "name": "Harriet Cole",
@@ -48,7 +48,7 @@
           "what": "awaiting the owner's console results; HWTEST-12/13 rigs up on the laptop"
         }
       ],
-      "note": "DOCS-17 merged; kill-by-PID + no-foreign-rm rule (decisions 9f058f5) in every brief"
+      "note": "Now Lead QA (decisions 4aa2b15); volunteer test plans await the owner's row"
     },
     {
       "name": "Wren Aldercroft",
