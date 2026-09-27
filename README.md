@@ -21,6 +21,11 @@ tools/workspace.sh status      # where each one stands
 
 [docs/tester-checklist.md](docs/tester-checklist.md) - what to test, what you should see, which logs to send.
 
+## For authors
+
+[docs/authors/README.md](docs/authors/README.md) - writing an App, an extension, a scanner processor, or a
+Store catalog.
+
 ## Licence
 
 The AutoBleem code is GPL-3.0-or-later (each repository carries its `LICENSE`); the AutoBleem name, logo
