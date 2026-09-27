@@ -16,10 +16,20 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64`) only does what writes the
   server's disk or needs its Docker: site publishes, the image build, the appliance's disk images, the page,
   cleanup. Pull requests never reach it.
-  A second runner group, **`pcusb-test`** (group id 3, owner-approved 2026-09-27), holds the PC-USB test
-  laptop's runner (single label `pcusb-test`, R21) and is limited to `autobleem2/autobleem` and
-  `autobleem2/autobleem-appliance`. A job that targets it runs on push / workflow_dispatch / schedule only,
-  never `pull_request` (the repos are public). Which jobs run there is a proposal to the Program Manager first.
+  A second runner group, **`pcusb-test`** (group id 3, owner-approved 2026-09-27, open to every autobleem2
+  repo), holds the laptop's runner (R21) - meant as a **second main runner**, not a device-test box. Today
+  it carries only the label `pcusb-test`, so no workflow reaches it. **The runner audit (2026-09-27)**:
+  every self-hosted job but two is a site write (`AB_REPO_DIR=/home/claude/autobleem-repo` bind-mounted:
+  appliance publish-release/publish-nightly, build retroarch.yml publish, manuals, pc-tools site, samples,
+  ext_store site, pcsx-ab/abnxt publish, retroarch-psc publish, autobleem-repo page/stack/cleanup/withdraw);
+  the other two need the server's own state (autobleem-build `image.yml` - the daemon's layer cache; the
+  appliance's `image` job - the cached base images). All of them must be pinned to the build server by a
+  label of its own (`psc-build`) **before** the laptop gets the general `self-hosted,linux,x64` labels, or a
+  site publish could land on the laptop and fail. What can run on either: pcsx-ab/abnxt's compile job with
+  `runner=self-hosted` (bare `self-hosted` today). **Pull requests never reach a self-hosted runner** - no
+  workflow uses `pull_request_target`, and each self-hosted job either sits in a workflow with no
+  `pull_request` trigger or excludes it in its `if:` (develop/tag refs, `event_name != 'pull_request'`,
+  dispatch inputs); keep it so for any job moved to either runner.
 - **Nightlies**: each component's develop build refreshes its rolling GitHub `nightly` pre-release through
   autobleem-build's `.github/actions/nightly-release` (used `@develop`): the tag moved, the assets replaced,
   then (2026-09-26) a `component-nightly` repository_dispatch starts autobleem-appliance's assembly - the
