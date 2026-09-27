@@ -88,4 +88,4 @@ done, its last word goes into `docs/history/` (or the repository's CLAUDE.md), w
 - An open item goes into `docs/todo.md` in the commit that finds it, and leaves in the commit that closes it.
 - When a milestone closes, update `docs/roadmap.md` ("Where we are" and the next milestone's tables).
 - The last full read of every repository's documentation was 2026-09-26; its stale-statement lists are
-  todo D1, D2, D10 and D11.
+  todo DOCS-1, D2, DOCS-7 and DOCS-8.

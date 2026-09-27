@@ -17,7 +17,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   renamed by hand. `docs/versioning.md`.
 - **alpha2 is withdrawn** (the owner, 2026-09-26): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` tags and
   releases are deleted; what the teams do now is still the road to the next pre-release, which is called
-  **alpha2** again. alpha1 stays (todo R1).
+  **alpha2** again. alpha1 stays (todo RELEASE-1).
 - **No promotion to a higher version before the owner's feature gate and the volunteers' test plans** (the
   owner, 2026-09-27). Before any `promote` - alpha, beta, rc or release - two things must be true:
   1. **Everything the external testers are to test is in the build**: the owner confirms that each of his
@@ -31,7 +31,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
      each plan (per step: pass / fail / blocked, the build's version, the hardware used, notes, the logs and
      photos attached), so every volunteer reports the same way. Every feature from point 1 has its lines
      there.
-  The PM checks both before putting the promote decision (R1/R4-style rows) in front of the owner; until
+  The PM checks both before putting the promote decision (RELEASE-1/R4-style rows) in front of the owner; until
   then the promote is not asked for. *Why:* external testers get one pass at a pre-release - a missing
   feature or a vague plan wastes it.
 - **`AB_SDK_ABI` moves only with a release** (the owner, 2026-09-26): within a development cycle the ABI may
@@ -230,7 +230,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   provably our own.
 - **Themes and samples have their own source repositories** (the owner, 2026-09-26 - until then all five
   themes stayed in the launcher): `autobleem-themes` becomes the themes' source and `autobleem-samples` the
-  sample pack's; the launcher's copies go once the build takes them from there (D5 done 2026-09-27: the
+  sample pack's; the launcher's copies go once the build takes them from there (DOCS-3 done 2026-09-27: the
   launcher's publish-launcher.yml no longer stages Themes/, and every appliance assembler bundles
   `autobleem-themes`' own package instead, via `stage_themes`; D6, the sample pack, still open).
   `autobleem-themes` keeps a version of its own, like `proc_unzip`/`ext_store` above (`OWN_VERSION_REPOS`) -
@@ -260,7 +260,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   captured by the team (DebugDriver on the dev build, the PC test VM, the laptop) and sent as screenshots to the
   Program Manager, who puts them to him in one question session. A console session keeps only what needs the
   hardware: real pads, Bluetooth, Wi-Fi, sound by ear, the kernel, power and standby.
-- **The laptop is where teams build and test first** (the owner, 2026-09-27, once R23 made every toolchain ready
+- **The laptop is where teams build and test first** (the owner, 2026-09-27, once RELEASE-12 made every toolchain ready
   there - `docs/pc-test-machine.md`):
   - A device build is `docker/run.sh ci/build.sh <psc|rpi|rpi64|pcusb|win>` in `~/src` on the laptop. That covers
     a test package, a binary for the console, a Pi or the PC stick, and a Windows zip. The build server takes

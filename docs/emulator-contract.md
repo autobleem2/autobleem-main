@@ -11,7 +11,7 @@ point here) and the launcher's `rc/launch.sh`.
 | | pcsx-ab (`Autobleem/bin/emu/`) | pcsx-abnxt (`Autobleem/bin/emunxt/`) |
 |---|---|---|
 | Base | the 2017 PCSX-ReARMed snapshot Sony shipped, plus Sony's and our patches | upstream r26 + our re-implementation of what matters (`frontend/ab/`), libpicofe |
-| Status | ships; the fallback | **the default** since 2026-09-21 (Options -> "PS1 Emulator"); compatibility pass pending (todo E1), then the owner decides whether pcsx-ab is archived (E2) |
+| Status | ships; the fallback | **the default** since 2026-09-21 (Options -> "PS1 Emulator"); compatibility pass pending (todo EMU-1), then the owner decides whether pcsx-ab is archived (EMU-2) |
 | Binary | `pcsx-ab` | also named `pcsx-ab` - the launch scripts do not care which folder it came from |
 
 They share `.pcsx`, the `pcsx.cfg` keys, Sony's save-state layout (a state crosses from one to the other,
@@ -67,7 +67,7 @@ variables (an older launcher sets none, an older emulator ignores them):
 | `AB_MEMCARD_DIR` | `memcarddir` | the game's card set (`Games/!MemCards/<set>`) is played in place instead of being swapped in and out |
 | `AB_LOAD_STATE` | `loadstate` | the kept slot is loaded where it is (like `-loadf`; `-load` is then ignored) instead of being copied to slot 0 |
 
-**Not yet run on a console in either emulator** (todo H1).
+**Not yet run on a console in either emulator** (todo HWTEST-1).
 
 ## Every way out leaves the game as it is
 

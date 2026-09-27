@@ -1,4 +1,4 @@
-# The PC test machine (`bleemmachine`, R21)
+# The PC test machine (`bleemmachine`, RELEASE-10)
 
 A laptop dedicated to PC-USB (`AB_TARGET=pcusb`) device testing and a second org CI runner. Its address is
 in `infrastructure.local.md` (not committed); this file is the how-to.
@@ -100,7 +100,7 @@ regression test needs - and the only option before any launcher has ever run on 
    or explicitly allows that class of command first).
 4. Boot (VM passthrough or real hardware) into the fresh first-boot setup wizard.
 
-## The virtual gamepad (padsim, R25)
+## The virtual gamepad (padsim, RELEASE-14)
 
 **Not for driving the UI** (the owner, 2026-09-27) - use the DebugDriver above. padsim stays installed for
 the day a test needs a real evdev pad in the guest (an emulator or an App's input), once it is made stable.
@@ -159,7 +159,7 @@ to rule out these additions as the cause of something:
 None of this touches the exFAT data partition (`Games/`, `System/`, the launcher's own tree) - a reimage of
 just the pendrive, or a fresh VM disk, clears it all in one step.
 
-## The two monitors: shell and status panel (R24)
+## The two monitors: shell and status panel (RELEASE-13)
 
 The laptop boots straight into **sway** (a Wayland compositor): `screemer` logs in on tty1 by itself
 (`/etc/systemd/system/getty@tty1.service.d/autologin.conf`) and `~/.profile` starts sway there through
@@ -205,7 +205,7 @@ card **first** in `WLR_DRM_DEVICES` (by-path names, `platform-evdi.0-card` then 
 crashes sway the moment it drives the evdi output; `WLR_RENDERER=pixman` cannot add the second card. The
 driver makes four evdi cards; only the first is given to sway (the empty ones fail the DRM backend).
 
-## Building every target on the laptop (R23)
+## Building every target on the laptop (RELEASE-12)
 
 Every toolchain is in the build image, so the laptop needs nothing but Docker (`screemer` is in the `docker`
 group - no sudo). Both images are pulled: `ghcr.io/autobleem2/autobleem-build:develop` (nightly/develop
@@ -223,12 +223,12 @@ the installer tarball; win: `AutoBleemSetup-*.exe` + the product zip). Getting i
 ```bash
 scp screemer@<laptop>:src/autobleem/dist/<target>/* .
 ```
-**A local build no longer dirties the tree** (D21, 2026-09-27): for the appliance and console targets
+**A local build no longer dirties the tree** (DOCS-15, 2026-09-27): for the appliance and console targets
 `ci/build.sh` used to write the freshly built emulators straight over the checked-in ones in
 `payload*/Autobleem/bin/emu*` (tracked files) before the launcher's version header was generated, so git saw
 a modified tree and the version stamped `-dirty`. It now stages them into `build_<t>/emu-stage/` instead and
 packages from there - `payload/` and `payload_linux/` stay exactly as checked out, `git status --porcelain`
-is empty after a build, and the version is clean. If an older build (from before D21) left the tree dirty,
+is empty after a build, and the version is clean. If an older build (from before DOCS-15) left the tree dirty,
 `git checkout -- payload payload_linux` still restores it.
 
 ## CI runner

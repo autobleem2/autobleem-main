@@ -15,12 +15,12 @@ own CLAUDE.md keeps only what is particular to it.
 | `app_wolf4sdl` | Wolfenstein 3D (shareware), Spear of Destiny demo | v20260504-2 | all five | raw buttons: `pad.ini` `virtual = psc` |
 | `app_jfsw` | Shadow Warrior (shareware), software renderer | v20260105-2 | all five | upstream's own Win32 build on Windows; turning axis 0.1 on psc |
 | `app_jfduke3d` | Duke Nukem 3D (shareware) | v20260105-2 | all five | kept as `app/eduke32` to replace the RetroBoot App in place |
-| `app_openbor` | OpenBOR v7533, no games | v7533-3 | all five | our branding; `virtual = psc`; games wait for the owner (todo A2) |
+| `app_openbor` | OpenBOR v7533, no games | v7533-3 | all five | our branding; `virtual = psc`; games wait for the owner (todo APPS-2) |
 | `app_amiberry` | Amiberry-Lite 5.9.3 (AROS, WHDLoad; no Kickstarts or games) | v5.9.3-1 | psc rpi rpi64 pcusb (**no win**) | C++17: gcc-12 against the console's Stretch sysroot with libstdc++ linked in - the route for any C++17 port |
 | `app_terminal` | Terminal (bash on a pty) - our own App, not a port | v1.0.0 | psc rpi rpi64 pcusb | built on the SDK, `VirtualPad=false`; see its CLAUDE.md |
 
 The owner's first console pass (2026-09-25/26) is behind the `-2`/`-3` releases; the rest of the hardware
-pass is the tester checklist's §12 (todo A1).
+pass is the tester checklist's §12 (todo APPS-1).
 
 ## The shape of a port repository
 
@@ -70,7 +70,7 @@ pass is the tester checklist's §12 (todo A1).
   a pre-release); `master` follows the released commit.
 - Publishing to the Store is by hand today: `gh release download`, `tools/store_item.py`, `repo_publish.sh
   store` - into all five catalogs. The id and folder of the RetroBoot App it replaces are kept, so the Store
-  replaces it in place on psc. Automating this is todo A5; the copies of the helper scripts in every
-  repository are todo A6.
+  replaces it in place on psc. Automating this is todo APPS-5; the copies of the helper scripts in every
+  repository are todo APPS-6.
 - One repository at a time, the owner answering each port's questions first; with the owner's OK the
   repository goes public in `autobleem2` with `AB_CI_ENABLED`.

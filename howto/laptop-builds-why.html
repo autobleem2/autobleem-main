@@ -1,4 +1,4 @@
-<!-- D21/D4 laptop: why the teams' laptop builds wait on the owner. A summary page (no how-to) for the admin panel's Needs you (i) button. -->
+<!-- DOCS-15/DOCS-2 laptop: why the teams' laptop builds wait on the owner. A summary page (no how-to) for the admin panel's Needs you (i) button. -->
 <style>
 :host{display:block;padding:1.2rem 1.4rem;font-weight:400;font-family:"Segoe UI",system-ui,sans-serif;color:#15202b;line-height:1.55;font-size:15px}
 h1{font-size:1.25rem;margin:0 0 .4rem;color:#0b3a7a}
@@ -9,7 +9,7 @@ ul,ol{padding-left:1.3rem}li{margin:.3rem 0}
 .time{color:#5a6b80;font-size:.9rem}
 </style>
 
-<h1>D21/D4: buildy zespołów na laptopie</h1>
+<h1>DOCS-15/DOCS-2: buildy zespołów na laptopie</h1>
 <p class="time">Dlaczego ta akcja jest potrzebna. Instrukcji krok po kroku tu nie ma: zabezpieczenia Claude nie pozwalają
 Eleanor opisywać, jak poszerzyć uprawnienia Claude Code. To robisz sam, jeśli zechcesz.</p>
 
@@ -17,8 +17,8 @@ Eleanor opisywać, jak poszerzyć uprawnienia Claude Code. To robisz sam, jeśli
 <ul>
   <li>Reguła z 27.09: zespoły budują i testują najpierw na laptopie, nie na Twoim PC.</li>
   <li>Dwa wiersze czekają na dowód z laptopa:
-    <b>D21</b> (<code>ci/build.sh</code> nie zostawia zmian w śledzonych plikach, a wersja nie ma dopisku <code>-dirty</code>) i
-    <b>D4</b> (angielski PDF instrukcji trafia do <code>Docs/</code> na pendrivie).</li>
+    <b>DOCS-15</b> (<code>ci/build.sh</code> nie zostawia zmian w śledzonych plikach, a wersja nie ma dopisku <code>-dirty</code>) i
+    <b>DOCS-2</b> (angielski PDF instrukcji trafia do <code>Docs/</code> na pendrivie).</li>
   <li>Sesje zespołów działają na Twoim PC i łączą się z laptopem przez ssh. Zabezpieczenie Claude Code (tryb auto)
       odrzuca każdą komendę ssh, która coś na laptopie zmienia; odmowy nazywały się „Remote Shell Writes”
       (build) i „Irreversible Local Destruction” (sprzątanie plików). Samo zabezpieczenie podaje, że da się na to
@@ -36,10 +36,10 @@ Eleanor opisywać, jak poszerzyć uprawnienia Claude Code. To robisz sam, jeśli
 
 <h2>Co dalej</h2>
 <ol>
-  <li>Jeśli pozwolisz, napisz Eleanor; Victor powtórzy dokładnie tę sekwencję, pokaże wynik i zamknie D21 i D4.</li>
+  <li>Jeśli pozwolisz, napisz Eleanor; Victor powtórzy dokładnie tę sekwencję, pokaże wynik i zamknie DOCS-15 i DOCS-2.</li>
   <li>Inna droga bez zmiany uprawnień: Claude uruchomiony na samym laptopie (w tmux, <code>~/src/autobleem</code>) robi ten
       build lokalnie, a Ty zatwierdzasz jego pytania; Victor przygotuje tekst polecenia do wklejenia.</li>
-  <li>Albo przyjmujesz dowody, które już są (czysty build na serwerze buildów + zielone CI dla D21, pełny assemble
-      na PC z PDF dla D4) i zamykamy oba wiersze bez laptopa.</li>
+  <li>Albo przyjmujesz dowody, które już są (czysty build na serwerze buildów + zielone CI dla DOCS-15, pełny assemble
+      na PC z PDF dla DOCS-2) i zamykamy oba wiersze bez laptopa.</li>
 </ol>
 <div class="note">Uprawnienia Claude Code i ustawienia to zawsze Twoja decyzja; zespoły nie obchodzą odmów.</div>

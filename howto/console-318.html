@@ -24,7 +24,7 @@ klawiatury, dźwięku, SSH z pendrive'a, kernela i sieci. Wygląd ekranów i tek
 <ul>
   <li>PSC z kernelem AutoBleem i pendrive z nightly 318 (<code>v2.0.0-alpha2-318-...</code> lub następnym z tym samym launcherem)</li>
   <li>2 pady przewodowe (jeden z wibracjami), opcjonalnie trzeci; klawiatura USB i hub</li>
-  <li>dongle Bluetooth + DS4 i DualSense (naładowane; do E15 najlepiej jeden pad rozładowany poniżej ~20%)</li>
+  <li>dongle Bluetooth + DS4 i DualSense (naładowane; do EMU-15 najlepiej jeden pad rozładowany poniżej ~20%)</li>
   <li>dongle WiFi; kabel micro-USB z danymi do PC (SSH); Twój klucz publiczny SSH</li>
   <li>gra PS1 dla 2 graczy (np. Tekken 3) i gra z wibracjami</li>
 </ul>
@@ -33,10 +33,10 @@ klawiatury, dźwięku, SSH z pendrive'a, kernela i sieci. Wygląd ekranów i tek
 <table>
   <tr><th>Blok</th><th>Co</th><th>Czas</th></tr>
   <tr><td>0</td><td>Na PC: nightly 318 na pendrive, klucz SSH do <code>System/ssh/authorized_keys</code></td><td>12 min</td></tr>
-  <tr><td>A</td><td>Jeden pad: SSH z pendrive'a (C10), kernel (K10), dźwięk L1/R1 (H14), klawiatura (H8), kreator mapowania (H10), brak ikony baterii dla pada na kablu (E15)</td><td>40 min</td></tr>
-  <tr><td>B</td><td>Dwa pady: kolejność graczy (C9), zamiana padów w PSC-Bios (C14) i w emulatorach (C11)</td><td>50 min</td></tr>
-  <tr><td>C</td><td>Pady Bluetooth: parowanie (K11), kursor (K10), bateria w PSC-Bios (C13) i w launcherze (C8), znaczniki P1/P2 (C12), ikona baterii w grze (E15)</td><td>1 h 30 min</td></tr>
-  <tr><td>D</td><td>WiFi: ikony źródeł w Store (H13), pobranie &gt; 2 GB (H12); opcjonalnie K3.6/K3.7</td><td>30 min</td></tr>
+  <tr><td>A</td><td>Jeden pad: SSH z pendrive'a (CONSOLE-4), kernel (KERNEL-6), dźwięk L1/R1 (HWTEST-14), klawiatura (HWTEST-8), kreator mapowania (HWTEST-10), brak ikony baterii dla pada na kablu (EMU-15)</td><td>40 min</td></tr>
+  <tr><td>B</td><td>Dwa pady: kolejność graczy (C9), zamiana padów w PSC-Bios (CONSOLE-8) i w emulatorach (CONSOLE-5)</td><td>50 min</td></tr>
+  <tr><td>C</td><td>Pady Bluetooth: parowanie (KERNEL-7), kursor (KERNEL-6), bateria w PSC-Bios (CONSOLE-7) i w launcherze (C8), znaczniki P1/P2 (CONSOLE-6), ikona baterii w grze (EMU-15)</td><td>1 h 30 min</td></tr>
+  <tr><td>D</td><td>WiFi: ikony źródeł w Store (HWTEST-13), pobranie &gt; 2 GB (HWTEST-12); opcjonalnie K3.6/K3.7</td><td>30 min</td></tr>
 </table>
 
 <h2>Jak to wygląda</h2>
@@ -46,5 +46,5 @@ klawiatury, dźwięku, SSH z pendrive'a, kernela i sieci. Wygląd ekranów i tek
   <li>Przy każdym teście podajesz PASS / FAIL / BLOCKED, a przy czymkolwiek dziwnym zdjęcie ekranu.</li>
   <li>Na koniec wyłącz zamianę padów i „Keep logs on the stick”, skopiuj <code>System/Logs/</code> na PC.</li>
 </ol>
-<div class="note">Po sesji wyniki idą do zespołów; wszystkie PASS otwierają decyzję R1 (nowe alpha2).
-Zespół software przygotowuje wcześniej źródło testowe Store do bloku D (H12/H13).</div>
+<div class="note">Po sesji wyniki idą do zespołów; wszystkie PASS otwierają decyzję RELEASE-1 (nowe alpha2).
+Zespół software przygotowuje wcześniej źródło testowe Store do bloku D (HWTEST-12/HWTEST-13).</div>

@@ -1,4 +1,4 @@
-# The admin panel in Polish (R28)
+# The admin panel in Polish (RELEASE-17)
 
 The owner, 2026-09-27: the admin panel on the site in Polish, with the information from `status.json` in
 Polish too. Not a priority; the PM builds it in her free time and the infrastructure team reviews and deploys it.
@@ -35,7 +35,7 @@ Polish too. Not a priority; the PM builds it in her free time and the infrastruc
 1. The strings table and the switch.
 2. The `_pl` fields in the page.
 3. `status.py --pl`.
-4. The tests: the admin's pytest and a page check at 1280 and 390 px, as for R27.
+4. The tests: the admin's pytest and a page check at 1280 and 390 px, as for RELEASE-16.
 5. Deploy on the build server.
 6. Screenshots of both languages to the owner, in a question session.
 

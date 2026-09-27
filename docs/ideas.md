@@ -26,7 +26,7 @@ Size as in todo.md.
 | A scaler thread for HQ2x/HQ3x (30 fps on the console today) | M | low | pcsx-abnxt, "if it ever matters" |
 | DuckStation as an alternative PS1 core on strong machines, driven like RetroArch | M-XL | low-med | CC-BY-NC-ND licence gate; resume pictures, memory cards and light guns unknown |
 | pcsx-abnxt as an upstream `psclassic` platform (a PR to notaz) | M | low | The shape is in pcsx-abnxt's CLAUDE.md |
-| `-sonyhacks` - the configuration layer of Sony's per-title hacks - as a lever for the compatibility pass | S | med | Not a default; see todo E1 |
+| `-sonyhacks` - the configuration layer of Sony's per-title hacks - as a lever for the compatibility pass | S | med | Not a default; see todo EMU-1 |
 | A native x86-64 Linux build of the emulators (the Atari VCS plan needs it) | M | low | |
 
 ## Console and kernel
@@ -37,13 +37,13 @@ Size as in todo.md.
 | A userland refresh: ship newer libraries than the stock root in the overlay, never the graphics stack | L | low-med | psc-kernel-payload `feature/userland-refresh`; a newer kernel is ruled out (the GPU blob pins 4.4 - the owner, 2026-09-25) |
 | `abfetch` checks certificate dates when the AutoBleem kernel gives a real clock | S | low | No battery clock on a stock console, hence off today |
 | Power Off: detect the OTG host up front instead of three refused suspends before `shutdown -h` | S | low | See `docs/console.md` |
-| Build RetroArch's cores from `cores-full.txt` (170) after the 81 are proven | L | low | retroarch-psc; todo E9 first |
+| Build RetroArch's cores from `cores-full.txt` (170) after the 81 are proven | L | low | retroarch-psc; todo EMU-9 first |
 
 ## Apps, extensions, the Store, processors
 
 | Idea | Size | Value | Notes |
 |---|---|---|---|
-| The virtual gamepad through uinput (non-SDL and static Apps, a virtual keyboard) | M | low-med | Needs uinput on the stock kernel (todo A3) |
+| The virtual gamepad through uinput (non-SDL and static Apps, a virtual keyboard) | M | low-med | Needs uinput on the stock kernel (todo APPS-3) |
 | Store item kinds: `rom:<system>` (into `RetroArch/roms/<system>/`) and `theme` (through `ThemeInstaller`) | M | med | store-plan |
 | Store search with the keyboard | S | med | |
 | Extension-provided System menu items, more launcher hooks | M | low | Explicitly not planned for now |
@@ -59,7 +59,7 @@ Size as in todo.md.
 |---|---|---|---|
 | A Pi update without a network: a package dropped on the data partition, applied at the next boot | M | med | `archive/rpi-image-and-update-plan.md`, Part 1 |
 | A `pcusb64` target key (a 64-bit PC stick) | M | low-med | app-format-plan |
-| The Atari VCS 800 port | L | low-med | The launcher's `docs/atari-vcs-plan.md`; blocked on one hardware probe (todo P7) |
+| The Atari VCS 800 port | L | low-med | The launcher's `docs/atari-vcs-plan.md`; blocked on one hardware probe (todo PLATFORM-7) |
 | The appliance fetches the emulators' binaries from their releases instead of keeping them in `payload_linux/Autobleem/bin/emu*` | M | low | Compile once, assemble many |
 | LAN Share: CHD output for a read disc; HTTPS or a password (only if ever reachable from outside); drive read offset and audio correction for redump-exact dumps | L | low | autobleem-pc-tools `docs/lan-share-plan.md` |
 

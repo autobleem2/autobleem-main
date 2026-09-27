@@ -59,7 +59,7 @@ def read_todo():
 
 def closed_ids(todo_text):
     """The todo.md rows marked done: `| ID | ~~title~~ **done ...`."""
-    return {m.group(1) for m in re.finditer(r"^\|\s*([A-Z]+\d+)\s*\|\s*~~", todo_text, re.M)}
+    return {m.group(1) for m in re.finditer(r"^\|\s*([A-Z]+-?\d+)\s*\|\s*~~", todo_text, re.M)}
 
 
 def item_ids(item_id):

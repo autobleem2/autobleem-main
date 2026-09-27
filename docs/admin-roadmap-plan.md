@@ -2,7 +2,7 @@
 
 The owner's request (2026-09-27): the admin panel (`autobleem-repo/admin`,
 `https://autobleem.retromenele.pl/admin/`) should show where the milestones stand and where each task is,
-laid out for his convenience. Row **R27** in `docs/todo.md`. Written by Eleanor Voss - Program Manager;
+laid out for his convenience. Row **RELEASE-16** in `docs/todo.md`. Written by Eleanor Voss - Program Manager;
 built by the infrastructure team (Victor Lane).
 
 ## What the owner sees
@@ -93,7 +93,7 @@ The panel shows `written_at` as its age ("12 min ago") and greys the block past 
 
 **Nobody edits it by hand since 2026-09-27** (the owner: it has to follow the real state live). Use
 **`tools/status.py`** instead. Each team manager runs it when their team starts, finishes or blocks on
-an item: `status.py team "<name>" --state working --item D21 "what" ...`. The PM runs it for the owner's queue
+an item: `status.py team "<name>" --state working --item DOCS-15 "what" ...`. The PM runs it for the owner's queue
 (`needs add|rm`) and for usage.
 
 Every write also does three things:
