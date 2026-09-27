@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T13:45:18+01:00",
+  "written_at": "2026-09-27T13:45:39+01:00",
   "written_by": "Eleanor Voss",
   "usage": {
     "five_hour_percent": 16,
@@ -80,12 +80,6 @@
       "kind": "decision",
       "what": "the go for promoting the new alpha2 - after the console tests, the owner's feature check and the volunteers' test plans",
       "howto": "howto/decision-release-1.html"
-    },
-    {
-      "id": "INTERN-SETUP",
-      "kind": "action",
-      "what": "create the abagents user on the laptop + log Claude in there (5 min) - then Eleanor sets up the Intern",
-      "howto": "howto/intern-setup.html"
     }
   ]
 }
