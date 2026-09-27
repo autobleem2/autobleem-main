@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:34:52+01:00",
+  "written_at": "2026-09-27T09:52:28+01:00",
   "written_by": "Marcus Hale - Team Manager (software/ui)",
   "usage": {
     "five_hour_percent": 66,
@@ -23,11 +23,11 @@
       "state": "working",
       "items": [
         {
-          "id": "R29",
-          "what": "review: 2 fixes sent to Daniel (a 0.0.0.0 test bind, serve_test_store advertised URL); pcsx-abnxt part ok"
+          "id": "H12/H13",
+          "what": "Store rig prep: >2 GB item + icon source for Harriet"
         }
       ],
-      "note": "D23 merged + closed (0809ea4)"
+      "note": "R29 merged + closed; D23 closed"
     },
     {
       "name": "Harriet Cole",
