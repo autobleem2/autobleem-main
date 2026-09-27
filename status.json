@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:56:21+01:00",
-  "written_by": "Marcus Hale - Team Manager (software/ui)",
+  "written_at": "2026-09-27T07:57:36+01:00",
+  "written_by": "Eleanor Voss - Program Manager",
   "usage": {
-    "five_hour_percent": 42,
+    "five_hour_percent": 48,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
-    "weekly_percent": 59,
+    "weekly_percent": 60,
     "weekly_cap_today_percent": 70,
     "weekly_resets_at": "2026-09-29T00:00:00+01:00"
   },
