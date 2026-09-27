@@ -15,9 +15,11 @@ machine's panel read it from develop every minute, so whoever changes a team's s
 
 Every write also drops the items whose todo.md row is closed (`| ID | ~~...~~`), stamps written_at (local
 time with its offset) and written_by (--by, else $AB_STATUS_BY), refuses LAN addresses and `_team` paths
-(the file is public), and commits status.json alone with `[skip ci]` and pushes develop - pulling with a merge
-(never a rebase: the checkout is shared) and retrying when another session pushed first. --no-push writes
-the file and stops. Standard library only.
+(the file is public), and pushes a commit of status.json alone (`[skip ci]`) straight onto origin's develop:
+it reads develop's latest status.json and todo.md, builds the commit with a private index, and retries when
+another session pushed first - the caller's working tree, the shared index and whatever is checked out
+(a branch, a detached merge-hub worktree) are never touched. --no-push edits the file on disk instead and
+stops. Standard library only.
 """
 import argparse
 import datetime
@@ -26,6 +28,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATUS = os.path.join(ROOT, "status.json")
@@ -34,12 +37,24 @@ STATES = ("working", "waiting", "asleep")
 PRIVATE = re.compile(r"\b(10\.\d{1,3}|192\.168|172\.(1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}\b|_team[/\\]")
 
 
+def load_empty():
+    return {"schema": 1, "teams": [], "needs_owner": []}
+
+
 def load():
     try:
         with open(STATUS, encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        return {"schema": 1, "teams": [], "needs_owner": []}
+        return load_empty()
+
+
+def read_todo():
+    try:
+        with open(TODO, encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
 
 
 def closed_ids(todo_text):
@@ -63,14 +78,6 @@ def drop(data, ids):
     gone += len(data.get("needs_owner", [])) - len(keep)
     data["needs_owner"] = keep
     return gone
-
-
-def sync_closed(data):
-    try:
-        with open(TODO, encoding="utf-8") as f:
-            return drop(data, closed_ids(f.read()))
-    except FileNotFoundError:
-        return 0
 
 
 def find_team(data, name):
@@ -133,44 +140,72 @@ def render(data):
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
-def git(*a, check=True):
-    return subprocess.run(["git", "-C", ROOT] + list(a), check=check, capture_output=True, text=True)
+def git(*a, check=True, stdin=None, env=None):
+    """Run git in ROOT; stdout comes back as UTF-8 text (bytes in and out, so Windows never adds a CR)."""
+    r = subprocess.run(["git", "-C", ROOT] + list(a), check=False, capture_output=True, input=stdin, env=env)
+    if check and r.returncode:
+        sys.exit("status.py: git %s failed: %s" % (a[0], r.stderr.decode("utf-8", "replace").strip()))
+    return r.returncode, r.stdout.decode("utf-8")
+
+
+def show(rev, path):
+    code, out = git("show", "%s:%s" % (rev, path), check=False)
+    return out if code == 0 else None
+
+
+def commit_on(base, text, message):
+    """A commit on top of `base` that changes status.json alone - built with a private index, so neither the
+    caller's working tree nor the shared index nor whatever branch (or detached HEAD) is checked out is
+    touched."""
+    _, blob = git("hash-object", "-w", "--stdin", stdin=text.encode("utf-8"))
+    with tempfile.TemporaryDirectory() as tmp:
+        env = dict(os.environ, GIT_INDEX_FILE=os.path.join(tmp, "index"))
+        git("read-tree", base, env=env)
+        git("update-index", "--add", "--cacheinfo", "100644,%s,status.json" % blob.strip(), env=env)
+        _, tree = git("write-tree", env=env)
+    _, commit = git("commit-tree", tree.strip(), "-p", base, "-m", message)
+    return commit.strip()
 
 
 def write_and_push(args, push):
-    """Pull, re-apply on the fresh file, commit status.json alone, push; retry when someone pushed first."""
-    for attempt in range(4):
+    """Apply the command to develop's latest status.json and push a commit of it straight to develop; retry
+    when another session pushed first. --no-push works on the files on disk instead."""
+    for attempt in range(5):
         if push:
-            git("pull", "--no-rebase", "-q", "origin", "develop")
-        data = load()
+            git("fetch", "-q", "origin", "develop")
+            _, base = git("rev-parse", "FETCH_HEAD")
+            base = base.strip()
+            raw, todo = show(base, "status.json"), show(base, "docs/todo.md") or ""
+            data = json.loads(raw) if raw else load_empty()
+        else:
+            data = load()
+            todo = read_todo()
         before = render(data)
         summary = apply(args, data)
-        closed = sync_closed(data)
+        closed = drop(data, closed_ids(todo))
         if args.cmd == "sync" and not closed:
             print("status.py: nothing to sync")
             return
         if closed:
             summary += " (+%d closed in todo.md)" % closed
+        if render(data) == before:
+            print("status.py: unchanged")
+            return
         data["schema"] = 1
         data["written_at"] = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
         data["written_by"] = args.by or os.environ.get("AB_STATUS_BY") or data.get("written_by", "")
         text = render(data)
         check_public(text)
-        if text == before:
-            print("status.py: unchanged")
-            return
-        with open(STATUS, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
         if not push:
+            with open(STATUS, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
             print("status.py: written (not pushed) - " + summary)
             return
-        git("commit", "-q", "-m", "status: %s [skip ci]" % summary, "--", "status.json")
-        if git("push", "-q", "origin", "develop", check=False).returncode == 0:
-            print("status.py: pushed - " + summary)
+        commit = commit_on(base, text, "status: %s [skip ci]" % summary)
+        code, _ = git("push", "-q", "origin", commit + ":refs/heads/develop", check=False)
+        if code == 0:
+            print("status.py: pushed %s - %s (your checkout catches up on its next pull)" % (commit[:7], summary))
             return
-        # undo only our own unpushed status commit - the index is shared, so touch no other path
-        git("reset", "-q", "--soft", "HEAD~1")
-        git("checkout", "-q", "HEAD", "--", "status.json")
     sys.exit("status.py: push kept failing - try again")
 
 
