@@ -158,6 +158,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | PLATFORM-5 | A Pi updating itself to the refreshed nightly, 32- and 64-bit, games and settings kept (checklist §4). | checklist §4 | S | tester | a3 |
 | PLATFORM-6 | LAN Share discs: a multi-disc game, CD audio tracks, a LibCrypt game (needs a drive that gives the subchannel), each published to a Pi's abstored and installed through the Store on the Pi 400 and the console. | pc-tools | M | tester | a4 |
 | PLATFORM-7 | Atari VCS 800: the one probe that decides the port's shape (the launcher's `docs/atari-vcs-plan.md`). | - | S | tester | later |
+| PLATFORM-8 | (the owner, 2026-09-27, found with TOOLS-8) **Closing the window quits at once**: Alt+F4 / the window's close button (`SDL_QUIT`) is a one-shot event that closes only the innermost screen, so a deep stack takes one close per screen. Give it the persistent quit that power off and the DebugDriver's `quit` use since TOOLS-8 (core cbad1f3), on the dev host, Windows and the PC stick. | core (ui `Input`), launcher | S | dev | later |
 
 ## DOCS - Documentation and repository hygiene
 
