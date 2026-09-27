@@ -1,0 +1,50 @@
+<!-- Intern on the laptop: the owner's one-time setup of the `abagents` user (sudo + Claude login). Shown in the admin panel's Roadmap tab (Needs you -> the (i) button). -->
+<style>
+:host{display:block;padding:1.2rem 1.4rem;font-weight:400;font-family:"Segoe UI",system-ui,sans-serif;color:#15202b;line-height:1.55;font-size:15px}
+h1{font-size:1.25rem;margin:0 0 .4rem;color:#0b3a7a}
+h2{font-size:1rem;margin:1.2rem 0 .3rem;color:#0b3a7a}
+code,pre{font-family:Consolas,ui-monospace,monospace;background:#eef3fa;border-radius:4px}
+code{padding:.05em .35em}
+pre{padding:.55rem .8rem;margin:.3rem 0 .6rem;overflow-x:auto}
+ol,ul{padding-left:1.3rem}li{margin:.35rem 0}
+.note{border-left:4px solid #4fc8ff;background:#f3f9ff;padding:.5rem .8rem;margin:.8rem 0}
+.time{color:#5a6b80;font-size:.9rem}
+</style>
+
+<h1>Praktykant na laptopie: użytkownik <code>abagents</code></h1>
+<p class="time">Około 5 minut, jednorazowo. Potem Eleanor sama zakłada pracowników na laptopie: najpierw Praktykanta,
+później kierowników i Wrena.</p>
+
+<h2>Co powstaje</h2>
+<ul>
+<li>Osobny użytkownik Linuksa <code>abagents</code>: bez sudo, w grupie <code>docker</code> (budowanie i testy w
+obrazie, tak jak zdecydowałeś), z dostępem tylko do własnego katalogu domowego. Twoje konto <code>screemer</code>,
+jego pliki i klucze zostają poza zasięgiem.</li>
+<li>Na nim mieszkają pracownicy AI. Każdy ma swój katalog, brief i listę uprawnień. Pierwszy to
+<b>Praktykant (Haiku)</b>, który robi proste zadania na polecenie kierowników i Wrena.</li>
+<li>PC łączy się z nim tym samym kluczem ssh, co z kontem <code>screemer</code>.</li>
+</ul>
+
+<h2>1. Połącz się z laptopem z PC</h2>
+<pre>ssh screemer@&lt;adres laptopa&gt;</pre>
+
+<h2>2. Załóż użytkownika (sudo zapyta o Twoje hasło)</h2>
+<pre>sudo useradd -m -s /bin/bash -G docker abagents
+sudo loginctl enable-linger abagents
+sudo install -d -m 700 -o abagents -g abagents /home/abagents/.ssh
+sudo install -m 600 -o abagents -g abagents ~/.ssh/authorized_keys /home/abagents/.ssh/authorized_keys</pre>
+<p>Pierwsza linia tworzy użytkownika. Druga pozwala jego usługom działać bez zalogowania. Dwie ostatnie
+kopiują listę kluczy ssh, które już mają dostęp do <code>screemer</code>, żeby PC mógł się łączyć.</p>
+
+<h2>3. Zainstaluj i zaloguj Claude Code jako <code>abagents</code></h2>
+<pre>sudo -iu abagents
+curl -fsSL https://claude.ai/install.sh | bash
+~/.local/bin/claude</pre>
+<p>Instalator to oficjalny skrypt Anthropic, ten sam, którym Claude trafił na konto <code>screemer</code>. W Claude
+wpisz <code>/login</code> i wybierz to samo konto co na PC. Otwórz pokazany link w przeglądarce na PC, wklej kod,
+a potem wpisz <code>/exit</code>. Na koniec:</p>
+<pre>exit
+exit</pre>
+
+<div class="note">Gotowe? Napisz Eleanor „abagents gotowy”. Ona sama zainstaluje most i Praktykanta, sprawdzi je
+testowym zadaniem i pokaże Ci wynik. Hasła i logowanie zostają po Twojej stronie; zespoły nigdy ich nie widzą.</div>
