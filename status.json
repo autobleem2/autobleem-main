@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T13:06:10+01:00",
+  "written_at": "2026-09-27T13:13:05+01:00",
   "written_by": "Victor Lane - Lead Platform",
   "usage": {
     "five_hour_percent": 16,
@@ -13,14 +13,9 @@
     {
       "name": "Victor Lane",
       "team": "infrastructure",
-      "state": "working",
-      "items": [
-        {
-          "id": "DOCS-18",
-          "what": "merged (manuals 581e4ba, launcher f11def8), CI running"
-        }
-      ],
-      "note": "now Lead Platform: RELEASE, KERNEL, PLATFORM, DOCS, CI"
+      "state": "waiting",
+      "items": [],
+      "note": "DOCS-18 closed; no open rows, ask Eleanor for the next"
     },
     {
       "name": "Marcus Hale",
