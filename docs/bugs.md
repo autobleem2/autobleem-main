@@ -40,3 +40,5 @@ entry. Search this file first, and mark a repeat `duplicate of BUG-N` rather tha
 | BUG-13 | Pi 400: the pad is dead for 1-3 s after every game and at boot - a multi-mode pad re-enumerates when SDL's hidapi driver probes it | rpi | minor | confirmed | Pi 400 | - |
 | BUG-14 | N64 in RetroArch: the homebrew RSP tests crash GLupeN64 inside the core; never tested with a real game | rpi, pcusb, win | minor | open | RetroArch core tests | [EMU-12](todo.md) |
 | BUG-15 | Every extension-catalog scan line is written twice to `autobleem.log` | all | minor | wontfix | console session 318, 2026-09-27 (declined for now by the owner) | - |
+| BUG-16 | The build image fails at random with exit 141: a version print piped into `head` under `pipefail` (SIGPIPE when `head` closes first) | all | minor | fixed-untested | CI run 36332017403 (autobleem-build image), 2026-09-27; fixed in autobleem-build dbb1378 | - |
+| BUG-17 | autobleem-repo's `tools/repo_assets.py` still reads the ab2 theme from `payload/Themes/ab2`, which no longer exists since the themes moved to their own repository | all | minor | fixing | review of the launcher's tools, 2026-09-27 | [DOCS-6](todo.md) |
