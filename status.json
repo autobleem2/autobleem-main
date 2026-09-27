@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:31:07+01:00",
+  "written_at": "2026-09-27T12:31:11+01:00",
   "written_by": "Eleanor Voss",
   "usage": {
     "five_hour_percent": 5,
@@ -64,6 +64,12 @@
       "kind": "device test",
       "what": "the console sessions on nightly 318 (hardware-only steps)",
       "howto": "howto/console-318.html"
+    },
+    {
+      "id": "RELEASE-1",
+      "kind": "decision",
+      "what": "the go for promoting the new alpha2 - after the console tests, the owner's feature check and the volunteers' test plans",
+      "howto": "howto/decision-release-1.html"
     }
   ]
 }
