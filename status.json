@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T08:37:16+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T08:37:34+01:00",
+  "written_by": "Marcus Hale - Team Manager (software/ui)",
   "usage": {
     "five_hour_percent": 62,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -36,12 +36,8 @@
       "state": "working",
       "items": [
         {
-          "id": "D20",
-          "what": "core's runStreaming test times from the stop request (Daniel)"
-        },
-        {
           "id": "R29",
-          "what": "headless test runs on Windows: AB_HEADLESS (hidden window, dummy audio) + serve_test_store on 127.0.0.1 (next after D20)"
+          "what": "headless test runs on Windows: AB_HEADLESS (hidden window, dummy audio) + serve_test_store on 127.0.0.1"
         },
         {
           "id": "H12/H13",
