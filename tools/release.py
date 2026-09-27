@@ -41,10 +41,14 @@ API = "https://api.github.com"
 # release of its own; it is tagged with the rest so every version names the core it was built with.
 STAGES = [
     ["psc-kernel-payload", "autobleem-core"],
-    ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-pc-tools"],
+    ["pcsx-abnxt", "autobleem", "autobleem-pc-tools"],
     ["autobleem-console-tools"],
 ]
 APPLIANCE = "autobleem-appliance"
+# pcsx-ab is frozen at its own v1.0-final (the owner, 2026-09-27; docs/decisions.md): never tagged with the
+# unified vX.Y.Z and never a nightly source - every package takes that one release
+# (autobleem-appliance tools/release_assets.sh, PCSXAB_FROZEN_TAG), so it is in neither STAGES nor
+# NIGHTLY_REPOS.
 # the build image: every v* tag (alpha/beta/rc/release alike, docs/decisions.md "two channels") compiles in
 # its master's :latest, never its develop's :develop - so promote() moves master to develop's head, and waits
 # for image.yml's push build to publish the new :latest, before the first STAGES tag is created. Not a
@@ -79,7 +83,7 @@ WORKFLOWS = {
 }
 # the components whose develop feeds the nightly (the kernel payload reaches it through its releases) - the
 # same list as the appliance's fingerprint (assemble.yml's plan; autobleem-themes joined it D5, 2026-09-27)
-NIGHTLY_REPOS = ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools",
+NIGHTLY_REPOS = ["pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools",
                  "ext_store", "proc_unzip", "autobleem-themes"]
 # what a component's develop build does not run for (its workflow's paths-ignore): a commit touching only these
 # publishes no nightly, so develop's head stays past the `nightly` tag - and is no reason to rebuild

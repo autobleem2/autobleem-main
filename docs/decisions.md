@@ -260,3 +260,12 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 ## Input is ignored while a spinner shows (the owner, 2026-09-27)
 
 While AutoBleem shows a spinner or any busy indicator and waits for a job, every pad and keyboard input is ignored: presses, releases, holds and stick movement. When the job ends, input starts from a clean state (no key held, no hold-repeat carried over), so an input made before or during the wait never acts afterwards. This holds for every screen and every program AutoBleem ships. It is implemented once in the busy path, not per screen. It came from BUG-21: pressing the pad during the Options reload started the value loop again (CONSOLE-13).
+
+## pcsx-ab is frozen at v1.0-final (the owner, 2026-09-27)
+
+The classic emulator, pcsx-ab, is closed. Its release `v1.0-final` (commit `7bef31b`, the build nightly 188
+shipped) is the reference build and never changes again: no more commits, tags or nightlies of pcsx-ab. Every
+package, a nightly and a release alike, takes that release (autobleem-appliance `tools/release_assets.sh`,
+`PCSXAB_FROZEN_TAG`), and `tools/release.py` no longer tags it or waits for its nightly. It came from a
+regression after 188: with the scale2x/eagle filters a game on the console ran at 15 fps instead of 50-60.
+Work on the emulator goes on in pcsx-abnxt only.

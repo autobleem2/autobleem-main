@@ -390,7 +390,7 @@ class TagPrecheck(unittest.TestCase):
     def test_precheck_tags_stops_on_a_conflicting_commit(self):
         source = {r: self.branches[(r, "develop")] for r in repos()}
         gh = TagPrecheckGitHub(self.branches, [], self.lines.append,
-                               existing_tags={("pcsx-ab", "v2.0.0-alpha2"): "f" * 40})  # not source["pcsx-ab"]
+                               existing_tags={("pcsx-abnxt", "v2.0.0-alpha2"): "f" * 40})  # not source["pcsx-abnxt"]
         with self.assertRaises(RuntimeError):
             release.precheck_tags(gh, "v2.0.0-alpha2", source, repos(), log=self.lines.append)
 
