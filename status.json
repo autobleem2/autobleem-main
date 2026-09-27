@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:59:54+01:00",
-  "written_by": "Eleanor Voss",
+  "written_at": "2026-09-27T13:06:10+01:00",
+  "written_by": "Victor Lane - Lead Platform",
   "usage": {
     "five_hour_percent": 16,
     "five_hour_resets_at": "17:00",
@@ -17,7 +17,7 @@
       "items": [
         {
           "id": "DOCS-18",
-          "what": "the last manual figures (PSC-Bios x2, ABFlashKit, Store source menu) for pl/da/fi - Ivy's capture run"
+          "what": "merged (manuals 581e4ba, launcher f11def8), CI running"
         }
       ],
       "note": "now Lead Platform: RELEASE, KERNEL, PLATFORM, DOCS, CI"
