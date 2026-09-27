@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:03:09+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T09:12:03+01:00",
+  "written_by": "Victor Lane - Team Manager (infrastructure)",
   "usage": {
     "five_hour_percent": 66,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -13,22 +13,14 @@
     {
       "name": "Victor Lane",
       "team": "infrastructure",
-      "state": "waiting",
+      "state": "working",
       "items": [
         {
-          "id": "D21",
-          "what": "ci/build.sh stops dirtying the tracked tree - merged + proven on the build server and CI; laptop proof blocked by the session sandbox (owner)"
-        },
-        {
-          "id": "D4",
-          "what": "English manual PDF in the console package - merged (appliance 51e1d2b, launcher README 588b8ed); laptop proof blocked (owner)"
-        },
-        {
           "id": "D22",
-          "what": "Danish and Finnish manuals get their screenshots (next)"
+          "what": "Danish and Finnish manuals get their screenshots - Ivy on it"
         }
       ],
-      "note": "admin how-to modal merged + deployed (autobleem-repo e237a97)"
+      "note": "D4 and D21 done; the laptop ssh-build rule works"
     },
     {
       "name": "Marcus Hale",
