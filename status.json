@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T13:42:47+01:00",
+  "written_at": "2026-09-27T13:45:18+01:00",
   "written_by": "Eleanor Voss",
   "usage": {
     "five_hour_percent": 16,
@@ -63,14 +63,9 @@
     {
       "name": "Nina Park",
       "team": "pool: Intern (Haiku), laptop",
-      "state": "working",
-      "items": [
-        {
-          "id": "ONBOARD-2",
-          "what": "Test task 2: find old-style task IDs (R1, C10, K10...) left in the hub's docs"
-        }
-      ],
-      "note": ""
+      "state": "waiting",
+      "items": [],
+      "note": "last task done: ONBOARD-2 (13:44)"
     }
   ],
   "needs_owner": [
