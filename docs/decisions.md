@@ -81,6 +81,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **The platforms are the owner's call** (2026-09-26): the PlayStation Classic, the Raspberry Pis, the PC
   stick and Windows (plus the Windows/Linux dev hosts). **macOS is not supported** - no work, rows or fixes
   for it. A new platform, or dropping one, is decided by the owner only.
+- **pcsx-ab is no longer developed** (the owner, 2026-09-27, in console session 318): it is retired over time,
+  and **pcsx-abnxt is the PS1 emulator where everything has to work**. New features, fixes and console checks
+  go to pcsx-abnxt only; a pcsx-ab-only bug or missing feature is not fixed (it stays shipped until EMU-2
+  archives it - when is still the owner's call). Nothing may depend on a pcsx-ab change.
 - **Full screen on every real target** (launcher, pcsx-ab, RetroArch); only the dev build has a window.
 - **The PlayStation Classic's own storage is never written** - not the root file system, not `/data`,
   nothing on the eMMC (ABFlashKit flashing the kernel on the user's request is the one exception).
