@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:12:03+01:00",
-  "written_by": "Victor Lane - Team Manager (infrastructure)",
+  "written_at": "2026-09-27T09:28:34+01:00",
+  "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 66,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -41,14 +41,14 @@
     {
       "name": "Harriet Cole",
       "team": "hardware",
-      "state": "working",
+      "state": "waiting",
       "items": [
         {
           "id": "D23",
-          "what": "flaky test_system cancel on Windows (borrowed from software/ui; Tom; Marcus reviews)"
+          "what": "flaky test_system cancel - pushed (core 228d52d, launcher d425593), Marcus reviewing"
         }
       ],
-      "note": "C15, C16 done; waiting: nightly with 27f652f for the C16 VM frame, the owner's 318 console results"
+      "note": "waiting: Marcus's D23 review, nightly with 27f652f for the C16 VM frame, the owner's 318 console results"
     },
     {
       "name": "Wren Aldercroft",
