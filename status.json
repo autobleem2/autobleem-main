@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T08:25:33+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T08:27:01+01:00",
+  "written_by": "Victor Lane - Team Manager (infrastructure)",
   "usage": {
     "five_hour_percent": 62,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -17,18 +17,18 @@
       "items": [
         {
           "id": "D21",
-          "what": "ci/build.sh stops dirtying the tracked tree - merged (launcher 78dd15f), CI running"
+          "what": "ci/build.sh stops dirtying the tracked tree - merged, CI green; laptop proof running"
         },
         {
           "id": "D4",
-          "what": "last part: the console package carries the English manual PDF in Docs/ - Ivy on it"
+          "what": "last part: English manual PDF in the console package - merged (appliance 51e1d2b); README link fix + laptop proof"
         },
         {
           "id": "D22",
           "what": "Danish and Finnish manuals get their screenshots (after D4)"
         }
       ],
-      "note": "R22 done (launcher d92030f)"
+      "note": "admin how-to modal merged + deployed (autobleem-repo e237a97)"
     },
     {
       "name": "Marcus Hale",
