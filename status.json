@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:37:00+01:00",
+  "written_at": "2026-09-27T07:55:00+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
     "five_hour_percent": 42,
@@ -15,9 +15,18 @@
       "team": "infrastructure",
       "state": "working",
       "items": [
-        {"id": "D21", "what": "ci/build.sh stops dirtying the tracked tree (Ivy)"},
-        {"id": "D4", "what": "the English manual PDF in the console package's Docs/ (next)"},
-        {"id": "D22", "what": "the Danish and Finnish manuals get their screenshots (after D4)"}
+        {
+          "id": "D21",
+          "what": "ci/build.sh stops dirtying the tracked tree (Ivy)"
+        },
+        {
+          "id": "D4",
+          "what": "the English manual PDF in the console package's Docs/ (next)"
+        },
+        {
+          "id": "D22",
+          "what": "the Danish and Finnish manuals get their screenshots (after D4)"
+        }
       ],
       "note": "R22 done (launcher d92030f)"
     },
@@ -26,35 +35,56 @@
       "team": "software/ui",
       "state": "working",
       "items": [
-        {"id": "D20", "what": "core's runStreaming test times from the stop request"},
-        {"id": "H11", "what": "check the network hub on rpi/pcusb/win (hidden there?) + a doc fix"},
-        {"id": "H12/H13", "what": "Store rig prep for the console session: a >2 GB item, a source with a favicon"}
+        {
+          "id": "D20",
+          "what": "core's runStreaming test times from the stop request"
+        },
+        {
+          "id": "H12/H13",
+          "what": "Store rig prep for the console session: a >2 GB item, a source with a favicon"
+        }
       ],
-      "note": "K14 done"
+      "note": "K14 done; H11 checked - stays as it is (owner)"
     },
     {
       "name": "Harriet Cole",
       "team": "hardware",
       "state": "working",
       "items": [
-        {"id": "C15", "what": "battery icons aligned with their text, a new screenshot for the owner"},
-        {"id": "C16", "what": "unplugging the only pad shows \"Controllers: None\""}
+        {
+          "id": "C15",
+          "what": "battery icons aligned with their text, a new screenshot for the owner"
+        },
+        {
+          "id": "C16",
+          "what": "unplugging the only pad shows \"Controllers: None\""
+        }
       ],
       "note": "318 screenshots reviewed by the owner; console plan trimmed to hardware-only steps"
     },
     {
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
-      "state": "waiting",
+      "state": "working",
       "items": [
-        {"id": "R24", "what": "panel v3 (load view in the status quadrant, the fourth empty); the second monitor after DisplayLink"}
+        {
+          "id": "R24",
+          "what": "owner OK on both monitors - merging feature/r24-panel-merge, closing the row"
+        }
       ],
       "note": "R23 done"
     }
   ],
   "needs_owner": [
-    {"id": "R24", "kind": "action", "what": "run the DisplayLink driver install in Wren's session"},
-    {"id": "318", "kind": "device test", "what": "the console sessions on nightly 318 (hardware-only steps)"},
-    {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 - after the console tests"}
+    {
+      "id": "318",
+      "kind": "device test",
+      "what": "the console sessions on nightly 318 (hardware-only steps)"
+    },
+    {
+      "id": "R1",
+      "kind": "decision",
+      "what": "the go for promoting the new alpha2 - after the console tests"
+    }
   ]
 }
