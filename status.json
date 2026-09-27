@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:54:27+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T07:56:21+01:00",
+  "written_by": "Marcus Hale - Team Manager (software/ui)",
   "usage": {
     "five_hour_percent": 42,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -37,14 +37,18 @@
       "items": [
         {
           "id": "D20",
-          "what": "core's runStreaming test times from the stop request"
+          "what": "core's runStreaming test times from the stop request (Daniel)"
+        },
+        {
+          "id": "R29",
+          "what": "headless test runs on Windows: AB_HEADLESS (hidden window, dummy audio) + serve_test_store on 127.0.0.1 (next after D20)"
         },
         {
           "id": "H12/H13",
-          "what": "Store rig prep for the console session: a >2 GB item, a source with a favicon"
+          "what": "Store LAN rig: an item > 2 GB and a source with a favicon (after R29)"
         }
       ],
-      "note": "K14 done; H11 checked - stays as it is (owner)"
+      "note": "C11/C12 manual lines being finished (autobleem-manuals feature/c11-c12-manual-v2)"
     },
     {
       "name": "Harriet Cole",
