@@ -18,6 +18,22 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **alpha2 is withdrawn** (the owner, 2026-09-26): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` tags and
   releases are deleted; what the teams do now is still the road to the next pre-release, which is called
   **alpha2** again. alpha1 stays (todo R1).
+- **No promotion to a higher version before the owner's feature gate and the volunteers' test plans** (the
+  owner, 2026-09-27). Before any `promote` - alpha, beta, rc or release - two things must be true:
+  1. **Everything the external testers are to test is in the build**: the owner confirms that each of his
+     ideas meant for that release is done and in the nightly being promoted. Eleanor (PM) lists the
+     release's todo/roadmap rows with their state and asks him; a missing one either gets finished first or
+     is moved to a later release by the owner, never silently dropped.
+  2. **An exact test plan is ready for the volunteers**, per platform, in `docs/tester-checklist.md`'s style:
+     which platform and which build/channel, what hardware helps (a named pad model, a Wi-Fi dongle, a USB
+     hub, a stick of a given size and filesystem, a console with the stock or the AutoBleem kernel...), the
+     step-by-step instructions, what should be seen, and which logs to send - plus **a form to fill in** for
+     each plan (per step: pass / fail / blocked, the build's version, the hardware used, notes, the logs and
+     photos attached), so every volunteer reports the same way. Every feature from point 1 has its lines
+     there.
+  The PM checks both before putting the promote decision (R1/R4-style rows) in front of the owner; until
+  then the promote is not asked for. *Why:* external testers get one pass at a pre-release - a missing
+  feature or a vague plan wastes it.
 - **`AB_SDK_ABI` moves only with a release** (the owner, 2026-09-26): within a development cycle the ABI may
   change once, and the release carries that one number. ABI 4 (`Extension::runEntry()`) is the next
   release's.
