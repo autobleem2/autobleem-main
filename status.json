@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:24:00+01:00",
+  "written_at": "2026-09-27T07:37:00+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
-    "five_hour_percent": 35,
+    "five_hour_percent": 42,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
-    "weekly_percent": 58,
+    "weekly_percent": 59,
     "weekly_cap_today_percent": 70,
     "weekly_resets_at": "2026-09-29T00:00:00+01:00"
   },
@@ -15,10 +15,11 @@
       "team": "infrastructure",
       "state": "working",
       "items": [
-        {"id": "R22", "what": "RetroArch driven from tests on the laptop - one capture pass of the menu, then merge"},
-        {"id": "D21", "what": "ci/build.sh stops dirtying the tracked tree"}
+        {"id": "D21", "what": "ci/build.sh stops dirtying the tracked tree (Ivy)"},
+        {"id": "D4", "what": "the English manual PDF in the console package's Docs/ (next)"},
+        {"id": "D22", "what": "the Danish and Finnish manuals get their screenshots (after D4)"}
       ],
-      "note": "D4 merged (develop c23863d, CI green); CI's Linux builds run on the 3 laptop runners"
+      "note": "R22 done (launcher d92030f)"
     },
     {
       "name": "Marcus Hale",
@@ -26,6 +27,7 @@
       "state": "working",
       "items": [
         {"id": "D20", "what": "core's runStreaming test times from the stop request"},
+        {"id": "H11", "what": "check the network hub on rpi/pcusb/win (hidden there?) + a doc fix"},
         {"id": "H12/H13", "what": "Store rig prep for the console session: a >2 GB item, a source with a favicon"}
       ],
       "note": "K14 done"
@@ -35,23 +37,24 @@
       "team": "hardware",
       "state": "working",
       "items": [
-        {"id": "318", "what": "the console session plan (two sessions) and the screenshots of its look-only checks"}
+        {"id": "C15", "what": "battery icons aligned with their text, a new screenshot for the owner"},
+        {"id": "C16", "what": "unplugging the only pad shows \"Controllers: None\""}
       ],
-      "note": "C14 done"
+      "note": "318 screenshots reviewed by the owner; console plan trimmed to hardware-only steps"
     },
     {
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
-      "state": "working",
+      "state": "waiting",
       "items": [
-        {"id": "R24", "what": "the status panel: load + htop view merged into one quadrant, the fourth left empty; then the second monitor"}
+        {"id": "R24", "what": "panel v3 (load view in the status quadrant, the fourth empty); the second monitor after DisplayLink"}
       ],
       "note": "R23 done"
     }
   ],
   "needs_owner": [
-    {"id": "R24", "kind": "action", "what": "run the DisplayLink driver install in Wren's session (his tooling may not)"},
-    {"id": "318", "kind": "device test", "what": "the console sessions on nightly 318: session 1 ~3h45 in two sittings, session 2 ~4h30"},
+    {"id": "R24", "kind": "action", "what": "run the DisplayLink driver install in Wren's session"},
+    {"id": "318", "kind": "device test", "what": "the console sessions on nightly 318 (hardware-only steps)"},
     {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 - after the console tests"}
   ]
 }
