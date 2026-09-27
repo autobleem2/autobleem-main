@@ -1,0 +1,50 @@
+<!-- 318: the console session on nightly 318 (hardware-only steps). A task summary for the admin panel's Needs you (i) button. -->
+<style>
+:host{display:block;padding:1.2rem 1.4rem;font-weight:400;font-family:"Segoe UI",system-ui,sans-serif;color:#15202b;line-height:1.55;font-size:15px}
+h1{font-size:1.25rem;margin:0 0 .4rem;color:#0b3a7a}
+h2{font-size:1rem;margin:1.2rem 0 .3rem;color:#0b3a7a}
+code{font-family:Consolas,ui-monospace,monospace;background:#eef3fa;border-radius:4px;padding:.05em .35em}
+ul,ol{padding-left:1.3rem}li{margin:.3rem 0}
+table{border-collapse:collapse;width:100%;margin:.4rem 0}
+td,th{border-bottom:1px solid #dde5ef;padding:.35rem .5rem;text-align:left;vertical-align:top}
+th{color:#0b3a7a;font-weight:600}
+.note{border-left:4px solid #4fc8ff;background:#f3f9ff;padding:.5rem .8rem;margin:.8rem 0}
+.time{color:#5a6b80;font-size:.9rem}
+</style>
+
+<h1>Sesja testowa na konsoli: nightly 318</h1>
+<p class="time">Skrót zadania. Ok. 3 h 45 min, najlepiej w dwóch podejściach (bloki 0-B ok. 1 h 45 min, przerwa, bloki C-D ok. 2 h).
+Harriet Cole prowadzi Cię krok po kroku w sesji, tu jest tylko przegląd.</p>
+
+<h2>Co sprawdzamy</h2>
+<p>Tylko to, czego nie da się sprawdzić ze zrzutów ekranu: zachowanie prawdziwych padów (przewodowych i Bluetooth),
+klawiatury, dźwięku, SSH z pendrive'a, kernela i sieci. Wygląd ekranów i teksty zostały już potwierdzone na zrzutach.</p>
+
+<h2>Potrzebne</h2>
+<ul>
+  <li>PSC z kernelem AutoBleem i pendrive z nightly 318 (<code>v2.0.0-alpha2-318-...</code> lub następnym z tym samym launcherem)</li>
+  <li>2 pady przewodowe (jeden z wibracjami), opcjonalnie trzeci; klawiatura USB i hub</li>
+  <li>dongle Bluetooth + DS4 i DualSense (naładowane; do E15 najlepiej jeden pad rozładowany poniżej ~20%)</li>
+  <li>dongle WiFi; kabel micro-USB z danymi do PC (SSH); Twój klucz publiczny SSH</li>
+  <li>gra PS1 dla 2 graczy (np. Tekken 3) i gra z wibracjami</li>
+</ul>
+
+<h2>Bloki</h2>
+<table>
+  <tr><th>Blok</th><th>Co</th><th>Czas</th></tr>
+  <tr><td>0</td><td>Na PC: nightly 318 na pendrive, klucz SSH do <code>System/ssh/authorized_keys</code></td><td>12 min</td></tr>
+  <tr><td>A</td><td>Jeden pad: SSH z pendrive'a (C10), kernel (K10), dźwięk L1/R1 (H14), klawiatura (H8), kreator mapowania (H10), brak ikony baterii dla pada na kablu (E15)</td><td>40 min</td></tr>
+  <tr><td>B</td><td>Dwa pady: kolejność graczy (C9), zamiana padów w PSC-Bios (C14) i w emulatorach (C11)</td><td>50 min</td></tr>
+  <tr><td>C</td><td>Pady Bluetooth: parowanie (K11), kursor (K10), bateria w PSC-Bios (C13) i w launcherze (C8), znaczniki P1/P2 (C12), ikona baterii w grze (E15)</td><td>1 h 30 min</td></tr>
+  <tr><td>D</td><td>WiFi: ikony źródeł w Store (H13), pobranie &gt; 2 GB (H12); opcjonalnie K3.6/K3.7</td><td>30 min</td></tr>
+</table>
+
+<h2>Jak to wygląda</h2>
+<ol>
+  <li>Napisz Eleanor, kiedy masz czas i konsolę pod ręką.</li>
+  <li>Przed sesją włącz Opcje → Diagnostics → „Keep logs on the stick”.</li>
+  <li>Przy każdym teście podajesz PASS / FAIL / BLOCKED, a przy czymkolwiek dziwnym zdjęcie ekranu.</li>
+  <li>Na koniec wyłącz zamianę padów i „Keep logs on the stick”, skopiuj <code>System/Logs/</code> na PC.</li>
+</ol>
+<div class="note">Po sesji wyniki idą do zespołów; wszystkie PASS otwierają decyzję R1 (nowe alpha2).
+Zespół software przygotowuje wcześniej źródło testowe Store do bloku D (H12/H13).</div>

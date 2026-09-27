@@ -1,0 +1,34 @@
+<!-- R1: the owner's go for the new alpha2. A decision summary for the admin panel's Needs you (i) button. -->
+<style>
+:host{display:block;padding:1.2rem 1.4rem;font-weight:400;font-family:"Segoe UI",system-ui,sans-serif;color:#15202b;line-height:1.55;font-size:15px}
+h1{font-size:1.25rem;margin:0 0 .4rem;color:#0b3a7a}
+h2{font-size:1rem;margin:1.2rem 0 .3rem;color:#0b3a7a}
+code{font-family:Consolas,ui-monospace,monospace;background:#eef3fa;border-radius:4px;padding:.05em .35em}
+ul,ol{padding-left:1.3rem}li{margin:.3rem 0}
+.note{border-left:4px solid #4fc8ff;background:#f3f9ff;padding:.5rem .8rem;margin:.8rem 0}
+.time{color:#5a6b80;font-size:.9rem}
+</style>
+
+<h1>Decyzja R1: zgoda na nowe alpha2</h1>
+<p class="time">Skrót decyzji. Nic nie musisz robić teraz: decyzja przychodzi po sesji testowej na konsoli (318).</p>
+
+<h2>O co chodzi</h2>
+<p>Obecne <code>v2.0.0-alpha2</code> (i przypadkowe <code>v2.0.0-alpha3</code>) zastępujemy nowym alpha2, zbudowanym
+z dzisiejszego develop. Alpha1 zostaje. Stare alpha2 zostaje na kanale testowym, dopóki nowe nie powstanie.</p>
+
+<h2>Co jest gotowe</h2>
+<ul>
+  <li>kanał nightly pakietu kernela i buildy console-tools bez starego fallbacku z 2020;</li>
+  <li>wycofywanie wersji ze strony (<code>repo_publish.sh withdraw</code>), sprawdzanie tagów w <code>release.py</code>,
+      kopia zapasowa wydań;</li>
+  <li>próbny przebieg <code>promote</code> był zielony;</li>
+  <li>sprawdzone, że urządzenia porównują wersje tylko na równość, więc zmiana numeracji nightly jest dla nich bezpieczna.</li>
+</ul>
+
+<h2>Twoja decyzja</h2>
+<ol>
+  <li><b>Tak</b>: w jednym przebiegu <code>promote</code> znikają stare tagi i wydania alpha2/alpha3, a nowe alpha2
+      jest tagowane i publikowane na kanale testowym (zespół infrastruktury, Victor).</li>
+  <li><b>Jeszcze nie</b>: np. gdy sesja na konsoli znajdzie błąd; najpierw poprawka, potem nowy nightly i ponowne pytanie.</li>
+</ol>
+<div class="note">Eleanor zada to pytanie po sesji 318, z jej wynikami. Wydania i tagi to zawsze Twoja decyzja.</div>
