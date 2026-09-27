@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T06:25:00+01:00",
+  "written_at": "2026-09-27T06:58:00+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
-    "five_hour_percent": 10,
+    "five_hour_percent": 17,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
     "weekly_percent": 54,
     "weekly_cap_today_percent": 70,
@@ -15,40 +15,44 @@
       "team": "infrastructure",
       "state": "working",
       "items": [
-        {"id": "R22", "what": "RetroArch driven from tests on the laptop - phase 2 with video_driver=gl (Ivy)"}
+        {"id": "R22", "what": "RetroArch driven from tests on the laptop - phase 2 proven, menu shots + cleanup, then merge"},
+        {"id": "D4", "what": "screenshots of the 2 text fixes for the owner's question session"},
+        {"id": "D21", "what": "ci/build.sh stops dirtying the tracked tree"}
       ],
-      "note": "R27 live; CI's Linux builds now run on the 3 laptop runners in all 7 repos; watching for the nightly that unlocks the console tests"
+      "note": "R27 live; CI's Linux builds run on the 3 laptop runners"
     },
     {
       "name": "Marcus Hale",
       "team": "software/ui",
-      "state": "asleep",
-      "items": [],
-      "note": "K14 done (launcher fb7a556, appliance b7ddead, proven on the test VM)"
+      "state": "working",
+      "items": [
+        {"id": "D20", "what": "core's runStreaming test times from the stop request"},
+        {"id": "H12/H13", "what": "Store rig prep for the console session: a >2 GB item, a source with a favicon"}
+      ],
+      "note": "K14 done"
     },
     {
       "name": "Harriet Cole",
       "team": "hardware",
-      "state": "asleep",
-      "items": [],
-      "note": "C14 done (console-tools f56c6ce); waits for the owner's console tests"
+      "state": "working",
+      "items": [
+        {"id": "318", "what": "the console session plan (_team/status/console-session-318.md, ~3h45) and the screenshots of its look-only checks"}
+      ],
+      "note": "C14 done"
     },
     {
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
-      "state": "asleep",
-      "items": [],
-      "note": "R23 done (every target builds on the laptop); R24 waits for the owner"
+      "state": "waiting",
+      "items": [
+        {"id": "R24", "what": "the status panel runs (launcher f5e4373); the second monitor is on a DisplayLink dock, not seen"}
+      ],
+      "note": "R23 done"
     }
   ],
   "needs_owner": [
-    {"id": "R24", "kind": "decision", "what": "the status panel on the laptop's second monitor: sway + foot, autologin, a Teams block - and connect the second monitor (not detected)"},
-    {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 (old alpha2/alpha3 tags go)"},
-    {"id": "P-a", "kind": "decision", "what": "proposal: core's runStreaming test times from the stop request (flaky under load; test only)"},
-    {"id": "P-b", "kind": "decision", "what": "proposal: install.sh:242 grep -qE -> grep -E >/dev/null, like K14 (both copies)"},
-    {"id": "P-c", "kind": "decision", "what": "proposal: ci/build.sh stages the emulators into the package, not the tracked tree (fresh clones stop saying -dirty)"},
-    {"id": "C11-B", "kind": "device test", "what": "pad swap on the console - waits for a nightly with launcher c7357bb"},
-    {"id": "C12-B", "kind": "device test", "what": "two DS4 pads over BT: P1/P2 and battery follow the pad - waits for a nightly with launcher 803f8a1"},
-    {"id": "C14-B", "kind": "device test", "what": "PSC-Bios player labels follow the pad swap (2 pads) - waits for a nightly after console-tools f56c6ce"}
+    {"id": "R24", "kind": "decision", "what": "the second monitor: plug it into the laptop's own HDMI, or install the DisplayLink driver"},
+    {"id": "318", "kind": "device test", "what": "the console session on nightly 318: ~3h45 in two sittings (C8-C14, E15, K10, K11, H8, H10, H12-H14)"},
+    {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 - after the console tests"}
   ]
 }
