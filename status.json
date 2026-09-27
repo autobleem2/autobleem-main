@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T05:02:00+01:00",
+  "written_at": "2026-09-27T06:00:00+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
-    "five_hour_percent": 93,
-    "five_hour_resets_at": "2026-09-27T05:40:00+01:00",
-    "weekly_percent": 53,
+    "five_hour_percent": 5,
+    "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
+    "weekly_percent": 54,
     "weekly_cap_today_percent": 70,
     "weekly_resets_at": "2026-09-29T00:00:00+01:00"
   },
@@ -15,44 +15,44 @@
       "team": "infrastructure",
       "state": "working",
       "items": [
-        {"id": "R27", "what": "the roadmap tab in the admin panel - step 1, the parser"},
-        {"id": "R22", "what": "RetroArch driven from tests on the laptop - root cause of the core segfault, after the reset"}
+        {"id": "R22", "what": "RetroArch driven from tests on the laptop - phase 1, the core segfault's backtrace (Ivy)"},
+        {"id": "CI", "what": "routed-repo merges: launcher done, pcsx-ab and pcsx-abnxt next"}
       ],
-      "note": "3 runners on the laptop online; the timing re-run after the reset"
+      "note": "R27 done and live; 3 laptop runners kept (console-tools 5m31s, was 9m22s on one)"
     },
     {
       "name": "Marcus Hale",
       "team": "software/ui",
-      "state": "asleep",
+      "state": "working",
       "items": [
-        {"id": "K14", "what": "the PC stick's installer fails on bookworm (package probe) - from 05:42"}
+        {"id": "K14", "what": "the PC stick's installer fails on bookworm (package probe) - Daniel, proof on the test VM"}
       ],
-      "note": ""
+      "note": "then: check core's runStreaming test failure Harriet saw"
     },
     {
       "name": "Harriet Cole",
       "team": "hardware",
-      "state": "asleep",
+      "state": "waiting",
       "items": [
-        {"id": "C14", "what": "PSC-Bios player labels follow the pad swap - ctest, merge, CI from 05:42"}
+        {"id": "C14", "what": "PSC-Bios player labels follow the pad swap - merged, CI running"}
       ],
-      "note": ""
+      "note": "C14-B added to the console tests; waits for a nightly"
     },
     {
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
-      "state": "asleep",
+      "state": "working",
       "items": [
-        {"id": "R23", "what": "every toolchain on the laptop - psc/rpi/win builds left"},
-        {"id": "R24", "what": "the status panel on the laptop's second monitor - design to the owner first"}
+        {"id": "R23", "what": "every toolchain on the laptop - psc/rpi/win builds left"}
       ],
-      "note": "the laptop moved: 192.168.68.146; the test VM is to be started with autostart"
+      "note": "the laptop is back after its move: runners, test VM (autostart on), padsim and DebugDriver all checked"
     }
   ],
   "needs_owner": [
+    {"id": "R24", "kind": "decision", "what": "the status panel on the laptop's second monitor: sway + foot, autologin, a Teams block - and connect the second monitor (not detected)"},
+    {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 (old alpha2/alpha3 tags go)"},
     {"id": "C11-B", "kind": "device test", "what": "pad swap on the console (sticks, buttons, rumble on pcsx-abnxt) - waits for a nightly with launcher c7357bb"},
     {"id": "C12-B", "kind": "device test", "what": "two DS4 pads over BT: P1/P2 and battery follow the pad - waits for a nightly with launcher 803f8a1"},
-    {"id": "R24", "kind": "decision", "what": "approve the status panel's design before Wren builds it"},
-    {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 (old alpha2/alpha3 tags go)"}
+    {"id": "C14-B", "kind": "device test", "what": "PSC-Bios player labels follow the pad swap (2 pads) - waits for a nightly after console-tools f56c6ce"}
   ]
 }
