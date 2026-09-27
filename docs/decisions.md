@@ -279,6 +279,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   resume, an ETA, a state note - is in Europe/Dublin time (IST, UTC+1 in summer; GMT in winter). A UTC value from an
   API or a log is converted first; quote the UTC in brackets only when it helps to find the log line.
 
+- **The Lead QA runs the console test sessions with the owner** (the owner, 2026-09-27): Harriet Cole - Lead QA,
+  not the Program Manager, walks the owner through a device/console test plan, answers his questions and
+  collects the results. Once RELEASE-19 is live, this happens in the admin panel's how-to window chat. The PM only
+  schedules the session (the Needs-you entry with the plan and its lead) and reports the outcome in the status.
+
 - **Only the owner adds user stories to the queue** (2026-09-27). The teams implement nothing he has not approved: no
   new row in `docs/todo.md` and no work on an idea until he says yes. A follow-up or an idea found along the way goes
   to the Program Manager as a proposal, who puts it to him. Plugins (beyond the approved extensions) and macOS are
