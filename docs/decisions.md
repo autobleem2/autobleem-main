@@ -288,7 +288,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   happens after his answer. The admin panel's Roadmap tab shows an (i) button beside the entry and opens the page
   in a modal, so he never has to ask. Whoever adds the entry (normally the Program Manager) writes the page in the
   same step. Like status.json, the page is public: no LAN addresses, no `_team` paths, no secrets - name the file on
-  his PC where such a detail is (`infrastructure.local.md`).
+  his PC where such a detail is (`infrastructure.local.md`). **When a session may not write the how-to** (e.g. its
+  safeguards refuse describing how to widen Claude Code's own permissions), the page still exists: why the action is
+  needed, what waits on it, and the details he needs to do it himself when those may be given - otherwise the why
+  alone (the owner, 2026-09-27).
 - **The owner is the hardware tester** (2026-09-26): every test that needs hands on a device (a pad, a
   keyboard, a button, a stick swapped, a sound judged by ear, a screen judged by eye) is done by him. Teams
   never schedule such a test themselves: they send it to the Program Manager as a test item - device,
