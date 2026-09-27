@@ -66,7 +66,8 @@ boot differs. Paths without a repository name are the launcher's; the Pi side is
 
 ## Still open
 
-- pcsx-ab / pcsx-abnxt have no i386 build: the package ships none and PS1 runs through RetroArch's
-  pcsx_rearmed core (`launch.sh`'s fallback).
+- ~~pcsx-ab / pcsx-abnxt have no i386 build~~ - closed later the same day (launcher 021b55c): both are built
+  for i386 and ship on the stick as `emu/` and `emunxt/`; RetroArch's pcsx_rearmed core is only `launch.sh`'s
+  fallback now.
 - Untested: 32-bit UEFI, real hardware, a pad (keyboard-as-pad is off on an appliance).
 - mmdebstrap rootless (`--rootless`/`--userns`) is unproven on the build server.
