@@ -76,3 +76,17 @@ The proof for "done" (`docs/debugging.md`) is the pytest run green, and a screen
 deployed page.
 
 Size: M. Team: infrastructure (Victor). No owner setup is needed.
+
+## `status.json` - schema 1 (written by the PM)
+
+```
+schema             1
+written_at         ISO 8601 with the Irish offset ("2026-09-27T05:02:00+01:00")
+written_by         "Eleanor Voss - Program Manager"
+usage              five_hour_percent, five_hour_resets_at, weekly_percent, weekly_cap_today_percent, weekly_resets_at
+teams[]            name, team, state ("working" | "waiting" | "asleep"), items[] {id, what}, note
+needs_owner[]      id, kind ("decision" | "device test" | "sudo" | "question"), what
+```
+
+Unknown keys are ignored by the panel. A missing `status.json` or a `schema` other than 1 shows "no status yet".
+The panel shows `written_at` as its age ("12 min ago") and greys the block past one hour.
