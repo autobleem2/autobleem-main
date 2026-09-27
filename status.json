@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:55:00+01:00",
+  "written_at": "2026-09-27T07:42:20+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
     "five_hour_percent": 42,
@@ -66,12 +66,7 @@
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
       "state": "working",
-      "items": [
-        {
-          "id": "R24",
-          "what": "owner OK on both monitors - merging feature/r24-panel-merge, closing the row"
-        }
-      ],
+      "items": [],
       "note": "R23 done"
     }
   ],
