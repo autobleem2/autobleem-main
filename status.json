@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:28:34+01:00",
+  "written_at": "2026-09-27T09:31:48+01:00",
   "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 66,
@@ -45,10 +45,18 @@
       "items": [
         {
           "id": "D23",
-          "what": "flaky test_system cancel - pushed (core 228d52d, launcher d425593), Marcus reviewing"
+          "what": "pushed, awaiting Marcus's review/merge (core 228d52d, launcher d425593)"
+        },
+        {
+          "id": "C16-VM",
+          "what": "Wren takes the VM frame once a nightly carries 27f652f"
+        },
+        {
+          "id": "318",
+          "what": "awaiting the owner's console results"
         }
       ],
-      "note": "waiting: Marcus's D23 review, nightly with 27f652f for the C16 VM frame, the owner's 318 console results"
+      "note": "Incident: D23 blanket bash kill ~09:10 reported to Eleanor/Marcus/Victor; kill-by-PID rule added"
     },
     {
       "name": "Wren Aldercroft",
