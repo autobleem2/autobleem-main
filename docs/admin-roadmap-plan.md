@@ -48,8 +48,8 @@ contents API, which the panel already uses. It is cached for 60 s and refreshed 
   deletes them when the next milestone opens.
 - **`docs/roadmap.md`** gives the milestone table (order, theme, gate).
 - **`status.json`** (new, at the root of autobleem-main) holds what git does not have: the teams' current work,
-  the device tests waiting, the open questions, and usage. The PM writes it with every status block she
-  writes to the owner, at most every 15 minutes (a small commit, `[skip ci]`). The schema is fixed in the
+  the device tests waiting, the open questions, and usage. It is written through `tools/status.py` on every
+  change (see the schema section below; a small commit, `[skip ci]`). The schema is fixed in the
   panel's tests. Without the file, blocks 1 and 3 say "no status yet".
 
 ## The API
@@ -90,3 +90,16 @@ needs_owner[]      id, kind ("decision" | "device test" | "sudo" | "question"), 
 
 Unknown keys are ignored by the panel. A missing `status.json` or a `schema` other than 1 shows "no status yet".
 The panel shows `written_at` as its age ("12 min ago") and greys the block past one hour.
+
+**Nobody edits it by hand since 2026-09-27** (the owner: it has to follow the real state live). Use
+**`tools/status.py`** instead. Each team manager runs it when their team starts, finishes or blocks on
+an item: `status.py team "<name>" --state working --item D21 "what" ...`. The PM runs it for the owner's queue
+(`needs add|rm`) and for usage.
+
+Every write also does three things:
+- it drops the items and queue entries whose todo.md row is closed (`| ID | ~~`);
+- it stamps the time and author;
+- it refuses LAN addresses and `_team` paths.
+
+It then commits `status.json` alone with `[skip ci]`, merges rather than rebasing (the checkout is shared) and retries when someone else pushed first. `status.py sync` runs only the todo.md part. The
+tests are in `tests/test_status.py`.
