@@ -256,3 +256,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   in a build, a test, a review, or on a device - records it there and keeps its state current. An entry is
   not approval to fix it: only the owner adds a `docs/todo.md` row for that. And a fix is never closed by
   whoever made it - only a check by someone else closes the bug.
+
+## Input is ignored while a spinner shows (the owner, 2026-09-27)
+
+While AutoBleem shows a spinner or any busy indicator and waits for a job, every pad and keyboard input is ignored: presses, releases, holds and stick movement. When the job ends, input starts from a clean state (no key held, no hold-repeat carried over), so an input made before or during the wait never acts afterwards. This holds for every screen and every program AutoBleem ships. It is implemented once in the busy path, not per screen. It came from BUG-21: pressing the pad during the Options reload started the value loop again (CONSOLE-13).
