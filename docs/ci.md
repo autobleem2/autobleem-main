@@ -12,16 +12,20 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 - **The image**: `ghcr.io/autobleem2/autobleem-build:develop` for develop pushes, PRs and nightlies,
   `:latest` for a `v*` tag (a nightly is develop all the way down, compilers included).
 - **Runners**: the Linux compile jobs go through **`autobleem-build`'s `route.yml`** (a reusable workflow,
-  2026-09-27): the laptop runner (`bleemmachine`, label `ab-main`, runner group `pcusb-test` - it has no
-  `self-hosted` label, so `runs-on` is `["ab-main"]` alone) when it is online, else hosted `ubuntu-24.04`.
+  2026-09-27): the laptop runners (`bleemmachine`, `bleemmachine-2`, `bleemmachine-3` - three instances on the one
+  laptop, because one runner runs one job at a time and serialized the matrix legs; label `ab-main`, runner
+  group `pcusb-test` - no `self-hosted` label, so `runs-on` is `["ab-main"]` alone) when any is online,
+  else hosted `ubuntu-24.04`. Measured 2026-09-27: console-tools 5m31s on three runners (9m22s on one,
+  about 3m hosted).
   A pull request always goes hosted, decided before any token is minted; `force_fallback` (a dispatch input)
   forces hosted for a test. The caller needs a `route` job (`secrets: inherit` - the `autobleem-admin` App
   reads the org's runner list; the repository must be in the App variables' selection, which Eleanor/the
   owner keep), a plain `route_runner` job re-exporting `runs_on` (a reusable workflow's outputs cannot feed
   `runs-on` directly), then `runs-on: fromJSON(...)` on the build job. **The build server is not a fallback**:
   its runner itself runs in a container, and a runner in a container cannot start a `container:` job
-  (proc_unzip run 36284746407). Moved so far: proc_unzip. Still hosted: `windows-latest` + MSYS2 for the
-  emulators' Windows builds, and every repository not yet moved. The build server's **self-hosted runner**
+  (proc_unzip run 36284746407). Moved (2026-09-27, each proven by a green develop build on the laptop): proc_unzip, ext_store,
+  console-tools, pc-tools, the launcher (`test.yml` native + `publish-launcher.yml`'s build matrix),
+  pcsx-ab, pcsx-abnxt. Still hosted: `windows-latest` + MSYS2 for the emulators' Windows builds. The build server's **self-hosted runner**
   (org-scoped, `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64,psc-build`) only
   does what writes the server's disk or needs its Docker: site publishes, the image build, the appliance's
   disk images, the page, cleanup. Pull requests never reach either self-hosted runner. **The runner audit (2026-09-27)**:
