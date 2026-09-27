@@ -15,8 +15,8 @@
       awaited when it actually touches what the image rebuilds for (R2). Components are then tagged in
       dependency order and each stage's tag builds are awaited before the next; the appliance's tag comes
       last - its build assembles the components' releases and publishes the channel.
-      Refuses to start (even with --dry-run) unless proc_unzip and ext_store already have a released v*
-      version of their own - they keep their own versioning and are never tagged by this script.
+      Refuses to start (even with --dry-run) unless proc_unzip, ext_store and autobleem-themes already have a
+      released v* version of their own - they keep their own versioning and are never tagged by this script.
   release.py next {alpha|beta|rc|release} [--version X.Y.Z]
       only prints the tag a promotion would make (what the admin panel shows before its confirmation)
 
@@ -53,13 +53,14 @@ BUILD_IMAGE = "autobleem-build"
 # image.yml's own paths-filter (its `on: push: paths:`) - a merge that touches neither means no rebuild ever
 # starts, so promote() must not wait for one
 BUILD_IMAGE_WATCHED_PATHS = ("docker/**", ".github/workflows/image.yml")
-# proc_unzip and ext_store keep versions of their own (docs/decisions.md, Eleanor's call on R3, 2026-09-26):
-# a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in STAGES. promote()
-# only checks each already has a released (non-prerelease) v* version of its own - tagged by hand in its own
-# repository, not by this script - so the appliance's release build has something other than a nightly to
-# bundle (autobleem-appliance's release_assets.sh errors otherwise). Both were tagged for the first time on
-# 2026-09-26: proc_unzip v1.1.0, ext_store v1.0.1.
-OWN_VERSION_REPOS = ["proc_unzip", "ext_store"]
+# proc_unzip, ext_store and autobleem-themes keep versions of their own (docs/decisions.md, Eleanor's call on
+# R3, 2026-09-26): a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in
+# STAGES. promote() only checks each already has a released (non-prerelease) v* version of its own - tagged
+# by hand in its own repository, not by this script - so the appliance's release build has something other
+# than a nightly to bundle (autobleem-appliance's release_assets.sh errors otherwise). proc_unzip and
+# ext_store were tagged for the first time on 2026-09-26 (v1.1.0, v1.0.1); autobleem-themes joined here D5,
+# 2026-09-27 (its package build, staged by the appliance's stage_themes) - it has no v* tag yet.
+OWN_VERSION_REPOS = ["proc_unzip", "ext_store", "autobleem-themes"]
 # the workflow that builds a component - its develop into the rolling `nightly` release, a tag into that
 # tag's release. A tag push may start other workflows too (the launcher's test gate); this is the one
 # awaited. autobleem-core has none (no release of its own).
@@ -72,13 +73,14 @@ WORKFLOWS = {
     "autobleem-pc-tools": "build.yml",
     "ext_store": "build.yml",
     "proc_unzip": "build.yml",
+    "autobleem-themes": "build.yml",
     "autobleem-appliance": "assemble.yml",
     "autobleem-build": "image.yml",
 }
 # the components whose develop feeds the nightly (the kernel payload reaches it through its releases) - the
-# same list as the appliance's fingerprint (assemble.yml's plan)
+# same list as the appliance's fingerprint (assemble.yml's plan; autobleem-themes joined it D5, 2026-09-27)
 NIGHTLY_REPOS = ["pcsx-ab", "pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools",
-                 "ext_store", "proc_unzip"]
+                 "ext_store", "proc_unzip", "autobleem-themes"]
 # what a component's develop build does not run for (its workflow's paths-ignore): a commit touching only these
 # publishes no nightly, so develop's head stays past the `nightly` tag - and is no reason to rebuild
 IGNORED_PATHS = {"autobleem": ("docs/**", "**.md", "manuals/**")}
