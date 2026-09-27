@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:34:44+01:00",
-  "written_by": "Victor Lane - Team Manager (infrastructure)",
+  "written_at": "2026-09-27T09:34:52+01:00",
+  "written_by": "Marcus Hale - Team Manager (software/ui)",
   "usage": {
     "five_hour_percent": 66,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -24,14 +24,10 @@
       "items": [
         {
           "id": "R29",
-          "what": "headless Windows test runs + LAN server bind address (tests on 127.0.0.1)"
-        },
-        {
-          "id": "H12/H13",
-          "what": "Store LAN rig: an item > 2 GB and a source with a favicon"
+          "what": "review: 2 fixes sent to Daniel (a 0.0.0.0 test bind, serve_test_store advertised URL); pcsx-abnxt part ok"
         }
       ],
-      "note": "D23 taken by Harriet's team (Tom), I review+merge; C11/C12 manual lines being finished"
+      "note": "D23 merged + closed (0809ea4)"
     },
     {
       "name": "Harriet Cole",
