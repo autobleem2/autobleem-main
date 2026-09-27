@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T13:17:30+01:00",
-  "written_by": "Victor Lane - Lead Platform",
+  "written_at": "2026-09-27T13:17:35+01:00",
+  "written_by": "Marcus Hale - Lead Software",
   "usage": {
     "five_hour_percent": 16,
     "five_hour_resets_at": "17:00",
@@ -20,11 +20,19 @@
     {
       "name": "Marcus Hale",
       "team": "software/ui",
-      "state": "waiting",
+      "state": "working",
       "items": [
         {
+          "id": "TOOLS-7",
+          "what": "PSC-Bios Finnish pad wizard: lost ö on the dim line"
+        },
+        {
+          "id": "TOOLS-8",
+          "what": "PSC-Bios: ~13 s quit from GuiPadConfig"
+        },
+        {
           "id": "HWTEST-12/HWTEST-13",
-          "what": "Store rig up on the laptop (:8127, :8128) until Harriet's console session"
+          "what": "Store rig up on the laptop until Harriet's session"
         }
       ],
       "note": "now Lead Software (CONSOLE, EMU, SDK, APPS, TOOLS); queue empty"
