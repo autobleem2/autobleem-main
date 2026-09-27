@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:45:09+01:00",
-  "written_by": "Victor Lane - Team Manager (infrastructure)",
+  "written_at": "2026-09-27T07:45:41+01:00",
+  "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 42,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -53,14 +53,14 @@
       "items": [
         {
           "id": "C15",
-          "what": "battery icons aligned with their text, a new screenshot for the owner"
+          "what": "battery icons aligned with their text (Tom, in progress)"
         },
         {
           "id": "C16",
-          "what": "unplugging the only pad shows \"Controllers: None\""
+          "what": "unplugging the only pad says 'Controllers: None' (next)"
         }
       ],
-      "note": "318 screenshots reviewed by the owner; console plan trimmed to hardware-only steps"
+      "note": "C14 closed; console-session-318 trimmed; waiting for the owner's console results"
     },
     {
       "name": "Wren Aldercroft",
