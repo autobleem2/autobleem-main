@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:54:13+01:00",
+  "written_at": "2026-09-27T07:54:27+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
     "five_hour_percent": 42,
@@ -80,6 +80,11 @@
       "id": "R1",
       "kind": "decision",
       "what": "the go for promoting the new alpha2 - after the console tests"
+    },
+    {
+      "id": "R26 login",
+      "kind": "action",
+      "what": "log in to Claude Code on the laptop (installed, waiting at its first-run screen in tmux)"
     }
   ]
 }
