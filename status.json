@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T08:27:01+01:00",
+  "written_at": "2026-09-27T08:27:53+01:00",
   "written_by": "Victor Lane - Team Manager (infrastructure)",
   "usage": {
     "five_hour_percent": 62,
@@ -13,19 +13,19 @@
     {
       "name": "Victor Lane",
       "team": "infrastructure",
-      "state": "working",
+      "state": "waiting",
       "items": [
         {
           "id": "D21",
-          "what": "ci/build.sh stops dirtying the tracked tree - merged, CI green; laptop proof running"
+          "what": "ci/build.sh stops dirtying the tracked tree - merged + proven on the build server and CI; laptop proof blocked by the session sandbox (owner)"
         },
         {
           "id": "D4",
-          "what": "last part: English manual PDF in the console package - merged (appliance 51e1d2b); README link fix + laptop proof"
+          "what": "English manual PDF in the console package - merged (appliance 51e1d2b, launcher README 588b8ed); laptop proof blocked (owner)"
         },
         {
           "id": "D22",
-          "what": "Danish and Finnish manuals get their screenshots (after D4)"
+          "what": "Danish and Finnish manuals get their screenshots (next)"
         }
       ],
       "note": "admin how-to modal merged + deployed (autobleem-repo e237a97)"
