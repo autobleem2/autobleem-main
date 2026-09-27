@@ -239,6 +239,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   and writes the documentation himself rather than sit idle. The same bar applies (`docs/debugging.md`: evidence
   run in that turn), and the Team Manager's review still reads the tests and the diff before the merge. Tests
   that need hands on a device still go to the Program Manager as test items.
+- **The owner confirms looks from screenshots, not by clicking** (the owner, 2026-09-27): anything he only has to
+  confirm that does not need the real console - how a screen looks, a label, a layout, a dialog's wording - is
+  captured by the team (DebugDriver on the dev build, the PC test VM, the laptop) and sent as screenshots to the
+  Program Manager, who puts them to him in one question session. A console session keeps only what needs the
+  hardware: real pads, Bluetooth, Wi-Fi, sound by ear, the kernel, power and standby.
 
 ## Working with Claude sessions
 
