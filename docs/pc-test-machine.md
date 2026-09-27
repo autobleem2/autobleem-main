@@ -162,13 +162,13 @@ just the pendrive, or a fresh VM disk, clears it all in one step.
 ## The two monitors: shell and status panel (R24)
 
 The laptop boots straight into **sway** (a Wayland compositor): `screemer` logs in on tty1 by itself
-(`/etc/systemd/system/getty@tty1.service.d/autologin.conf`) and `~/.profile` starts sway there - on tty1
-only, never over ssh. If sway exits, tty1 stays at a plain shell (`~/.cache/sway.log`); logging out starts
+(`/etc/systemd/system/getty@tty1.service.d/autologin.conf`) and `~/.profile` starts sway there through
+`~/.local/share/abpanel/start-sway.sh` - on tty1 only, never over ssh. If sway exits, tty1 stays at a plain shell (`~/.cache/sway.log`); logging out starts
 it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-install-recommends`).
 
 - **Workspace 1** (the working monitor, `$work` = `eDP-1`, the laptop's screen): a full-screen foot with tmux
-  session `main` - `tmux attach -t main` over ssh joins the same shell.
-- **Workspace 2** (the standby monitor, `$panel`): four quadrants, laid out by `tools/abpanel/layout.sh`
+  session `main` - `tmux attach -t main` over ssh joins the same shell. 14 pt (`~/.config/foot/foot.ini`).
+- **Workspace 2** (the standby monitor, `$panel` = `DVI-I-1`, the monitor on the dock): 12 pt, four quadrants, laid out by `tools/abpanel/layout.sh`
   (the owner's layout, 2026-09-27; launcher branch `feature/r24-panel-merge` until it is merged):
   - top-left, `abpanel overview`: the logo, host, runners and VM, then the htop-like load view (a bar per
     core, memory, swap, load average, disk, the top processes by CPU and by memory side by side);
@@ -177,15 +177,16 @@ it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-
   - bottom-left, `abpanel teams`: autobleem-main's `status.json` on develop (every 60 s, no token) - usage,
     the teams, Needs the owner;
   - bottom-right, `abpanel empty`: reserved, blank until its use is decided.
-- Until the second monitor is seen, both workspaces are on the laptop's screen: **Super+1** the shell,
-  **Super+2** the panel. Super+Return a new terminal, Super+Shift+E leaves sway.
-- The code is the launcher repo's `tools/abpanel/` (abpanel.py, layout.sh, sway.config); `install.sh` puts it
-  in place for the current user (`~/.local/share/abpanel`, `~/.config/sway/config`, the `~/.profile` block),
+- Without the dock both workspaces are on the laptop's screen: **Super+1** the shell, **Super+2** the panel. Super+Return a new terminal, Super+Shift+E leaves sway.
+- The code is the launcher repo's `tools/abpanel/` (abpanel.py, layout.sh, start-sway.sh, sway.config,
+  foot.ini); `install.sh` puts it in place for the current user (`~/.local/share/abpanel`,
+  `~/.config/sway/config`, `~/.config/foot/foot.ini`, the `~/.profile` block),
   `install.sh --uninstall` takes it away. After an update: `git pull` in `~/src/autobleem`, run `install.sh`,
   then log the tty1 session out (`loginctl terminate-session <tty1's session>`) to restart sway.
 - One-frame checks over ssh: `abpanel overview --once`, `teams --once` (also `status`, `load`).
 - Screenshots (what the PM shows the owner): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
-  and `WAYLAND_DISPLAY=wayland-1`; `swaymsg workspace 2; grim ws2.png`.
+  and `WAYLAND_DISPLAY=wayland-1`; `grim -o DVI-I-1 panel.png`. With the dock, `grim -o eDP-1` fails
+  ("failed to copy output") - the laptop's screen is on the secondary GPU; judge it by eye.
 
 **The second monitor is on the ThinkPad Hybrid USB-C dock, which is DisplayLink** (`lsusb` 17e9:6015): its
 video goes over USB, so the Intel GPU never sees it (`DP-*`/`HDMI-*` stay "disconnected"). It needs the
@@ -194,8 +195,15 @@ synaptics.com, adding `/etc/apt/sources.list.d/synaptics.list`, key scoped with 
 `displaylink-driver` (the proprietary DisplayLinkManager daemon) with Synaptics' `evdi` DKMS module. Secure
 Boot is off, so the module needs no signing. **DKMS rebuilds evdi on every kernel update** - that needs
 `linux-headers-<new kernel>` installed with it (`linux-headers-amd64` pulls them); if the second monitor is
-gone after an update, check `dkms status` first. Once the monitor shows up (`swaymsg -t get_outputs`, likely
-`DVI-I-1`), `$panel` in `~/.config/sway/config` names it.
+gone after an update, check `/usr/sbin/dkms status` first (installed 2026-09-27, displaylink-driver 6.4.0-22,
+evdi 1.15.1).
+
+**sway with the evdi card** (tried 2026-09-27, `start-sway.sh`): only one setup runs both monitors - the evdi
+card **first** in `WLR_DRM_DEVICES` (by-path names, `platform-evdi.0-card` then the Intel `pci-0000:00:02.0-card`),
+`WLR_RENDERER_ALLOW_SOFTWARE=1` (the primary renderer is then software), `WLR_DRM_NO_MODIFIERS=1`, and
+`sway --unsupported-gpu` (sway refuses DisplayLink's proprietary daemon otherwise). The Intel card first
+crashes sway the moment it drives the evdi output; `WLR_RENDERER=pixman` cannot add the second card. The
+driver makes four evdi cards; only the first is given to sway (the empty ones fail the DRM backend).
 
 ## Building every target on the laptop (R23)
 
