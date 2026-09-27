@@ -214,8 +214,12 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   provably our own.
 - **Themes and samples have their own source repositories** (the owner, 2026-09-26 - until then all five
   themes stayed in the launcher): `autobleem-themes` becomes the themes' source and `autobleem-samples` the
-  sample pack's; the launcher's copies go once the build takes them from there (todo D5, D6).
-  `ab2/ab.ogg` is the owner's own composition.
+  sample pack's; the launcher's copies go once the build takes them from there (D5 done 2026-09-27: the
+  launcher's publish-launcher.yml no longer stages Themes/, and every appliance assembler bundles
+  `autobleem-themes`' own package instead, via `stage_themes`; D6, the sample pack, still open).
+  `autobleem-themes` keeps a version of its own, like `proc_unzip`/`ext_store` above (`OWN_VERSION_REPOS`) -
+  `release.py promote` refuses to start until it has a released v* version too. `ab2/ab.ogg` is the owner's
+  own composition.
 - **Images**: xz level 2 (`AB_XZ_LEVEL=2`) - speed over size; cache the base images between builds.
 
 ## Testing

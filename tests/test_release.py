@@ -78,7 +78,7 @@ class FakeGitHub(release.GitHub):
         self.compare_status = compare_status or {}  # {repo: "ahead"|"behind"|"identical"|"diverged"}
         # OWN_VERSION_REPOS's latest release tag, defaulted so a promote() in an unrelated test still passes
         # check_own_version_repos(); {repo: None} in a test means "no release yet"
-        self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1"}
+        self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1", "autobleem-themes": "v1.0.0"}
         self.latest_releases.update(latest_releases or {})
 
     def compare(self, repo, base, head):
@@ -296,9 +296,9 @@ class BuildImageMaster(unittest.TestCase):
 
 
 class OwnVersionRepos(unittest.TestCase):
-    """proc_unzip and ext_store keep their own version numbers: promote() must refuse to start (dry run
-    included, since the check is read-only) unless each already has a released v* version - it is never one
-    of the vX.Y.Z tags this script makes."""
+    """proc_unzip, ext_store and autobleem-themes keep their own version numbers: promote() must refuse to
+    start (dry run included, since the check is read-only) unless each already has a released v* version -
+    it is never one of the vX.Y.Z tags this script makes."""
 
     def setUp(self):
         self.lines = []
@@ -306,14 +306,23 @@ class OwnVersionRepos(unittest.TestCase):
 
     def test_present_passes_and_is_logged(self):
         gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
-                        latest_releases={"proc_unzip": "v1.1.0", "ext_store": "v1.0.1"})
+                        latest_releases={"proc_unzip": "v1.1.0", "ext_store": "v1.0.1",
+                                         "autobleem-themes": "v1.0.0"})
         release.check_own_version_repos(gh, log=self.lines.append)
         self.assertTrue(any("proc_unzip: keeps its own version, latest release v1.1.0" in l for l in self.lines))
         self.assertTrue(any("ext_store: keeps its own version, latest release v1.0.1" in l for l in self.lines))
+        self.assertTrue(any("autobleem-themes: keeps its own version, latest release v1.0.0" in l for l in self.lines))
 
     def test_no_release_raises(self):
         gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
                         latest_releases={"proc_unzip": None})
+        with self.assertRaises(RuntimeError):
+            release.check_own_version_repos(gh, log=self.lines.append)
+
+    def test_themes_with_no_release_yet_raises(self):
+        # autobleem-themes' real state as of D5, 2026-09-27: no v* release yet
+        gh = FakeGitHub(self.branches, ["v2.0.0-alpha2"], self.lines.append,
+                        latest_releases={"autobleem-themes": None})
         with self.assertRaises(RuntimeError):
             release.check_own_version_repos(gh, log=self.lines.append)
 
