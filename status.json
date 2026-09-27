@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T07:57:36+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T07:58:21+01:00",
+  "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 48,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
@@ -57,14 +57,14 @@
       "items": [
         {
           "id": "C15",
-          "what": "battery icons aligned with their text (Tom, in progress)"
+          "what": "battery icons aligned with their text (merged launcher ba13652, CI running; frame to Eleanor)"
         },
         {
           "id": "C16",
-          "what": "unplugging the only pad says 'Controllers: None' (next)"
+          "what": "unplugging the only pad says 'Controllers: None' (Tom, in progress)"
         }
       ],
-      "note": "C14 closed; console-session-318 trimmed; waiting for the owner's console results"
+      "note": "waiting for the owner's console results on 318"
     },
     {
       "name": "Wren Aldercroft",
