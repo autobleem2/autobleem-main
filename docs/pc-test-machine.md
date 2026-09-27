@@ -96,6 +96,60 @@ regression test needs - and the only option before any launcher has ever run on 
    or explicitly allows that class of command first).
 4. Boot (VM passthrough or real hardware) into the fresh first-boot setup wizard.
 
+## The virtual gamepad (padsim, R25)
+
+The VM's pendrive is a real appliance stick - it has no way to take pad input except a real controller
+plugged into the laptop and passed through, which doesn't script. **padsim** is a test-only virtual X360
+gamepad, reachable and drivable from the host, so `ab_drive.py`-style scripting works on a real running
+launcher instead of just the DebugDriver's own build.
+
+- **Guest side**: `padsim` (a small C daemon, source at `/usr/local/src/padsim/padsim.c` in the guest,
+  binary at `/usr/local/bin/padsim`) opens a uinput device shaped exactly like a wired Xbox 360 pad
+  (vendor `0x045e`, product `0x028e`, the standard button/axis layout) - the same thing SDL2, RetroArch,
+  both PCSX forks and Apps all already resolve natively, so nothing new needs teaching. It's started by
+  `padsim.service`, a systemd unit on the **guest's root filesystem** (`/etc/systemd/system/padsim.service`
+  - never the data/exFAT partition, so it can't be mistaken for anything shipped on a real stick), reading
+  `/dev/virtio-ports/org.autobleem.padsim`.
+- **Host side**: the guest's virtio-serial port is backed by a plain unix socket on the laptop (no network,
+  no TCP port) - the channel device in the VM's domain XML:
+  ```xml
+  <channel type='unix'>
+    <source mode='bind' path='/tmp/pcusb-test-padsim.sock'/>
+    <target type='virtio' name='org.autobleem.padsim'/>
+  </channel>
+  ```
+  (needs a `<controller type='virtio-serial' index='0'/>` alongside it; the socket's `source path` is
+  pinned to `/tmp` deliberately - libvirt's own default location under `/run/libvirt/qemu/channel/...` is
+  `0750 libvirt-qemu:libvirt-qemu`, unreachable by `screemer` without also being in that group).
+- **Driving it**: `python tools/padsim_client.py --socket /tmp/pcusb-test-padsim.sock press a` (or
+  `run "dpad down; wait 200; press a"`) from bleemmachine itself. One line in, one `ok`/`err <msg>` line
+  back - the same shape as `ab_drive.py`'s own DebugDriver protocol, with padsim's own small vocabulary
+  (`press`/`release`/`hold`/`stick`/`trigger`/`dpad`) documented in the script's own docstring.
+- **Proven end to end** (2026-09-27, debugging.md's bar): a `press a` sent from the host socket, the raw
+  evdev bytes read back in the guest (`EV_KEY BTN_SOUTH` press + `SYN`, then release + `SYN` - exact byte
+  match, not just "a device exists"), and the running launcher's Options screen visibly moving its
+  selection three rows for three `dpad down` commands sent the same way, caught in a `virsh screenshot`
+  before/after pair.
+
+### What's different from a clean pcusb-test-vm image
+
+Everything below is test-machine convenience, never anything a real stick or a real user sees. Reimaging
+the VM's pendrive from a fresh build (Method B above) wipes all of it - use that path whenever a test needs
+to rule out these additions as the cause of something:
+- sshd host keys + the `autobleem` user's `authorized_keys` (one dedicated key, `pcusb-test-vm_ed25519` on
+  bleemmachine) - persistent SSH into the guest, owner-approved for this VM specifically.
+- `autobleem ALL=(ALL) NOPASSWD:ALL` in `/etc/sudoers.d/taskforce-vm-sandbox`.
+- `gcc`, `make`, `evtest` (apt-installed, pulled in the i386 dev toolchain as dependencies).
+- `/etc/modules-load.d/padsim.conf` (loads `uinput` at boot) and `/etc/udev/rules.d/99-padsim-uinput.rules`
+  (`/dev/uinput` group `input`, mode 0660).
+- `/usr/local/bin/padsim` + `/usr/local/src/padsim/padsim.c` + `/etc/systemd/system/padsim.service`
+  (enabled, root-fs only).
+- On the host (bleemmachine): `screemer` added to the `libvirt-qemu` group (owner's direct OK), and the
+  VM's domain XML has the extra `<controller type='virtio-serial'>` + `<channel>` device.
+
+None of this touches the exFAT data partition (`Games/`, `System/`, the launcher's own tree) - a reimage of
+just the pendrive, or a fresh VM disk, clears it all in one step.
+
 ## CI runner
 
 A second org-scoped self-hosted runner, deliberately **not** sharing the build server's exposure:
