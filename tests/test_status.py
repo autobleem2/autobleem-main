@@ -90,6 +90,14 @@ class Commands(unittest.TestCase):
         run(data, "needs", "rm", "R22", "C15")
         self.assertEqual([n["id"] for n in data["needs_owner"]], ["R1"])
 
+    def test_a_queue_entry_can_carry_its_howto_page(self):
+        data = sample()
+        run(data, "needs", "add", "R26 login", "action", "log in", "--howto", "howto/claude-login.html")
+        self.assertEqual(data["needs_owner"][-1]["howto"], "howto/claude-login.html")
+        for bad in ("howto/Claude.html", "../x.html", "howto/x.htm", "howto/xhtml"):
+            with self.assertRaises(SystemExit):
+                run(sample(), "needs", "add", "X", "action", "x", "--howto", bad)
+
     def test_usage(self):
         data = sample()
         run(data, "usage", "42", "59", "--cap", "70")

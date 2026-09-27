@@ -1,0 +1,46 @@
+<!-- R26: logging Claude Code in on the laptop. Shown in the admin panel's Roadmap tab (Needs you -> the (i) button). -->
+<style>
+:host{display:block;padding:1.2rem 1.4rem;font-weight:400;font-family:"Segoe UI",system-ui,sans-serif;color:#15202b;line-height:1.55;font-size:15px}
+h1{font-size:1.25rem;margin:0 0 .4rem;color:#0b3a7a}
+h2{font-size:1rem;margin:1.2rem 0 .3rem;color:#0b3a7a}
+code,pre{font-family:Consolas,ui-monospace,monospace;background:#eef3fa;border-radius:4px}
+code{padding:.05em .35em}
+pre{padding:.55rem .8rem;margin:.3rem 0 .6rem;overflow-x:auto}
+ol{padding-left:1.3rem}li{margin:.35rem 0}
+.note{border-left:4px solid #4fc8ff;background:#f3f9ff;padding:.5rem .8rem;margin:.8rem 0}
+.time{color:#5a6b80;font-size:.9rem}
+</style>
+
+<h1>Logowanie Claude Code na laptopie (bleemmachine)</h1>
+<p class="time">Około 3 minuty. Claude Code jest już zainstalowany dla użytkownika <code>screemer</code> i czeka na
+ekranie pierwszego uruchomienia w sesji tmux <code>main</code>.</p>
+
+<h2>1. Połącz się z laptopem z PC</h2>
+<p>W PowerShell na PC (ten sam klucz ssh, którego używają zespoły):</p>
+<pre>ssh screemer@&lt;adres laptopa&gt;
+tmux attach -t main</pre>
+<p>Adres laptopa jest w <code>infrastructure.local.md</code> w katalogu autobleem-main na Twoim PC. Lewy ekran
+laptopa pokazuje tę samą sesję, więc możesz też pisać bezpośrednio na klawiaturze laptopa. Z PC jest jednak
+łatwiej, bo link do logowania kopiuje się do przeglądarki.</p>
+
+<h2>2. Uruchom Claude</h2>
+<p>Jeśli w sesji nie widać już ekranu powitalnego Claude, wpisz:</p>
+<pre>claude</pre>
+
+<h2>3. Przejdź ekrany pierwszego uruchomienia</h2>
+<ol>
+  <li><b>Motyw</b>: wybierz dowolny i naciśnij Enter.</li>
+  <li><b>Sposób logowania</b>: <i>Claude account with subscription</i> (Twoje konto Pro/Max, to samo co na PC).</li>
+  <li>Claude pokaże <b>długi link</b> („Browser didn't open? Use the url below…”). Zaznacz go w terminalu i otwórz
+      w przeglądarce na PC. Zaloguj się, jeśli trzeba, i kliknij <b>Authorize</b>.</li>
+  <li>Strona pokaże <b>kod</b>. Skopiuj go, wklej do terminala przy „Paste code here” i naciśnij Enter.</li>
+  <li>Kolejne ekrany (uwagi o bezpieczeństwie, ustawienia terminala, zaufanie do folderu) zatwierdź Enterem.</li>
+</ol>
+
+<h2>4. Sprawdź i wyjdź</h2>
+<p>Gdy zobaczysz pole do wpisywania (<code>&gt;</code>), wpisz <code>/status</code>. Ma tam być Twoje konto.
+Zamknij Claude komendą <code>/exit</code>. Z tmux wyjdź bez zamykania sesji: <b>Ctrl+b</b>, potem <b>d</b>. Na
+koniec wpisz <code>exit</code>, żeby zamknąć ssh.</p>
+
+<div class="note">Na koniec napisz Eleanor „zalogowane”. Zdejmie ten punkt z listy. Pomysł z uruchamianiem sesji
+zespołów na laptopie nadal czeka na Twoją decyzję; samo logowanie niczego nie przenosi.</div>

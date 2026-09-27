@@ -279,6 +279,14 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - **the team sessions**: she decides whether a team has work, and may create a team (a new team manager's
     session, named per the naming rule) and close or clear one when it has no work or needs a fresh start
     (its state saved first - a REPORT.md, nothing uncommitted lost).
+- **An owner task comes with its how-to** (the owner, 2026-09-27): every entry in status.json's `needs_owner`
+  that the owner carries out himself (a login, a click in a settings page, a file copied, a device step) is
+  added with a Polish how-to page - `howto/<name>.html` in this repository, one `<style>` block (`:host` is the
+  page) and plain HTML, no scripts - and `tools/status.py needs add ... --howto howto/<name>.html`. The admin
+  panel's Roadmap tab shows an (i) button beside the entry and opens the page in a modal, so he never has to
+  ask how. Whoever adds the entry (normally the Program Manager) writes the page; a decision or a look check
+  needs none. Like status.json, the page is public: no LAN addresses, no `_team` paths, no secrets - name the
+  file on his PC where such a detail is (`infrastructure.local.md`).
 - **The owner is the hardware tester** (2026-09-26): every test that needs hands on a device (a pad, a
   keyboard, a button, a stick swapped, a sound judged by ear, a screen judged by eye) is done by him. Teams
   never schedule such a test themselves: they send it to the Program Manager as a test item - device,

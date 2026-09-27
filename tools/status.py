@@ -113,7 +113,12 @@ def apply(args, data):
             if len(args.rest) != 3:
                 sys.exit("needs add ID KIND \"what\"")
             nid, kind, what = args.rest
-            queue[:] = [n for n in queue if n.get("id") != nid] + [{"id": nid, "kind": kind, "what": what}]
+            entry = {"id": nid, "kind": kind, "what": what}
+            if getattr(args, "howto", None):
+                if not re.match(r"^howto/[a-z0-9][a-z0-9-]{0,63}\.html$", args.howto):
+                    sys.exit("status.py: --howto is howto/<name>.html (lower case, digits, dashes)")
+                entry["howto"] = args.howto
+            queue[:] = [n for n in queue if n.get("id") != nid] + [entry]
             return "owner's queue + " + nid
         queue[:] = [n for n in queue if n.get("id") not in args.rest]
         return "owner's queue - " + " ".join(args.rest)
@@ -226,6 +231,7 @@ def main(argv=None):
     n = sub.add_parser("needs")
     n.add_argument("action", choices=("add", "rm"))
     n.add_argument("rest", nargs="+")
+    n.add_argument("--howto", help="howto/<name>.html - the page the admin panel opens beside the entry")
     u = sub.add_parser("usage")
     u.add_argument("five", type=int)
     u.add_argument("weekly", type=int)
