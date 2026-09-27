@@ -56,19 +56,23 @@ virsh -c qemu:///system screenshot pcusb-test /tmp/shot.ppm   # PNG despite the 
 copy it back over the same ssh connection (`scp screemer@<laptop>:/tmp/shot.ppm ...`). This needs no tunnel,
 no extra port, and nothing is ever exposed beyond the ssh session already in use.
 
-For interactive driving instead of a one-off screenshot, use **`tools/ab_drive.py`** (the DebugDriver) the
-same as any other device (`docs/console.md`, `docs/history/raspberry-pi.md`'s H7 item): set `AB_DEBUG_PORT`
-(and, to reach it from outside the VM, `AB_DEBUG_BIND=0.0.0.0` inside the guest only - the VM's own NAT
-network, `192.168.122.0/24`, is not the laptop's LAN) via a systemd drop-in on the guest, then reach it
-through the laptop:
+**Driving the UI is `tools/ab_drive.py` (the DebugDriver), always** - not padsim (the owner, 2026-09-27:
+padsim navigation is not stable yet). It is set up permanently for every dev:
+- **Guest**: `/etc/systemd/system/autobleem.service.d/debug-driver.conf` (root fs) sets
+  `AB_DEBUG_PORT=6900`; the launcher listens on the guest's own `127.0.0.1:6900` (loopback only).
+- **Laptop**: a `screemer` user service, `~/.config/systemd/user/pcusb-test-debugdriver.service` (linger on,
+  so it runs from boot with nobody logged in), holds an ssh forward from the laptop's **`127.0.0.1:6900`**
+  to the guest's - never the LAN. The guest's address is pinned (`192.168.122.119`, a DHCP reservation for
+  its MAC in libvirt's `default` network), so the forward does not break on a new lease.
+- **From your PC**, one hop:
 ```bash
-ssh -L 6900:192.168.122.<vm-ip>:<port> screemer@<laptop>   # one hop: the VM is on the laptop's own libvirt
-                                                            # NAT network (`virsh net-dhcp-leases default`
-                                                            # gives its current IP), reachable from the
-                                                            # laptop directly - no second ssh needed
-python tools/ab_drive.py run "menu 6; wait_screen GuiOptions; shot a.png" --host 127.0.0.1 --port 6900
+ssh -L 16900:127.0.0.1:6900 screemer@<laptop>
+python tools/ab_drive.py run "menu software; wait 4000; grab upd.png" --port 16900
 ```
-Remove the drop-in afterwards - the same rule as every other device.
+Use a local port other than 6900 on a dev PC - a local dev launcher may already hold the default one.
+`grab` brings the frame back over the socket; nothing is written on the stick. `systemctl --user status
+pcusb-test-debugdriver` on the laptop if it does not answer (the launcher restarts with the service; the
+forward reconnects every 5 s).
 
 ## Installing a nightly
 
@@ -97,6 +101,9 @@ regression test needs - and the only option before any launcher has ever run on 
 4. Boot (VM passthrough or real hardware) into the fresh first-boot setup wizard.
 
 ## The virtual gamepad (padsim, R25)
+
+**Not for driving the UI** (the owner, 2026-09-27) - use the DebugDriver above. padsim stays installed for
+the day a test needs a real evdev pad in the guest (an emulator or an App's input), once it is made stable.
 
 The VM's pendrive is a real appliance stick - it has no way to take pad input except a real controller
 plugged into the laptop and passed through, which doesn't script. **padsim** is a test-only virtual X360
@@ -144,8 +151,10 @@ to rule out these additions as the cause of something:
   (`/dev/uinput` group `input`, mode 0660).
 - `/usr/local/bin/padsim` + `/usr/local/src/padsim/padsim.c` + `/etc/systemd/system/padsim.service`
   (enabled, root-fs only).
+- `/etc/systemd/system/autobleem.service.d/debug-driver.conf` (`AB_DEBUG_PORT=6900`, the DebugDriver).
 - On the host (bleemmachine): `screemer` added to the `libvirt-qemu` group (owner's direct OK), and the
-  VM's domain XML has the extra `<controller type='virtio-serial'>` + `<channel>` device.
+  VM's domain XML has the extra `<controller type='virtio-serial'>` + `<channel>` device; the
+  `pcusb-test-debugdriver` user service with linger enabled; the DHCP reservation pinning the guest's IP.
 
 None of this touches the exFAT data partition (`Games/`, `System/`, the launcher's own tree) - a reimage of
 just the pendrive, or a fresh VM disk, clears it all in one step.
