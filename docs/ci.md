@@ -23,9 +23,11 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   appliance publish-release/publish-nightly, build retroarch.yml publish, manuals, pc-tools site, samples,
   ext_store site, pcsx-ab/abnxt publish, retroarch-psc publish, autobleem-repo page/stack/cleanup/withdraw);
   the other two need the server's own state (autobleem-build `image.yml` - the daemon's layer cache; the
-  appliance's `image` job - the cached base images). All of them must be pinned to the build server by a
-  label of its own (`psc-build`) **before** the laptop gets the general `self-hosted,linux,x64` labels, or a
-  site publish could land on the laptop and fail. What can run on either: pcsx-ab/abnxt's compile job with
+  appliance's `image` job - the cached base images). All of them are pinned to the build server by its own
+  label, `runs-on: [self-hosted, psc-build]` (2026-09-27, all 10 repos) - never use the general
+  `self-hosted,linux,x64` labels for a new job. **psc-build's runner itself runs in a container**, so it
+  cannot run a job with `container:` ("Container feature is not supported when runner is already running
+  inside container") - no compile job can go there. What can run on either: pcsx-ab/abnxt's compile job with
   `runner=self-hosted` (bare `self-hosted` today). **Pull requests never reach a self-hosted runner** - no
   workflow uses `pull_request_target`, and each self-hosted job either sits in a workflow with no
   `pull_request` trigger or excludes it in its `if:` (develop/tag refs, `event_name != 'pull_request'`,
@@ -74,13 +76,12 @@ seven repositories, for the dispatch to the appliance (the App needs Contents: w
 seven components - nothing reacted to `:develop` being republished, and the manual "nightly refresh"
 (`tools/release.py nightly` / the admin panel button) by default rebuilds only what a component's own
 develop moved past its `nightly` tag, which an image-only change never does either. `image.yml`'s
-`dispatch-nightly-refresh` job now mints the same App's token (needs `AB_ADMIN_APP_ID`/`AB_ADMIN_APP_KEY`
-added to `autobleem-build` too, and the App installed there with permission to dispatch workflows in
-`autobleem-main`) and starts `autobleem-main`'s `nightly.yml` with `rebuild_all: true` - the existing,
+`dispatch-nightly-refresh` job now mints the same App's token (`AB_ADMIN_APP_ID`/`AB_ADMIN_APP_KEY` reach
+`autobleem-build` since 2026-09-27; proven by image run 36284543904 -> nightly 36284615325) and starts `autobleem-main`'s `nightly.yml` with `rebuild_all: true` - the existing,
 already-tested path that rebuilds every `NIGHTLY_REPOS` component regardless of their own source (none of
 them pin the image by digest, so the rebuild alone picks up the new toolchain) and reassembles the
 appliance's nightly. Only for a real `:develop` push (never master, a pull request, or a validate-only
-`workflow_dispatch` with `push: false`); with the App not yet wired into `autobleem-build` it is a quiet
+`workflow_dispatch` with `push: false`); should the App ever stop reaching `autobleem-build` it is a quiet
 `::notice`, and the fallback stays what it always was - run `nightly.yml` by hand with `rebuild_all` (the
 admin panel's "Refresh nightly", once it exposes that option, or `gh workflow run nightly.yml -f
 rebuild_all=true --repo autobleem2/autobleem-main`).
