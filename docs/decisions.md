@@ -242,6 +242,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 
 ## Working with Claude sessions
 
+- **Times are Irish local time** (the owner, 2026-09-27): every time a session states or schedules - a reset, a
+  resume, an ETA, a state note - is in Europe/Dublin time (IST, UTC+1 in summer; GMT in winter). A UTC value from an
+  API or a log is converted first; quote the UTC in brackets only when it helps to find the log line.
+
 - **Only the owner adds user stories to the queue** (2026-09-27). The teams implement nothing he has not approved: no
   new row in `docs/todo.md` and no work on an idea until he says yes. A follow-up or an idea found along the way goes
   to the Program Manager as a proposal, who puts it to him. Plugins (beyond the approved extensions) and macOS are
