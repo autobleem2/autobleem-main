@@ -338,6 +338,16 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   another session committed to.
 - Post a one-line progress note at each step of long multi-repository work, mapped to the plan; don't
   idle-wait on CI - pick up the next item meanwhile.
+- **Never kill processes by name, never delete a checkout you did not create** (the owner, 2026-09-27, after two
+  incidents on his PC the same morning: a `Get-Process bash | Stop-Process -Force` stopped every bash on the PC,
+  the PM's Telegram listener among them, and an agent's cleanup `rm -rf`'d the pre-existing
+  `E:\Programming\autobleem-console-tools` checkout). Every session and agent, on every machine:
+  - a process is stopped only by a PID the same task started and recorded - never by name or pattern
+    (`Stop-Process -Name`, `killall`, `pkill -f`, `taskkill /IM`), and the recorded list is checked afterwards;
+  - a directory is deleted only when the same task created it and recorded it at creation - never a
+    pre-existing checkout, worktree or folder; before any `rm -rf` of a git tree: `git status`, `git stash list`,
+    `git log --branches --not --remotes` and `git worktree list` all clean;
+  - both rules go into every brief.
 - **Clean up after yourself on the build server** (the owner, 2026-09-25, after `psc-build` reached 88%):
   when a build there is finished - its result fetched, or CI now builds it - delete what the build left
   behind: the `build_*/` and `dist/` folders, fetched data caches, logs you wrote to `~`, containers and
