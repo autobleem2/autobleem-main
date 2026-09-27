@@ -159,10 +159,38 @@ to rule out these additions as the cause of something:
 None of this touches the exFAT data partition (`Games/`, `System/`, the launcher's own tree) - a reimage of
 just the pendrive, or a fresh VM disk, clears it all in one step.
 
+## Building every target on the laptop (R23)
+
+Every toolchain is in the build image, so the laptop needs nothing but Docker (`screemer` is in the `docker`
+group - no sudo). Both images are pulled: `ghcr.io/autobleem2/autobleem-build:develop` (nightly/develop
+builds) and `:latest` (release builds) - `docker pull` either to refresh it. Checkouts in `~/src`: the launcher
+(`autobleem`, with submodules) and, next to it, `pcsx-ab` and `pcsx-abnxt` - `ci/build.sh` builds both
+emulators first for psc/rpi/rpi64/pcusb (`AB_NO_PCSX=1` ships the checked-in binaries instead).
+
+One command per target, from `~/src/autobleem` (`git pull --recurse-submodules` first):
+```bash
+AB_BUILD_IMAGE=ghcr.io/autobleem2/autobleem-build:develop docker/run.sh ci/build.sh <psc|rpi|rpi64|pcusb|win>
+```
+Measured 2026-09-27 (8 threads, sccache cold, the runners idle): psc 237 s, rpi 578 s, rpi64 324 s, pcusb
+326 s, win 618 s - all exit 0. The package lands in `dist/<target>/` (psc: `.zip` + `.tar.gz`; rpi/rpi64/pcusb:
+the installer tarball; win: `AutoBleemSetup-*.exe` + the product zip). Getting it back to a PC:
+```bash
+scp screemer@<laptop>:src/autobleem/dist/<target>/* .
+```
+**A local build stamps its version `-dirty`**: for the appliance and console targets `ci/build.sh` writes the
+freshly built emulators over the checked-in ones in `payload*/Autobleem/bin/emu*` (tracked files) before the
+launcher's version header is generated, so git sees a modified tree. Harmless for a test build; restore with
+`git checkout -- payload payload_linux` before the next pull.
+
 ## CI runner
 
-A second org-scoped self-hosted runner, deliberately **not** sharing the build server's exposure:
-- Labels `ab-main,pcusb-test` (`--no-default-labels`) - a dedicated label, not the generic
+Three org-scoped self-hosted runners, deliberately **not** sharing the build server's exposure:
+- **bleemmachine** carries `ab-main,pcusb-test`; **bleemmachine-2** and **bleemmachine-3** (2026-09-27, Victor's
+  scale-out) carry `ab-main` only, so a job that drives the VM (`pcusb-test`) can only land on the first one and
+  never runs twice at once. Three is the ceiling: 4 cores / 8 threads with the VM holding 2 vCPUs (RAM is not
+  the limit). Each has its own directory (`~gha-runner/actions-runner[-N]`) and service
+  (`actions.runner.autobleem2.bleemmachine[-N].service`).
+- Labels (`--no-default-labels`) - a dedicated label, not the generic
   `self-hosted,linux,x64` the build server's runner carries, so a workflow only reaches this machine when a
   job is explicitly retargeted at it. Runner group `pcusb-test` (id 3, every autobleem2 repo).
 - Runs as its own user (`gha-runner`), a systemd service
