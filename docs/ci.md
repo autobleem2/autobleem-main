@@ -11,14 +11,20 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   change a repository's visibility unasked.
 - **The image**: `ghcr.io/autobleem2/autobleem-build:develop` for develop pushes, PRs and nightlies,
   `:latest` for a `v*` tag (a nightly is develop all the way down, compilers included).
-- **Runners**: compiling happens on hosted runners (`ubuntu-24.04`; `windows-latest` + MSYS2 for the
-  emulators' Windows builds). The org's one **self-hosted runner** (on the build server, org-scoped,
-  `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64`) only does what writes the
-  server's disk or needs its Docker: site publishes, the image build, the appliance's disk images, the page,
-  cleanup. Pull requests never reach it.
-  A second runner group, **`pcusb-test`** (group id 3, owner-approved 2026-09-27, open to every autobleem2
-  repo), holds the laptop's runner (R21) - meant as a **second main runner**, not a device-test box. Today
-  it carries only the label `pcusb-test`, so no workflow reaches it. **The runner audit (2026-09-27)**:
+- **Runners**: the Linux compile jobs go through **`autobleem-build`'s `route.yml`** (a reusable workflow,
+  2026-09-27): the laptop runner (`bleemmachine`, label `ab-main`, runner group `pcusb-test` - it has no
+  `self-hosted` label, so `runs-on` is `["ab-main"]` alone) when it is online, else hosted `ubuntu-24.04`.
+  A pull request always goes hosted, decided before any token is minted; `force_fallback` (a dispatch input)
+  forces hosted for a test. The caller needs a `route` job (`secrets: inherit` - the `autobleem-admin` App
+  reads the org's runner list; the repository must be in the App variables' selection, which Eleanor/the
+  owner keep), a plain `route_runner` job re-exporting `runs_on` (a reusable workflow's outputs cannot feed
+  `runs-on` directly), then `runs-on: fromJSON(...)` on the build job. **The build server is not a fallback**:
+  its runner itself runs in a container, and a runner in a container cannot start a `container:` job
+  (proc_unzip run 36284746407). Moved so far: proc_unzip. Still hosted: `windows-latest` + MSYS2 for the
+  emulators' Windows builds, and every repository not yet moved. The build server's **self-hosted runner**
+  (org-scoped, `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64,psc-build`) only
+  does what writes the server's disk or needs its Docker: site publishes, the image build, the appliance's
+  disk images, the page, cleanup. Pull requests never reach either self-hosted runner. **The runner audit (2026-09-27)**:
   every self-hosted job but two is a site write (`AB_REPO_DIR=/home/claude/autobleem-repo` bind-mounted:
   appliance publish-release/publish-nightly, build retroarch.yml publish, manuals, pc-tools site, samples,
   ext_store site, pcsx-ab/abnxt publish, retroarch-psc publish, autobleem-repo page/stack/cleanup/withdraw);
