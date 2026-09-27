@@ -230,6 +230,10 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **Hardware proofs are delegated to testers**: `docs/tester-checklist.md`.
 - **Never point a test write at a real disk of a development PC** (the flasher is proven by the unit
   suite and by testers).
+- **Debug by root cause, report by evidence** (the owner, 2026-09-27): every session follows
+  `docs/debugging.md` - no fix before the root cause is found, three failed fixes stop the work for a design
+  question, and no "done/green/fixed" without the proving command run and read in that turn. Team Managers put it
+  in every developer's and tester's brief and check it in review.
 
 ## Working with Claude sessions
 
