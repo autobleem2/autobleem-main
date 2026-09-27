@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T08:13:35+01:00",
+  "written_at": "2026-09-27T08:18:28+01:00",
   "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 48,
@@ -53,14 +53,9 @@
     {
       "name": "Harriet Cole",
       "team": "hardware",
-      "state": "working",
-      "items": [
-        {
-          "id": "C16",
-          "what": "unplugging the only pad says 'Controllers: None' (merged 27f652f; CI + laptop suites running; VM frame via Wren after the next nightly)"
-        }
-      ],
-      "note": "C15 done (owner OK); waiting for the owner's console results on 318"
+      "state": "waiting",
+      "items": [],
+      "note": "C15, C16 done; waiting: next nightly with 27f652f (C16 VM frame via Wren), the owner's console results on 318"
     },
     {
       "name": "Wren Aldercroft",
