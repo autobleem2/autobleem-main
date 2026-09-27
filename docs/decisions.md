@@ -234,6 +234,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   `docs/debugging.md` - no fix before the root cause is found, three failed fixes stop the work for a design
   question, and no "done/green/fixed" without the proving command run and read in that turn. Team Managers put it
   in every developer's and tester's brief and check it in review.
+- **No tester slot -> the developer tests and documents** (the owner, 2026-09-27): when a team has no free agent
+  slot for a tester (or the doc writer) and the developer is waiting on that step, the developer runs the tests
+  and writes the documentation himself rather than sit idle. The same bar applies (`docs/debugging.md`: evidence
+  run in that turn), and the Team Manager's review still reads the tests and the diff before the merge. Tests
+  that need hands on a device still go to the Program Manager as test items.
 
 ## Working with Claude sessions
 
