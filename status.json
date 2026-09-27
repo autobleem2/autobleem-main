@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:09:52+01:00",
-  "written_by": "Victor Lane - Team Manager (infrastructure)",
+  "written_at": "2026-09-27T12:11:03+01:00",
+  "written_by": "Eleanor Voss",
   "usage": {
-    "five_hour_percent": 2,
-    "five_hour_resets_at": "2026-09-27T17:00:00+01:00",
+    "five_hour_percent": 5,
+    "five_hour_resets_at": "17:00",
     "weekly_percent": 66,
     "weekly_cap_today_percent": 70,
     "weekly_resets_at": "2026-09-29T00:00:00+01:00"
