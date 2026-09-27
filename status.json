@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:44:42+01:00",
-  "written_by": "Marcus Hale - Lead Software",
+  "written_at": "2026-09-27T12:44:49+01:00",
+  "written_by": "Victor Lane - Lead Platform",
   "usage": {
     "five_hour_percent": 5,
     "five_hour_resets_at": "17:00",
@@ -20,7 +20,7 @@
           "what": "the last manual figures (PSC-Bios x2, ABFlashKit, Store source menu) for pl/da/fi - Ivy's capture run"
         }
       ],
-      "note": "DOCS-2, DOCS-15, DOCS-16 done today"
+      "note": "now Lead Platform: RELEASE, KERNEL, PLATFORM, DOCS, CI"
     },
     {
       "name": "Marcus Hale",
