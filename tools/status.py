@@ -113,6 +113,8 @@ def apply(args, data):
             if len(args.rest) != 3:
                 sys.exit("needs add ID KIND \"what\"")
             nid, kind, what = args.rest
+            if not re.match(r"^[A-Za-z0-9][A-Za-z0-9-]{0,63}$", nid):
+                sys.exit("status.py: a needs ID is letters, digits and dashes (the admin's Done button needs that)")
             entry = {"id": nid, "kind": kind, "what": what}
             if getattr(args, "howto", None):
                 if not re.match(r"^howto/[a-z0-9][a-z0-9-]{0,63}\.html$", args.howto):
