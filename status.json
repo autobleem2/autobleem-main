@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T06:58:00+01:00",
+  "written_at": "2026-09-27T07:24:00+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
-    "five_hour_percent": 17,
+    "five_hour_percent": 35,
     "five_hour_resets_at": "2026-09-27T10:40:00+01:00",
-    "weekly_percent": 54,
+    "weekly_percent": 58,
     "weekly_cap_today_percent": 70,
     "weekly_resets_at": "2026-09-29T00:00:00+01:00"
   },
@@ -15,11 +15,10 @@
       "team": "infrastructure",
       "state": "working",
       "items": [
-        {"id": "R22", "what": "RetroArch driven from tests on the laptop - phase 2 proven, menu shots + cleanup, then merge"},
-        {"id": "D4", "what": "screenshots of the 2 text fixes for the owner's question session"},
+        {"id": "R22", "what": "RetroArch driven from tests on the laptop - one capture pass of the menu, then merge"},
         {"id": "D21", "what": "ci/build.sh stops dirtying the tracked tree"}
       ],
-      "note": "R27 live; CI's Linux builds run on the 3 laptop runners"
+      "note": "D4 merged (develop c23863d, CI green); CI's Linux builds run on the 3 laptop runners"
     },
     {
       "name": "Marcus Hale",
@@ -36,23 +35,23 @@
       "team": "hardware",
       "state": "working",
       "items": [
-        {"id": "318", "what": "the console session plan (_team/status/console-session-318.md, ~3h45) and the screenshots of its look-only checks"}
+        {"id": "318", "what": "the console session plan (two sessions) and the screenshots of its look-only checks"}
       ],
       "note": "C14 done"
     },
     {
       "name": "Wren Aldercroft",
       "team": "task force (PC test machine)",
-      "state": "waiting",
+      "state": "working",
       "items": [
-        {"id": "R24", "what": "the status panel runs (launcher f5e4373); the second monitor is on a DisplayLink dock, not seen"}
+        {"id": "R24", "what": "the status panel: load + htop view merged into one quadrant, the fourth left empty; then the second monitor"}
       ],
       "note": "R23 done"
     }
   ],
   "needs_owner": [
-    {"id": "R24", "kind": "decision", "what": "the second monitor: plug it into the laptop's own HDMI, or install the DisplayLink driver"},
-    {"id": "318", "kind": "device test", "what": "the console session on nightly 318: ~3h45 in two sittings (C8-C14, E15, K10, K11, H8, H10, H12-H14)"},
+    {"id": "R24", "kind": "action", "what": "run the DisplayLink driver install in Wren's session (his tooling may not)"},
+    {"id": "318", "kind": "device test", "what": "the console sessions on nightly 318: session 1 ~3h45 in two sittings, session 2 ~4h30"},
     {"id": "R1", "kind": "decision", "what": "the go for promoting the new alpha2 - after the console tests"}
   ]
 }
