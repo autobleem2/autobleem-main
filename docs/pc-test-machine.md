@@ -169,7 +169,7 @@ it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-
 - **Workspace 1** (the working monitor, `$work` = `eDP-1`, the laptop's screen): a full-screen foot with tmux
   session `main` - `tmux attach -t main` over ssh joins the same shell. 14 pt (`~/.config/foot/foot.ini`).
 - **Workspace 2** (the standby monitor, `$panel` = `DVI-I-1`, the monitor on the dock): 12 pt, four quadrants, laid out by `tools/abpanel/layout.sh`
-  (the owner's layout, 2026-09-27; launcher branch `feature/r24-panel-merge` until it is merged):
+  (the owner's layout, 2026-09-27; merged into launcher develop as 83dd31f):
   - top-left, `abpanel overview`: the logo, host, runners and VM, then the htop-like load view (a bar per
     core, memory, swap, load average, disk, the top processes by CPU and by memory side by side);
   - top-right: the VM's **live** view (`virt-viewer --attach`: through libvirt, no port of its own; the VM's
