@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T08:45:15+01:00",
+  "written_at": "2026-09-27T08:45:20+01:00",
   "written_by": "Eleanor Voss - Program Manager",
   "usage": {
     "five_hour_percent": 66,
@@ -67,11 +67,6 @@
   ],
   "needs_owner": [
     {
-      "id": "R1",
-      "kind": "decision",
-      "what": "the go for promoting the new alpha2 - after the console tests"
-    },
-    {
       "id": "D21/D4 laptop",
       "kind": "action",
       "what": "allow the teams' builds on the laptop over ssh in your own Claude Code permission settings (the sandbox refuses them now); D21 and D4 wait on it"
@@ -81,6 +76,12 @@
       "kind": "device test",
       "what": "the console sessions on nightly 318 (hardware-only steps)",
       "howto": "howto/console-318.html"
+    },
+    {
+      "id": "R1",
+      "kind": "decision",
+      "what": "the go for promoting the new alpha2 - after the console tests",
+      "howto": "howto/decision-r1.html"
     }
   ]
 }
