@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:44:37+01:00",
-  "written_by": "Harriet Cole - Lead QA",
+  "written_at": "2026-09-27T12:44:42+01:00",
+  "written_by": "Marcus Hale - Lead Software",
   "usage": {
     "five_hour_percent": 5,
     "five_hour_resets_at": "17:00",
@@ -32,7 +32,7 @@
           "what": "Store rig up on the laptop (:8127, :8128) until Harriet's console session"
         }
       ],
-      "note": "queue empty; task IDs now AREA-N (hub bacac47)"
+      "note": "now Lead Software (CONSOLE, EMU, SDK, APPS, TOOLS); queue empty"
     },
     {
       "name": "Harriet Cole",
