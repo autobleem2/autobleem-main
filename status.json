@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:31:11+01:00",
-  "written_by": "Eleanor Voss",
+  "written_at": "2026-09-27T12:31:56+01:00",
+  "written_by": "Marcus Hale - Team Manager (software/ui)",
   "usage": {
     "five_hour_percent": 5,
     "five_hour_resets_at": "17:00",
@@ -28,11 +28,11 @@
       "state": "waiting",
       "items": [
         {
-          "id": "H12/H13",
+          "id": "HWTEST-12/HWTEST-13",
           "what": "Store rig up on the laptop (:8127, :8128) until Harriet's console session"
         }
       ],
-      "note": "C11/C12 manual merged; H13 rig ready; queue empty"
+      "note": "queue empty; task IDs now AREA-N (hub bacac47)"
     },
     {
       "name": "Harriet Cole",
