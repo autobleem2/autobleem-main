@@ -1,8 +1,8 @@
-# Multi-platform Apps (`docs/app-format-plan.md`)
+# Multi-platform Apps (`docs/archive/app-format-plan.md`)
 
 Moved verbatim out of the launcher's CLAUDE.md on 2026-09-26 (task D19). The two standing rules from this section (SDL2 shared never bundled, the `app_<name>`/`ext_<name>` naming rule) stay in CLAUDE.md too.
 
-## Multi-platform Apps (2026-09-24, `docs/app-format-plan.md`)
+## Multi-platform Apps (2026-09-24, `docs/archive/app-format-plan.md`)
 
 **One App folder, a binary per platform.**
 - `Apps/<name>/` keeps its shared files once (icon, data, `pad.ini`) and one binary per platform key in

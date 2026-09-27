@@ -77,7 +77,7 @@ generated, never stored - autobleem-repo's CLAUDE.md has its rules.
 | `docs/archive/` | finished plans, reduced to what they decided (the full texts are in git history) |
 
 Open plans that belong to one repository stay there: the launcher's `docs/` (`extensions-plan.md`,
-`store-plan.md`, `app-format-plan.md`, `virtual-gamepad-plan.md`, `scanner-processors-next-plan.md`,
+`store-plan.md`, `virtual-gamepad-plan.md`, `scanner-processors-next-plan.md`,
 `atari-vcs-plan.md`, plus the references `theme-format.md`, `menu-options.md`, `translation.md`),
 autobleem-pc-tools' `docs/lan-share-plan.md`, autobleem-console-tools' native-backend plan. When a plan is
 done, its last word goes into `docs/history/` (or the repository's CLAUDE.md), what is still open into
