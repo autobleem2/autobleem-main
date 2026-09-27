@@ -244,6 +244,18 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   captured by the team (DebugDriver on the dev build, the PC test VM, the laptop) and sent as screenshots to the
   Program Manager, who puts them to him in one question session. A console session keeps only what needs the
   hardware: real pads, Bluetooth, Wi-Fi, sound by ear, the kernel, power and standby.
+- **The laptop is where teams build and test first** (the owner, 2026-09-27, once R23 made every toolchain ready
+  there - `docs/pc-test-machine.md`):
+  - A device build is `docker/run.sh ci/build.sh <psc|rpi|rpi64|pcusb|win>` in `~/src` on the laptop. That covers
+    a test package, a binary for the console, a Pi or the PC stick, and a Windows zip. The build server takes
+    only what the laptop cannot do. The owner's PC is not a build machine.
+  - The unit suites run there too (`ci/build.sh native`). `make_win.sh` on the owner's PC is kept for
+    Windows-only code and the Windows dev build's screenshots.
+  - UI checks and screenshots of anything that is not Windows-specific are taken on the pcusb-test VM (the
+    DebugDriver through the laptop's tunnel, `padsim` for pads) rather than on the owner's PC. That leaves no
+    windows and no firewall prompts on his screen.
+  - One build at a time per team. The laptop also carries three CI runners and the VM, so check its load
+    (the panel) before starting a long build. Clean up build dirs afterwards.
 
 ## Working with Claude sessions
 
