@@ -149,7 +149,7 @@ def run_task(adir, task_path):
             f.write(parsed["session_id"])
     result = {
         "id": tid, "agent": cfg.get("name"), "display": cfg.get("display"), "from": task.get("from"),
-        "ok": ok, "timed_out": timed_out, "exit": code,
+        "row": task.get("row"), "ok": ok, "timed_out": timed_out, "exit": code,
         "result": (parsed or {}).get("result") if parsed else out[-4000:],
         "stderr": err[-2000:] if not ok else "",
         "cost_usd": (parsed or {}).get("total_cost_usd"), "turns": (parsed or {}).get("num_turns"),
@@ -224,7 +224,9 @@ def cmd_ask(a):
         sys.exit("empty task")
     tid = time.strftime("%Y%m%d-%H%M%S-") + secrets.token_hex(2)
     write_json(os.path.join(adir, "inbox", tid + ".json"),
-               {"id": tid, "from": a.sender, "prompt": prompt, "created": now(), "timeout_min": a.timeout_min})
+               {"id": tid, "from": a.sender, "prompt": prompt, "created": now(), "timeout_min": a.timeout_min,
+                "row": a.row,
+                "what": a.what or next((ln.strip() for ln in prompt.splitlines() if ln.strip()), "")[:90]})
     print(tid)
 
 
@@ -258,7 +260,11 @@ def cmd_status(a):
                     "enabled": not os.path.exists(os.path.join(adir, "disabled")),
                     "queued": sorted(f[:-5] for f in os.listdir(os.path.join(adir, "inbox")) if f.endswith(".json")),
                     "running": running,
-                    "results": len(os.listdir(os.path.join(adir, "outbox")))})
+                    "results": len(os.listdir(os.path.join(adir, "outbox"))),
+                    "tasks": [dict(state=state, **{k: t.get(k) for k in ("id", "from", "row", "what", "created")})
+                              for state in ("running", "inbox")
+                              for t in (read_json(os.path.join(adir, state, f), {})
+                                        for f in sorted(os.listdir(os.path.join(adir, state))) if f.endswith(".json"))]})
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 
@@ -305,6 +311,8 @@ def main():
     s.add_argument("name")
     s.add_argument("--from", dest="sender", required=True)
     s.add_argument("--timeout-min", type=float, default=None)
+    s.add_argument("--row", default="", help="the todo row (or a short label) the task belongs to, for the panel")
+    s.add_argument("--what", default="", help="one line for the panel; default: the task's first line")
     for c in ("wait", "result"):
         s = sub.add_parser(c)
         s.add_argument("id")

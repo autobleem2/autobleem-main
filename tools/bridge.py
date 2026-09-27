@@ -11,12 +11,17 @@ first line of ~/.autobleem-agents-host.
     python tools/bridge.py install                          copy agentd + its systemd unit, (re)start it
     python tools/bridge.py spawn intern --model haiku --display "..." --brief b.md [--settings s.json]
     python tools/bridge.py settings intern s.json           replace a worker's permissions
-    python tools/bridge.py ask intern "task" --from "Marcus Hale" [--wait [SECONDS]]
+    python tools/bridge.py ask intern "task" --from "Marcus Hale" [--row TOOLS-7] [--what "..."] [--wait [SECONDS]]
     python tools/bridge.py wait ID [--timeout S] | result ID | cancel ID
     python tools/bridge.py status | log intern [-n N] | enable intern | disable intern
+    python tools/bridge.py publish                          show every worker in the panel's "Teams now"
 
 `ask --wait` prints the worker's answer (the `result` field) and exits 0 when it succeeded, 1 when it did not;
 `--json` prints the whole result record instead.
+
+The panel: `ask` and a finished `wait`/`result` publish every worker as a row of status.json (through
+tools/status.py, as the one who asked) - "working" with its queued/running tasks (the --row ID, or task-HHMMSS),
+"waiting" when it has none; `publish` does the same by hand. `--no-publish` skips it.
 """
 import argparse
 import json
@@ -87,6 +92,46 @@ def install(_):
     print("agentd: " + out.strip())
 
 
+def worker_row(w):
+    """(name, label) of a worker's status.json row: "Nina Park - Intern (Haiku)" -> "Nina Park", "pool: ..."."""
+    display = w.get("display") or w["name"]
+    name, _, role = display.partition(" - ")
+    return name.strip(), "pool: %s, laptop" % (role.strip() or w["name"])
+
+
+def publish(by, note_for=None):
+    """Every worker's status.json row, from agentd's status. note_for = (worker, text) sets that one's note."""
+    workers = json.loads(agentd(["status"])[0] or "[]")
+    for w in workers:
+        name, label = worker_row(w)
+        args = [sys.executable, os.path.join(HERE, "status.py"), "--by", by, "team", name, "--label", label]
+        tasks = w.get("tasks") or []
+        if tasks:
+            args += ["--state", "working"]
+            for t in tasks:
+                tid = t.get("row") or "task-" + (t.get("id") or "")[9:15]
+                args += ["--item", tid, ("queued: " if t.get("state") == "inbox" else "") + (t.get("what") or "")]
+        else:
+            args += ["--state", "waiting" if w.get("enabled") else "asleep", "--clear-items"]
+        if note_for and note_for[0] == w["name"]:
+            args += ["--note", note_for[1]]
+        p = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if p.returncode != 0:
+            print("panel: %s not published: %s" % (name, p.stderr.decode("utf-8", "replace").strip()), file=sys.stderr)
+
+
+def finished_note(text):
+    """(worker, note) for a finished task's record, else None."""
+    try:
+        r = json.loads(text)
+    except ValueError:
+        return None
+    if r.get("waiting") or not r.get("agent"):
+        return None
+    return r["agent"], "last task %s: %s (%s)" % ("done" if r.get("ok") else "FAILED",
+                                                  (r.get("row") or r.get("id") or ""), (r.get("finished") or "")[11:16])
+
+
 def print_result(text, as_json):
     try:
         r = json.loads(text)
@@ -109,6 +154,8 @@ def print_result(text, as_json):
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):  # a worker's answer is UTF-8; a Windows console is not
+        stream.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("install")
@@ -129,6 +176,8 @@ def main():
     s.add_argument("--timeout-min")
     s.add_argument("--wait", nargs="?", const="1800", help="wait for the answer (seconds, default 1800)")
     s.add_argument("--json", action="store_true")
+    s.add_argument("--row", default="", help="the todo row the task belongs to (shown in the panel)")
+    s.add_argument("--what", default="", help="one line for the panel (default: the task's first line)")
     s = sub.add_parser("wait")
     s.add_argument("id")
     s.add_argument("--timeout", default="1800")
@@ -137,6 +186,9 @@ def main():
     s.add_argument("id")
     s.add_argument("--json", action="store_true")
     sub.add_parser("status")
+    sub.add_parser("publish")
+    p.add_argument("--no-publish", action="store_true", help="do not update the panel's status.json")
+    p.add_argument("--by", default=os.environ.get("AB_STATUS_BY", "Eleanor Voss"), help="who publishes")
     for c in ("cancel",):
         sub.add_parser(c).add_argument("id")
     for c in ("enable", "disable"):
@@ -162,19 +214,33 @@ def main():
         args = ["ask", a.name, "--from", a.sender]
         if a.timeout_min:
             args += ["--timeout-min", a.timeout_min]
+        if a.row:
+            args += ["--row", a.row]
+        if a.what:
+            args += ["--what", a.what]
         tid = agentd(args, a.task)[0].strip()
+        if not a.no_publish:
+            publish(a.sender)
         if not a.wait:
             print(tid)
             return
-        sys.exit(print_result(agentd(["wait", tid, "--timeout", a.wait])[0], a.json))
-    elif a.cmd == "wait":
-        sys.exit(print_result(agentd(["wait", a.id, "--timeout", a.timeout])[0], a.json))
-    elif a.cmd == "result":
-        sys.exit(print_result(agentd(["result", a.id])[0], a.json))
+        finish(agentd(["wait", tid, "--timeout", a.wait])[0], a, a.sender)
+    elif a.cmd in ("wait", "result"):
+        finish(agentd(["wait", a.id, "--timeout", a.timeout] if a.cmd == "wait" else ["result", a.id])[0], a, a.by)
+    elif a.cmd == "publish":
+        publish(a.by)
     elif a.cmd == "log":
         print(agentd(["log", a.name, "-n", a.n])[0].rstrip())
     elif a.cmd in ("status", "cancel", "enable", "disable"):
         print(agentd([a.cmd] + ([a.id] if a.cmd == "cancel" else [a.name] if a.cmd != "status" else []))[0].rstrip())
+
+
+def finish(text, a, by):
+    code = print_result(text, a.json)
+    note = finished_note(text)
+    if note and not a.no_publish:
+        publish(by, note)
+    sys.exit(code)
 
 
 if __name__ == "__main__":

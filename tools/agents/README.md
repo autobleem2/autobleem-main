@@ -26,6 +26,12 @@ python tools/bridge.py status
 python tools/bridge.py log intern
 ```
 
+**The panel.** Every worker shows up as a row in `status.json`, and so in the admin panel's "Teams now":
+- `ask` (`--row TOOLS-7` names the todo row, `--what` gives one line) marks the worker "working" with its tasks;
+- a finished `wait`/`result` sets it back to "waiting", with a note on the last task;
+- `publish` does the same by hand;
+- `--no-publish` (before the subcommand) skips it.
+
 `ask --wait` blocks until the answer arrives (default 30 minutes) and exits 0 on success. Without `--wait`
 it prints the task id; `wait <id>` or `result <id>` fetch the answer later. `cancel <id>` stops a running
 task by the pid agentd recorded for it. `disable <name>` stops a worker from taking new tasks.
