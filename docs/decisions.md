@@ -16,13 +16,13 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   (`v2.0.0-alpha2-17-g1760cc8`) - the name the launcher's update check compares with, so it must never be
   renamed by hand. `docs/versioning.md`.
 - **alpha2 is withdrawn** (the owner, 2026-09-26): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` tags and
-  releases are deleted; what the teams do now is still the road to the next pre-release, which is called
+  releases are deleted; the current work is still the road to the next pre-release, which is called
   **alpha2** again. alpha1 stays (todo RELEASE-1).
 - **No promotion to a higher version before the owner's feature gate and the volunteers' test plans** (the
   owner, 2026-09-27). Before any `promote` - alpha, beta, rc or release - two things must be true:
   1. **Everything the external testers are to test is in the build**: the owner confirms that each of his
-     ideas meant for that release is done and in the nightly being promoted. Eleanor (PM) lists the
-     release's todo/roadmap rows with their state and asks him; a missing one either gets finished first or
+     ideas meant for that release is done and in the nightly being promoted. The release's todo/roadmap
+     rows are listed with their state and put to him; a missing one either gets finished first or
      is moved to a later release by the owner, never silently dropped.
   2. **An exact test plan is ready for the volunteers**, per platform, in `docs/tester-checklist.md`'s style:
      which platform and which build/channel, what hardware helps (a named pad model, a Wi-Fi dongle, a USB
@@ -31,8 +31,8 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
      each plan (per step: pass / fail / blocked, the build's version, the hardware used, notes, the logs and
      photos attached), so every volunteer reports the same way. Every feature from point 1 has its lines
      there.
-  The PM checks both before putting the promote decision (RELEASE-1/R4-style rows) in front of the owner; until
-  then the promote is not asked for. *Why:* external testers get one pass at a pre-release - a missing
+  Both are checked before the promote decision (RELEASE-1-style rows) is put to the owner; until then the
+  promote is not asked for. *Why:* external testers get one pass at a pre-release - a missing
   feature or a vague plan wastes it.
 - **`AB_SDK_ABI` moves only with a release** (the owner, 2026-09-26): within a development cycle the ABI may
   change once, and the release carries that one number. ABI 4 (`Extension::runEntry()`) is the next
@@ -199,8 +199,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     stick's `Extensions/store/`, a Linux package's `extensions/` for `install.sh`, the Windows program
     folder's `Extensions/` for AutoBleemWinSetup), and every install and update replaces the shipped folder
     whole. The Store's own state (`System/Extensions/store/`, `disabled.txt`) and any extension the user
-    unpacked by hand are never touched. **ext_store keeps a version of its own** (Eleanor's call on R3,
-    2026-09-26 - it is not tagged with the unified `vX.Y.Z`, unlike `release.py`'s `STAGES` repositories):
+    unpacked by hand are never touched. **ext_store keeps a version of its own** (2026-09-26 - it is not tagged with the unified `vX.Y.Z`, unlike `release.py`'s `STAGES` repositories):
     v1.0.1 as of 2026-09-26. A development build takes its `nightly`, a release its latest `v*` release;
     `release.py promote` refuses to start until one exists, and a release build with none is now an error
     rather than a silent nightly fallback. The plugin's SDK stamp must match the launcher's.
@@ -217,7 +216,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - The built-in ECM decoding stays as it is (no `proc_unecm` for now).
   - `proc_unzip` is the first processor and the example; `tools/proc_check.py` checks one before publishing.
   - **Unzip ships with every package** (2026-09-25): a processor is bundled, unlike an extension. **It keeps
-    a version of its own** (Eleanor's call on R3, 2026-09-26 - `release.py`'s `STAGES` never tags it with the
+    a version of its own** (2026-09-26 - `release.py`'s `STAGES` never tags it with the
     unified `vX.Y.Z`): v1.1.0 as of 2026-09-26. The appliance takes its `nightly` for a development build and
     its latest `v*` release for a release; `release.py promote` refuses to start until one exists, and a
     release build with none is now an error, not a silent nightly fallback. An update replaces its program
@@ -248,161 +247,4 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   suite and by testers).
 - **Debug by root cause, report by evidence** (the owner, 2026-09-27): every session follows
   `docs/debugging.md` - no fix before the root cause is found, three failed fixes stop the work for a design
-  question, and no "done/green/fixed" without the proving command run and read in that turn. Team Managers put it
-  in every developer's and tester's brief and check it in review.
-- **No tester slot -> the developer tests and documents** (the owner, 2026-09-27): when a team has no free agent
-  slot for a tester (or the doc writer) and the developer is waiting on that step, the developer runs the tests
-  and writes the documentation himself rather than sit idle. The same bar applies (`docs/debugging.md`: evidence
-  run in that turn), and the Team Manager's review still reads the tests and the diff before the merge. Tests
-  that need hands on a device still go to the Program Manager as test items.
-- **The owner confirms looks from screenshots, not by clicking** (the owner, 2026-09-27): anything he only has to
-  confirm that does not need the real console - how a screen looks, a label, a layout, a dialog's wording - is
-  captured by the team (DebugDriver on the dev build, the PC test VM, the laptop) and sent as screenshots to the
-  Program Manager, who puts them to him in one question session. A console session keeps only what needs the
-  hardware: real pads, Bluetooth, Wi-Fi, sound by ear, the kernel, power and standby.
-- **The laptop is where teams build and test first** (the owner, 2026-09-27, once RELEASE-12 made every toolchain ready
-  there - `docs/pc-test-machine.md`):
-  - A device build is `docker/run.sh ci/build.sh <psc|rpi|rpi64|pcusb|win>` in `~/src` on the laptop. That covers
-    a test package, a binary for the console, a Pi or the PC stick, and a Windows zip. The build server takes
-    only what the laptop cannot do. The owner's PC is not a build machine.
-  - The unit suites run there too (`ci/build.sh native`). `make_win.sh` on the owner's PC is kept for
-    Windows-only code and the Windows dev build's screenshots.
-  - UI checks and screenshots of anything that is not Windows-specific are taken on the pcusb-test VM (the
-    DebugDriver through the laptop's tunnel, never padsim) rather than on the owner's PC. That leaves no
-    windows and no firewall prompts on his screen.
-  - One build at a time per team. The laptop also carries three CI runners and the VM, so check its load
-    (the panel) before starting a long build. Clean up build dirs afterwards.
-
-## Working with Claude sessions
-
-- **Times are Irish local time** (the owner, 2026-09-27): every time a session states or schedules - a reset, a
-  resume, an ETA, a state note - is in Europe/Dublin time (IST, UTC+1 in summer; GMT in winter). A UTC value from an
-  API or a log is converted first; quote the UTC in brackets only when it helps to find the log line.
-
-- **The Lead QA runs the console test sessions with the owner** (the owner, 2026-09-27): Harriet Cole - Lead QA,
-  not the Program Manager, walks the owner through a device/console test plan, answers his questions and
-  collects the results. Once RELEASE-19 is live, this happens in the admin panel's how-to window chat. The PM only
-  schedules the session (the Needs-you entry with the plan and its lead) and reports the outcome in the status.
-
-- **Only the owner adds user stories to the queue** (2026-09-27). The teams implement nothing he has not approved: no
-  new row in `docs/todo.md` and no work on an idea until he says yes. A follow-up or an idea found along the way goes
-  to the Program Manager as a proposal, who puts it to him. Plugins (beyond the approved extensions) and macOS are
-  outside his plans.
-
-- **One Program Manager over the teams** (the owner - the CEO - 2026-09-26): **Eleanor Voss - Program
-  Manager (roadmap)** writes no code. She keeps `docs/roadmap.md` and `docs/todo.md`, reports how far the
-  next milestone or release is, plans user stories with the owner, and owns:
-  - **the questions for the owner**: a team manager sends her any question that needs his decision; she
-    queues them (`_team/ceo-questions.md` next to the checkouts), puts them to him together and relays the
-    answers. A decision he gives directly in a team's session is cc'd to her in one line;
-  - **todo intake**: teams send her new items instead of adding rows; she writes the row and decides which
-    team does it (`Team:` in the row). The commit that finishes the work still deletes its row;
-  - **the team sessions**: she decides whether a team has work, and may create a team (a new team manager's
-    session, named per the naming rule) and close or clear one when it has no work or needs a fresh start
-    (its state saved first - a REPORT.md, nothing uncommitted lost).
-- **Every "Needs you" entry comes with its page** (the owner, 2026-09-27, widened the same day from "tasks he
-  does himself"): every entry in status.json's `needs_owner` is added with a Polish page - `howto/<name>.html` in
-  this repository, one `<style>` block (`:host` is the page) and plain HTML, no scripts - and `tools/status.py
-  needs add ... --howto howto/<name>.html`. For an action (a login, a click in a settings page, a file copied) the
-  page is the step-by-step how-to; for a device test (a console session) or a decision it is a short summary of
-  the task - what is tested or decided, what is needed (build, stick, pad), the steps or the options, and what
-  happens after his answer. The admin panel's Roadmap tab shows an (i) button beside the entry and opens the page
-  in a modal, so he never has to ask. Whoever adds the entry (normally the Program Manager) writes the page in the
-  same step. Like status.json, the page is public: no LAN addresses, no `_team` paths, no secrets - name the file on
-  his PC where such a detail is (`infrastructure.local.md`). **When a session may not write the how-to** (e.g. its
-  safeguards refuse describing how to widen Claude Code's own permissions), the page still exists: why the action is
-  needed, what waits on it, and the details he needs to do it himself when those may be given - otherwise the why
-  alone (the owner, 2026-09-27).
-- **The owner is the hardware tester** (2026-09-26): every test that needs hands on a device (a pad, a
-  keyboard, a button, a stick swapped, a sound judged by ear, a screen judged by eye) is done by him. Teams
-  never schedule such a test themselves: they send it to the Program Manager as a test item - device,
-  build/stick needed, exact steps, the expected result per step - and she runs it with the owner step by
-  step, then returns the results (and any todo rows) to the team. What the DebugDriver can drive
-  automatically stays with the teams' testers, on a machine the owner has said is free.
-- **The 5-hour window is spent evenly** (the owner, 2026-09-26): usage should follow a straight line from
-  the window's start to 98% at its reset - the target at any moment is `98 x minutes elapsed / 300`. The
-  Program Manager checks it every 15 minutes and sets the **agent slots** (how many agents may run at once)
-  per team: above the line, fewer slots; well below it, more. Team managers keep to their slots and pause
-  the lowest-priority work first (state saved). The other levers: a team manager's session stays under
-  ~300k tokens of context (every turn re-reads all of it). **No manual /clear** (the owner, 2026-09-26 -
-  typing it interrupted the agents): every session auto-compacts at ~300k (`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=30`
-  in the owner's `~/.claude/settings.json`), and after a larger task (a batch merged, no agent running) a team
-  manager writes `_team/status/<team>-STATE.md`, commits, tells the Program Manager in one line and clears
-  itself (`clear_session` with `self`); the Program Manager waits until it is idle and restarts it with "read
-  `<team>-STATE.md` and continue" when it has work. Never clear while an agent runs; progress jobs every 15 minutes and status through files, no
-  acknowledgement messages; Opus only where a rule asks for it (it weighs ~3 Sonnet slots); a fresh agent
-  per task; teams start their batches staggered after a window reset.
-- **The 5-hour stop line is 98%** for every team (the owner, 2026-09-26 - was 90% earlier the same day): above it a team stops its agents,
-  saves its state and waits for the window's reset.
-- **An idle team helps the others** (the owner, 2026-09-26): a team with free slots and nothing of its own
-  may take *simple* rows from another team's list in `docs/todo.md` (tell the Program Manager and the owning
-  team's manager which row, so nobody does it twice), within its slots. The moment work of its own kind
-  arrives, it stops the borrowed row - committed on its branch with a short HANDOFF note, the owning team
-  told - and turns to its own.
-- **The company is leads plus one shared pool** (the owner, 2026-09-27; replaces "A team is three" below
-  step by step, as the laptop bridge takes the workers):
-  - **Eleanor Voss, Program Manager (Opus), is the dispatcher**: one queue, the priorities, and the slot budget
-    for each 5-hour window, taken from the 5-hour and weekly usage. She starts and stops every worker.
-  - **Three leads**, standing Opus sessions that review, merge and make the technical calls in their areas:
-    **Marcus Hale, Lead Software** (CONSOLE, EMU, SDK, APPS, TOOLS); **Victor Lane, Lead Platform** (RELEASE,
-    KERNEL, PLATFORM, DOCS, CI); **Harriet Cole, Lead QA** (HWTEST, the console sessions, and the volunteers'
-    test plans with their forms that the promotion rule needs). A lead with nothing to review sleeps.
-  - **One pool of workers, not bound to a team**: Developers (Sonnet), Testers + Docs (Haiku) and **Interns**
-    (Haiku - simple tasks on another agent's request, e.g. a small blocker; no merges, no pushes to
-    develop/master, no publishing). A lead asks the PM for a worker for a row ("a developer for CONSOLE-3"),
-    the PM gives the slot where the work is and starts the worker - on the laptop through the bridge
-    (`tools/bridge.py`, user `abagents`) once it runs; the worker reports to that area's lead and is stopped
-    when the row is done.
-  - **Wren Aldercroft stays the System Administrator** (service desk for the leads).
-  - The move: the Intern on the laptop first (the bridge's test), then the pool, then the leads and Wren.
-    Until a lead's workers move, the rules below hold for them.
-- **A team is three** (the owner, 2026-09-26, replacing the earlier multi-agent teams): the **Team Manager**
-  (Opus, the session), **one Developer** (Sonnet) and **one Docs + Tester** (Haiku). No Opus developers, no
-  separate reviewer agent, no Fable.
-  - The **Team Manager reviews** the code and the test screenshots, **merges** to develop (fetch first; no
-    rebase or force; core before its dependants) and closes the todo rows. He does not write code; hard code
-    is the Developer's, with the manager's design help and review.
-  - The **Developer** builds, prepares the test environment (build, staged binaries, test trees, servers, the
-    DebugDriver) and writes each test as a script the Tester can run alone: exact commands and the expected
-    result of every step. He also updates the owner's Windows instance at the end of a batch.
-  - The **Tester** (Haiku) only runs the tests - asking the Developer who wrote them when stuck - and
-    updates the documentation and, after a merge, the user manuals (screenshots, build, publish).
-  - **Questions** that need research or a decision go to the Program Manager, the team's expert; she answers
-    or puts them to the owner.
-  - The slots, the ~300k-token rule for manager sessions and device tests through the Program Manager stay.
-
-- Several sessions work at once, sometimes in the same checkout: before pushing a shared branch look for
-  commits that are not yours (`git log origin/<b>..<b>`), merge rather than rebase, never delete a branch
-  another session committed to.
-- Post a one-line progress note at each step of long multi-repository work, mapped to the plan; don't
-  idle-wait on CI - pick up the next item meanwhile.
-- **Never kill processes by name, never delete a checkout you did not create** (the owner, 2026-09-27, after two
-  incidents on his PC the same morning: a `Get-Process bash | Stop-Process -Force` stopped every bash on the PC,
-  the PM's Telegram listener among them, and an agent's cleanup `rm -rf`'d the pre-existing
-  `E:\Programming\autobleem-console-tools` checkout). Every session and agent, on every machine:
-  - a process is stopped only by a PID the same task started and recorded - never by name or pattern
-    (`Stop-Process -Name`, `killall`, `pkill -f`, `taskkill /IM`), and the recorded list is checked afterwards;
-  - a directory is deleted only when the same task created it and recorded it at creation - never a
-    pre-existing checkout, worktree or folder; before any `rm -rf` of a git tree: `git status`, `git stash list`,
-    `git log --branches --not --remotes` and `git worktree list` all clean;
-  - both rules go into every brief.
-- **Clean up after yourself on the build server** (the owner, 2026-09-25, after `psc-build` reached 88%):
-  when a build there is finished - its result fetched, or CI now builds it - delete what the build left
-  behind: the `build_*/` and `dist/` folders, fetched data caches, logs you wrote to `~`, containers and
-  images you pulled only for it (`alpine` for a root-owned delete, say). A synced tree that CI builds from
-  now on goes entirely. Only your own: another session's files are theirs to delete - ask it (`ListAgents`,
-  `SendMessage`) or the owner, never remove them yourself; the site (`~/autobleem-repo`), the runner and the
-  shared build images are never "leftovers".
-- **The Haiku Docs + Tester also owns the user manuals** (the owner, 2026-09-26) - on top of, not instead of, its
-  other work (running the tests, the repos' CLAUDE.md/docs/READMEs as before). The team's Developer decides when a
-  change needs the manual and tells the Haiku; the Haiku updates the manual text (and asks the Developer for new
-  screenshots - building and `tools/manual_shots.py` runs stay with the Developer), **translates it into every
-  language the launcher supports** by default (not only English and Polish), and reports it to the Team Manager.
-  The Team Manager reviews and merges it so that CI publishes it to the site - the Haiku no longer runs
-  `repo_publish.sh manuals` itself (replaces the "Haiku publishes the manuals" rule of the same day).
-- **Nothing runs visibly on the owner's PC** (the owner, 2026-09-26): no team starts an app in a window or full
-  screen on his PC; every UI test there - the dev build, the installed Windows instance, screenshots - goes through
-  the DebugDriver (`tools/ab_drive.py`, window hidden, never `--show` unless he asks to watch).
-- **Team sessions are quiet** (the owner, 2026-09-26): a Team Manager writes no progress updates or reports to the
-  owner in its own session window; it talks only with its agents and the Program Manager, who is the owner's one
-  channel. Status lines in `_team/status/<team>.md` stay current.
+  question, and no "done/green/fixed" without the proving command run and read in that turn.

@@ -19,8 +19,8 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   about 3m hosted).
   A pull request always goes hosted, decided before any token is minted; `force_fallback` (a dispatch input)
   forces hosted for a test. The caller needs a `route` job (`secrets: inherit` - the `autobleem-admin` App
-  reads the org's runner list; the repository must be in the App variables' selection, which Eleanor/the
-  owner keep), a plain `route_runner` job re-exporting `runs_on` (a reusable workflow's outputs cannot feed
+  reads the org's runner list; the repository must be in the App variables' selection, which the
+  owner keeps), a plain `route_runner` job re-exporting `runs_on` (a reusable workflow's outputs cannot feed
   `runs-on` directly), then `runs-on: fromJSON(...)` on the build job. **The build server is not a fallback**:
   its runner itself runs in a container, and a runner in a container cannot start a `container:` job
   (proc_unzip run 36284746407). Moved (2026-09-27, each proven by a green develop build on the laptop): proc_unzip, ext_store,

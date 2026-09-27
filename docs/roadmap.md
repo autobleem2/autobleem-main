@@ -2,11 +2,10 @@
 
 Where the project stands and the order the open work goes in. Every item named here is a row of
 **`docs/todo.md`** (its ID in brackets); ideas nobody has committed to are in **`docs/ideas.md`**. Written
-from a read of every repository's documentation on 2026-09-26 - re-plan when a milestone closes. Kept by
-Eleanor Voss - Program Manager (roadmap), `docs/decisions.md`.
+from a read of every repository's documentation on 2026-09-26 - re-plan when a milestone closes.
 
-**Renumbered 2026-09-26** (the owner): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` are withdrawn - what
-the teams do now is still the road to the next pre-release, which is **alpha2** again. The old plan's
+**Renumbered 2026-09-26** (the owner): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` are withdrawn - the
+current work is still the road to the next pre-release, which is **alpha2** again. The old plan's
 alpha3/4/5 are now alpha2/3/4; todo.md's milestone column follows.
 
 ## Where we are

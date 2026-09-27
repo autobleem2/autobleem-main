@@ -37,8 +37,8 @@ project; the plugin itself is not used.
 - A failing test first - a doctest case, a script, a `tools/ab_drive.py` run, a `proc_check.py` sample - then
   the fix, then the same test passing. The test stays in the tree when it can.
 - One fix, the root cause only. No "while I'm here" edits in the same commit.
-- **Three failed fixes = stop.** The design is in question, not the next patch: report to the Team Manager (and
-  through the Program Manager to the owner if it needs his decision) before a fourth attempt.
+- **Three failed fixes = stop.** The design is in question, not the next patch: report it (to the owner if it needs his
+  decision) before a fourth attempt.
 
 **When it really is the environment** (a flaky network, a device, timing): say what was ruled out and how,
 then add handling (a retry, a timeout, a clear message) and logging for next time. Most "no root cause" cases
@@ -50,9 +50,8 @@ are an investigation stopped too early.
   `launch.log`/`pcsx.log`, `standby.log`, `AB_SHOT` frames, `autobleem-gui --sysinfo`.
 - **Check the instrument before the code**: busybox `ps` cuts lines at ~78 columns (read `/proc/<pid>/cmdline`);
   `pgrep -f` inside `ssh`/`bash -c` matches itself. K9 was a "bug" made by the first of these.
-- A test that needs hands on a device goes to the Program Manager as a test item (decisions.md, "The owner is
-  the hardware tester"); everything the DebugDriver, the laptop VM (`docs/pc-test-machine.md`) or ssh can
-  reach, the team does itself.
+- A test that needs hands on a device goes to the tester checklist (`docs/tester-checklist.md`); everything the
+  DebugDriver, the laptop VM (`docs/pc-test-machine.md`) or ssh can reach is tested directly.
 
 ## Before saying "done"
 

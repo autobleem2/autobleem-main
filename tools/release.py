@@ -53,8 +53,8 @@ BUILD_IMAGE = "autobleem-build"
 # image.yml's own paths-filter (its `on: push: paths:`) - a merge that touches neither means no rebuild ever
 # starts, so promote() must not wait for one
 BUILD_IMAGE_WATCHED_PATHS = ("docker/**", ".github/workflows/image.yml")
-# proc_unzip, ext_store and autobleem-themes keep versions of their own (docs/decisions.md, Eleanor's call on
-# R3, 2026-09-26): a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in
+# proc_unzip, ext_store and autobleem-themes keep versions of their own (docs/decisions.md,
+# 2026-09-26): a promotion never tags them with the unified vX.Y.Z, so they are deliberately not in
 # STAGES. promote() only checks each already has a released (non-prerelease) v* version of its own - tagged
 # by hand in its own repository, not by this script - so the appliance's release build has something other
 # than a nightly to bundle (autobleem-appliance's release_assets.sh errors otherwise). proc_unzip and

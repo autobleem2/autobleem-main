@@ -184,7 +184,7 @@ it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-
   `install.sh --uninstall` takes it away. After an update: `git pull` in `~/src/autobleem`, run `install.sh`,
   then log the tty1 session out (`loginctl terminate-session <tty1's session>`) to restart sway.
 - One-frame checks over ssh: `abpanel overview --once`, `teams --once` (also `status`, `load`).
-- Screenshots (what the PM shows the owner): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
+- Screenshots (for the owner's look checks): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
   and `WAYLAND_DISPLAY=wayland-1`; `grim -o DVI-I-1 panel.png`. With the dock, `grim -o eDP-1` fails
   ("failed to copy output") - the laptop's screen is on the secondary GPU; judge it by eye.
 
@@ -234,7 +234,7 @@ is empty after a build, and the version is clean. If an older build (from before
 ## CI runner
 
 Three org-scoped self-hosted runners, deliberately **not** sharing the build server's exposure:
-- **bleemmachine** carries `ab-main,pcusb-test`; **bleemmachine-2** and **bleemmachine-3** (2026-09-27, Victor's
+- **bleemmachine** carries `ab-main,pcusb-test`; **bleemmachine-2** and **bleemmachine-3** (2026-09-27,
   scale-out) carry `ab-main` only, so a job that drives the VM (`pcusb-test`) can only land on the first one and
   never runs twice at once. Three is the ceiling: 4 cores / 8 threads with the VM holding 2 vCPUs (RAM is not
   the limit). Each has its own directory (`~gha-runner/actions-runner[-N]`) and service

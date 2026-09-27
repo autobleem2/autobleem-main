@@ -13,7 +13,7 @@ republish the page. The logic lives in workflows - autobleem-main's `nightly.yml
 panel does can also be done with `gh workflow run`.
 
 **The API**: every view and button is also JSON (`GET /admin/api/status|channels|health|audit`, `POST
-/admin/api/nightly|promote|runs/<repo>/<id>/cancel|rerun|withdraw|page`), for scripts and Claude sessions.
+/admin/api/nightly|promote|runs/<repo>/<id>/cancel|rerun|withdraw|page`), for scripts.
 It takes `Authorization: Bearer <GitHub token>`: the service asks GitHub whose token it is and applies the
 same member/release-manager rules - no separate API keys.
 
