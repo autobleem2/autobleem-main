@@ -70,6 +70,7 @@ generated, never stored - autobleem-repo's CLAUDE.md has its rules.
 | `docs/versioning.md`, `docs/ci.md`, `docs/code-signing.md` | the version scheme; every workflow; Authenticode through SignPath (parked) |
 | `docs/infrastructure.md` | what runs where (the addresses are in the git-ignored `infrastructure.local.md`) |
 | `docs/tester-checklist.md` | the hardware proofs, for testers |
+| `docs/authors/README.md` | writing an App, an extension, a scanner processor or a Store catalog - for outside authors |
 | `docs/kernel-flash-recovery.md`, `docs/pi-install-guide.md` | recovering a console; installing on a Pi |
 | `docs/store-homebrew-plan.md` | an open plan: homebrew PS1 games in the Store |
 | `docs/history/*.md` | how each platform and the big features came to be |
