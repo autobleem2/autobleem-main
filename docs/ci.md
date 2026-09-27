@@ -38,7 +38,7 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 | `autobleem-console-tools`, `autobleem-pc-tools` | `build.yml` | push, `v*`, PR, dispatch | the tools, tests, packages |
 | `ext_store`, `proc_unzip`, `proc_template`, `app_*` | `build.yml` | push, `v*`, PR, dispatch | per-target packages, the nightly; ext_store also publishes the site's Store page (self-hosted) |
 | `autobleem-manuals` | `build.yml` | push, `v*`, PR, dispatch (`publish`) | the PDFs; publish self-hosted |
-| `autobleem-build` | `image.yml` | push/PR under `docker/**`; dispatch | builds the image on the self-hosted runner (layer cache), `:develop` from develop, `:latest` from master, plus `:<sha>` |
+| `autobleem-build` | `image.yml` | push/PR under `docker/**`; dispatch | builds the image on the self-hosted runner (layer cache), `:develop` from develop, `:latest` from master, plus `:<sha>`; a real develop push also dispatches `autobleem-main`'s `nightly.yml` with `rebuild_all` (R17, below) |
 | | `retroarch.yml` | monthly (3rd, 04:17), daily 04:41, dispatch | RetroArch + cores for the Pis, the PC stick and Windows -> `rpi/`, `pc/`, `win/` on the site |
 | `retroarch-psc` | `upstream.yml` | daily 04:41, dispatch | a new upstream RetroArch release built for the console, tagged, published to `psc/retroarch/` |
 | | `build.yml` | push, `v*`, PR, dispatch | the full RetroArch + sharded cores build (gated by `CI_ENABLED` - see below) |
@@ -54,6 +54,22 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 GitHub App (`AB_ADMIN_APP_ID`, `AB_ADMIN_APP_KEY`); the admin panel (`archive/admin-panel-plan.md`) is
 their front end. The components' `nightly` jobs use the same App, with the same two names in each of the
 seven repositories, for the dispatch to the appliance (the App needs Contents: write on autobleem-appliance).
+
+**A develop image push reaches the nightly on its own (R17, 2026-09-27).** Until then a toolchain change in
+`autobleem-build`'s `docker/Dockerfile` only reached the nightly with the next unrelated commit in one of the
+seven components - nothing reacted to `:develop` being republished, and the manual "nightly refresh"
+(`tools/release.py nightly` / the admin panel button) by default rebuilds only what a component's own
+develop moved past its `nightly` tag, which an image-only change never does either. `image.yml`'s
+`dispatch-nightly-refresh` job now mints the same App's token (needs `AB_ADMIN_APP_ID`/`AB_ADMIN_APP_KEY`
+added to `autobleem-build` too, and the App installed there with permission to dispatch workflows in
+`autobleem-main`) and starts `autobleem-main`'s `nightly.yml` with `rebuild_all: true` - the existing,
+already-tested path that rebuilds every `NIGHTLY_REPOS` component regardless of their own source (none of
+them pin the image by digest, so the rebuild alone picks up the new toolchain) and reassembles the
+appliance's nightly. Only for a real `:develop` push (never master, a pull request, or a validate-only
+`workflow_dispatch` with `push: false`); with the App not yet wired into `autobleem-build` it is a quiet
+`::notice`, and the fallback stays what it always was - run `nightly.yml` by hand with `rebuild_all` (the
+admin panel's "Refresh nightly", once it exposes that option, or `gh workflow run nightly.yml -f
+rebuild_all=true --repo autobleem2/autobleem-main`).
 
 ## By hand
 
