@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T09:31:48+01:00",
+  "written_at": "2026-09-27T09:33:38+01:00",
   "written_by": "Harriet Cole - Team Manager (hardware)",
   "usage": {
     "five_hour_percent": 66,
@@ -44,10 +44,6 @@
       "state": "waiting",
       "items": [
         {
-          "id": "D23",
-          "what": "pushed, awaiting Marcus's review/merge (core 228d52d, launcher d425593)"
-        },
-        {
           "id": "C16-VM",
           "what": "Wren takes the VM frame once a nightly carries 27f652f"
         },
@@ -56,7 +52,7 @@
           "what": "awaiting the owner's console results"
         }
       ],
-      "note": "Incident: D23 blanket bash kill ~09:10 reported to Eleanor/Marcus/Victor; kill-by-PID rule added"
+      "note": "D23 merged by Marcus (core 222122d, launcher 1a8d4db); bash-kill incident reported, kill-by-PID rule"
     },
     {
       "name": "Wren Aldercroft",
