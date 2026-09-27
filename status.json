@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "written_at": "2026-09-27T12:09:02+01:00",
-  "written_by": "Eleanor Voss - Program Manager",
+  "written_at": "2026-09-27T12:09:52+01:00",
+  "written_by": "Victor Lane - Team Manager (infrastructure)",
   "usage": {
     "five_hour_percent": 2,
     "five_hour_resets_at": "2026-09-27T17:00:00+01:00",
@@ -13,9 +13,14 @@
     {
       "name": "Victor Lane",
       "team": "infrastructure",
-      "state": "waiting",
-      "items": [],
-      "note": "D4, D21, D22 done; queue empty - waiting for the next item"
+      "state": "working",
+      "items": [
+        {
+          "id": "D24",
+          "what": "the last five manual figures - Ivy on it (headless)"
+        }
+      ],
+      "note": "D4, D21, D22 done; console-tools checkout re-cloned"
     },
     {
       "name": "Marcus Hale",
