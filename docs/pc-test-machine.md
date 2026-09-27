@@ -174,17 +174,15 @@ it again. Packages: `sway foot virt-viewer grim chafa` (the owner's sudo, `--no-
     core, memory, swap, load average, disk, the top processes by CPU and by memory side by side);
   - top-right: the VM's **live** view (`virt-viewer --attach`: through libvirt, no port of its own; the VM's
     VNC listens on 127.0.0.1 only);
-  - bottom-left, `abpanel teams`: the `status.json` at `AB_TEAMS_URL` (every 60 s, no token) - usage, the
-    teams, Needs the owner;
+  - bottom-left: a status view that comes with the panel's own repository;
   - bottom-right, `abpanel empty`: reserved, blank until its use is decided.
 - Without the dock both workspaces are on the laptop's screen: **Super+1** the shell, **Super+2** the panel. Super+Return a new terminal, Super+Shift+E leaves sway.
 - The code is `tools/abpanel/` (abpanel.py, layout.sh, start-sway.sh, sway.config, foot.ini) in the panel's own
-  repository, not the launcher's (moved out 2026-09-27); the Teams block reads its `status.json` URL from
-  `AB_TEAMS_URL`, unset here hides it. `install.sh` puts it in place for the current user
+  repository, not the launcher's (moved out 2026-09-27). `install.sh` puts it in place for the current user
   (`~/.local/share/abpanel`, `~/.config/sway/config`, `~/.config/foot/foot.ini`, the `~/.profile` block),
   `install.sh --uninstall` takes it away. After an update: `git pull`, run `install.sh`, then log the tty1
   session out (`loginctl terminate-session <tty1's session>`) to restart sway.
-- One-frame checks over ssh: `abpanel overview --once`, `teams --once` (also `status`, `load`).
+- One-frame checks over ssh: `abpanel overview --once` (also `status`, `load`).
 - Screenshots (for the owner's look checks): `grim` with `SWAYSOCK=/run/user/1000/sway-ipc.1000.$(pgrep -x sway).sock`
   and `WAYLAND_DISPLAY=wayland-1`; `grim -o DVI-I-1 panel.png`. With the dock, `grim -o eDP-1` fails
   ("failed to copy output") - the laptop's screen is on the secondary GPU; judge it by eye.
