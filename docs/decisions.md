@@ -252,7 +252,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   - The unit suites run there too (`ci/build.sh native`). `make_win.sh` on the owner's PC is kept for
     Windows-only code and the Windows dev build's screenshots.
   - UI checks and screenshots of anything that is not Windows-specific are taken on the pcusb-test VM (the
-    DebugDriver through the laptop's tunnel, `padsim` for pads) rather than on the owner's PC. That leaves no
+    DebugDriver through the laptop's tunnel, never padsim) rather than on the owner's PC. That leaves no
     windows and no firewall prompts on his screen.
   - One build at a time per team. The laptop also carries three CI runners and the VM, so check its load
     (the panel) before starting a long build. Clean up build dirs afterwards.
