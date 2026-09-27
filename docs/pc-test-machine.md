@@ -9,7 +9,7 @@ in `infrastructure.local.md` (not committed); this file is the how-to.
   the removable path, no NVRAM change. This is the host.
 - The host runs, natively: the GitHub Actions runner (`docker/runner`, see "CI runner" below), Docker, and
   KVM/libvirt.
-- A libvirt/KVM VM, **`pcusb-test`** (2 vCPU / 2 GiB, `qemu:///system` - a fresh `virsh` needs `-c
+- A libvirt/KVM VM, **`pcusb-test`** (2 vCPU / 2 GiB, **autostart on** - it comes up with the laptop, `qemu:///system` - a fresh `virsh` needs `-c
   qemu:///system`, the unprivileged per-user session driver is the default otherwise and cannot make a
   bridge), boots the **real PC-USB pendrive** by whole-USB-device passthrough - not an imported disk image,
   so the same first-boot/update/BIOS paths a real machine takes are exercised. `screemer` is in the `libvirt`
