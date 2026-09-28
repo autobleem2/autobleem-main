@@ -146,6 +146,43 @@ renews runs out by itself, so a tester that died never blocks the VM for long. `
 lease. The lease is `~/.local/state/abvm/lock.json` on the laptop, written under `flock`. No CI job drives the
 VM today; one that does must take the lease too.
 
+### Sandboxes: testing the application while the VM is taken (RELEASE-20, 2026-09-28)
+
+The lease above is for the **hardware test** - the stick's launcher, padsim, install paths. To test the
+**application** meanwhile, `abvm.py sandbox` starts extra launchers **headless in the same VM**, next to the
+stick's own (which keeps the screen): each one's whole root is a folder on the laptop's disk, never the stick,
+with its own runtime dir (`/run/abvm-sb/<name>` in the guest), DebugDriver port (6910-6919, forwarded on the
+laptop's loopback) and **its own lease** (`sandbox take <name> <task>`; the VM's lease is not needed).
+
+```bash
+export ABVM_WHO=<your name>
+python tools/vm/abvm.py sandbox take mine "the options screen"
+python tools/vm/abvm.py sandbox start mine --build ~/src/autobleem/dist/pcusb   # a laptop build, used where it lies
+python tools/vm/abvm.py sandbox drive mine "wait_screen GuiLauncher 20; key f10; wait 800; grab a.png" --out shots
+python tools/vm/abvm.py sandbox logs mine 40
+python tools/vm/abvm.py sandbox reset mine                                      # afresh from the template, < 1 s
+python tools/vm/abvm.py sandbox rm mine
+```
+
+- **How it is wired**: `~/abvm/sandboxes/` on the laptop is the VM's **9p share** (`<filesystem type='mount'
+  accessmode='squash'>`, target `abvm-sandboxes`; the domain XML before it is `~/abvm/pcusb-test.before-9p.xml`),
+  mounted in the guest at `/mnt/abvm` by `mnt-abvm.mount` (root fs; `sandbox setup` installs it, with the VM's
+  lease). The laptop has the `acl` package: `libvirt-qemu` may pass through `~` and `~/abvm` and write in
+  `~/abvm/sandboxes`, and default ACLs give both users rwx on everything made there. The guest checks
+  permissions itself against the laptop's owner, so a sandbox tree is opened `a+rwX` - a disposable test tree.
+- **What a sandbox holds**: `_template` (`sandbox template`: the stick's launcher, abpad, rc, themes,
+  extensions and Apps, no games, empty databases) copied, with `--build` laying a build's `dist/<target>/Autobleem`
+  over it; `Autobleem/bin/db` links the one shared copy of the cover DBs in `_shared/db`. The launcher runs with
+  `SDL_VIDEODRIVER=offscreen`, `SDL_AUDIODRIVER=dummy`, `AB_HEADLESS=1`, `AB_ROOT`/`AB_RUNTIME_DIR`/`AB_LOG_DIR`
+  inside the sandbox; its output is `System/Logs/abvm-out.txt`, grabs land in the sandbox's `.abvm/grabs/`
+  and come back to `--out`. Stopping is the driver's `quit` (a kill after 5 s).
+- **Measured**: a start in 1 s, a two-screen script with grabs in 3.6 s, a stop in 3.7 s, a reset in 0.7 s;
+  SQLite on the share works.
+- **Limits today**: at most `ABVM_SANDBOX_SLOTS` (default **1**) run at once - an idle launcher still uses a
+  whole CPU and the VM has 2 (RELEASE-21 brings the frame cap); the headless window is 1024x768 with the 16:9
+  UI letterboxed in it; the DebugDriver gives logical buttons only (no raw joysticks, hot-plug or batteries in a
+  sandbox - that is RELEASE-21); a sandbox reaches the network like the stick's launcher (update check, Store).
+
 ## The virtual gamepads and keyboard (padsim, RELEASE-14; padsim 5, 2026-09-28)
 
 The launcher's DebugDriver (above) stays the way to script the launcher's own screens with frames coming
