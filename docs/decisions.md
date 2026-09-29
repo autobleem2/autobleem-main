@@ -272,3 +272,11 @@ package, a nightly and a release alike, takes that release (autobleem-appliance 
 `PCSXAB_FROZEN_TAG`), and `tools/release.py` no longer tags it or waits for its nightly. It came from a
 regression after 188: with the scale2x/eagle filters a game on the console ran at 15 fps instead of 50-60.
 Work on the emulator goes on in pcsx-abnxt only.
+
+## ab_gui - the AutoBleem User Interface Library (the owner, 2026-09-30)
+
+The launcher's look (PanelStyle), its list/dialog/keyboard widgets and the screen stack become a library of
+their own: **`ab_gui`**, in full **AutoBleem User Interface Library** - a GUI for consoles, driven mainly by a
+gamepad with the keyboard as the fallback, on top of lib_ableem, knowing nothing of AutoBleem itself, so other
+programs can be built on it later. Licence: **GPL-3.0-or-later**, the same as the launcher. Its design comes
+first as a document for the owner's OK; the move itself changes nothing on screen.
