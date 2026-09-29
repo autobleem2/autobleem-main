@@ -77,6 +77,7 @@ order; each is checked on the Pi (screenshots) before it is closed. Letters in b
 | UIREV-24 | German fixes: Memory Cards, Spielemanager, Hintergrundmusik (S6, O8) | lang | S | dev+tester | - | new |
 | UIREV-25 | Delete the unused playlists/game-dir menu headers (D1) | launcher `gui/menus` | S | dev | - | new |
 | UIREV-26 | Polish batch: row colours, the repeated "System" heading, captured frame without the empty hint band, memory-card panels over the captured frame, extensions icon column, About credits (S2-S5, C5, C6, X1, A1) | launcher, core | M | dev+tester | - | new |
+| UIREV-27 | The launcher's small icons (the pad/players, USB, internal, HD/SD and the other meta badges) are invisible on light themes - give them the same frame the Play button has (the owner, 2026-09-29) | launcher `evoui/controls`, themes | S | dev+tester | - | new |
 
 ## HWTEST - Hardware proofs (the tester checklist)
 
