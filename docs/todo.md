@@ -78,6 +78,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 | UIREV-25 | Delete the unused playlists/game-dir menu headers (D1) | launcher `gui/menus` | S | dev | - | new |
 | UIREV-26 | Polish batch: row colours, the repeated "System" heading, captured frame without the empty hint band, memory-card panels over the captured frame, extensions icon column, About credits (S2-S5, C5, C6, X1, A1) | launcher, core | M | dev+tester | - | new |
 | UIREV-27 | The launcher's small icons (the pad/players, USB, internal, HD/SD and the other meta badges) are invisible on light themes - give them the same frame the Play button has (the owner, 2026-09-29) | launcher `evoui/controls`, themes | S | dev+tester | - | new |
+| UIREV-28 | Every footer names what the shoulder buttons do where they do something (L1/R1 first/last row or tabs, L2/R2 page, ...) - today most panels (Options first) leave them out. First a design for panels where it would not fit (paired hints like "L1/R1 First/last", "L2/R2 Page"; icons-only fallback; what can be dropped), then an audit of every footer in the code and the fixes; all 16 languages (the owner, 2026-09-29) | launcher, core `panel_style.cpp` | M | dev+tester | - | new |
 
 ## HWTEST - Hardware proofs (the tester checklist)
 
