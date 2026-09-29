@@ -52,7 +52,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 | ID | What | Where | Size | Who | Ms | State |
 |---|---|---|---|---|---|---|
 | UIREV-1 | Options (and the game editor): L2/R2 page, L1/R1 go to the first/last row; the shoulder buttons never change a value (today R2 sets the row to its last value) (O1) (2026-09-29, Pi 400 QA: **FAIL** - L2/R2 and R1 correct, but L1 lands on the section-header row with no visible cursor; `!autobleem\out\ui-review\qa-report.md`) | launcher `gui_options_menu_base.*` | S | dev+tester | - | in progress |
-| UIREV-2 | The d-pad hint arrows are readable on the light hint bars of aergb/autobleem/default/evolution (L1) | core `panel_style.cpp` | S | dev+tester | - | new |
+| UIREV-2 | The d-pad hint arrows are readable on the light hint bars of aergb/autobleem/default/evolution (L1) | core `panel_style.cpp` | S | dev+tester | - | done |
 | UIREV-3 | A footer never runs under its counter: after the smallest font, icons only or shortened labels (C1) | core `panel_style.cpp` | S | dev+tester | - | new |
 | UIREV-4 | Set picker: long titles shortened before the count; the panel keeps one height across the tabs (P1, P2) | launcher `evoui_set_picker.cpp` | S | dev+tester | - | new |
 | UIREV-5 | Game Manager: "Failed to delete" is actually shown (M3) | launcher `gui_game_manager_menu.cpp` | S | dev+tester | - | new |
@@ -77,7 +77,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 | UIREV-24 | German fixes: Memory Cards, Spielemanager, Hintergrundmusik (S6, O8) | lang | S | dev+tester | - | new |
 | UIREV-25 | Delete the unused playlists/game-dir menu headers (D1) | launcher `gui/menus` | S | dev | - | new |
 | UIREV-26 | Polish batch: row colours, the repeated "System" heading, captured frame without the empty hint band, memory-card panels over the captured frame, extensions icon column, About credits (S2-S5, C5, C6, X1, A1) | launcher, core | M | dev+tester | - | new |
-| UIREV-27 | The launcher's small icons (the pad/players, USB, internal, HD/SD and the other meta badges) are invisible on light themes - give them the same frame the Play button has (the owner, 2026-09-29) | launcher `evoui/controls`, themes | S | dev+tester | - | new |
+| UIREV-27 | The launcher's small icons (the pad/players, USB, internal, HD/SD and the other meta badges) are invisible on light themes - give them the same frame the Play button has (the owner, 2026-09-29) (2026-09-29: combined with UIREV-2, same outline mechanism reused from `GuiLauncher::makePlayOutline`; code done and pushed to `feature/uirev`, native suite green - the on-screen check needs real game data, folded into Victor's PLATFORM-14 VM set) | launcher `evoui/controls`, themes | S | dev+tester | - | in progress |
 | UIREV-28 | Every footer names what the shoulder buttons do where they do something (L1/R1 first/last row or tabs, L2/R2 page, ...) - today most panels (Options first) leave them out. First a design for panels where it would not fit (paired hints like "L1/R1 First/last", "L2/R2 Page"; icons-only fallback; what can be dropped), then an audit of every footer in the code and the fixes; all 16 languages (the owner, 2026-09-29) | launcher, core `panel_style.cpp` | M | dev+tester | - | new |
 
 ## HWTEST - Hardware proofs (the tester checklist)
