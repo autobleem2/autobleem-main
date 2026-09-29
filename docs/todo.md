@@ -47,7 +47,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 ## UIREV - Launcher UI review (the owner approved the list, 2026-09-29)
 
 A review of every launcher screen in the five themes and German (2026-09-29). One fix per commit, done in this
-order; each is checked on the Pi (screenshots) before it is closed. Letters in brackets are the review's finding IDs.
+order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merges to develop until the owner approves the whole cycle on the console; he closes the rows then. Letters in brackets are the review's finding IDs.
 
 | ID | What | Where | Size | Who | Ms | State |
 |---|---|---|---|---|---|---|
