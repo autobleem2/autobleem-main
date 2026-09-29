@@ -8,7 +8,8 @@ puts them there. Paths without a repository name are the launcher's.
 - The console runs **our own RetroArch**, not RetroBoot's: the public repository `autobleem2/retroarch-psc`,
   merged from AutoBleem-NG's `retroarch-psc` + `libretro-cores-psc` (the NG org is gone from GitHub).
 - `make retroarch` builds with the `autobleem-build` image's `/opt/psc` toolchain (Stretch gcc-6, the
-  console's glibc 2.24 sysroot, our **SDL2 2.0.14**) - the compiler pcsx-ab and the launcher use. NG's
+  console's glibc 2.24 sysroot, our **SDL2 2.0.14** - 2026-09-29: superseded by the console's own
+  `autobleem_sdl` 2.0.18, see `docs/decisions.md`) - the compiler pcsx-ab and the launcher use. NG's
   crosstool-ng stage is kept as `make retroarch-ctng`. Stretch's freetype and liblzma are unpacked into the
   sysroot for the build, and a **wayland-scanner 1.12** is built because a newer one emits
   `wl_proxy_marshal_flags()`, which the console's libwayland 1.12 lacks.

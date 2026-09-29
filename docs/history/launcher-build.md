@@ -110,3 +110,8 @@ retroarch-psc's `wl_shell_fallback.patch` did for RetroArch 1.22), with the 1.18
 optional - the route to 2.0.22 or 2.30 and `SDL_RenderGeometry` (2.0.18), which the carousel's turned covers
 already use when the headers have it. SDL2's ABI is backward compatible, so a newer libSDL2 in the archive
 never needs a rebuild of the programs.
+
+**2026-09-29: superseded.** The patch described above as future work was built: the console's SDL2 is now our
+own `autobleem2/autobleem_sdl` at 2.0.18 (the `wl_shell` fallback plus two GLES2 renderer fixes), replacing
+plain upstream 2.0.14 in the build image. 2.0.18 is the new ceiling for the same reason 2.0.14 was (2.0.20+
+needs libwayland >= 1.18, the console has 1.12). See `docs/decisions.md` and `autobleem_sdl`'s own README.

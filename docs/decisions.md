@@ -99,8 +99,11 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
   with Reset** and, on Linux, a Start+Select hold (2026-09-25). `docs/emulator-contract.md`.
 - **The stick is written only when the user's state changes** (the quiet stick, 2026-09-24): logs, the
   selection hand-over and RetroArch's appended config live in RAM (`/tmp/autobleem` on the console).
-- **The console's SDL2 is 2.0.14 at most**, Wayland video and ALSA audio only (Sony's Weston offers only
-  `wl_shell`, which 2.0.16 removed; the console's libwayland is 1.12).
+- **The console's SDL2 is our own `autobleem_sdl` (2026-09-29)**: no longer upstream, `autobleem2/autobleem_sdl`
+  at **2.0.18** with the `wl_shell` window restored and two GLES2 renderer fixes, built into the image from a
+  pinned commit; Wayland video and ALSA audio only (Sony's Weston offers only `wl_shell`, which 2.0.16
+  removed; the console's libwayland is 1.12, so **2.0.18 is the new ceiling** - 2.0.20+ needs libwayland
+  >= 1.18). Declared stable: stay on it until a wall needs another backport.
 - **No BIOS file in any repository or on the download site** - only lists of hashes and upstream URLs.
 - **RetroArch is optional everywhere**; without it nothing RetroArch-related runs.
 - **The PC USB stick never says "Pi"** - every user-facing text on it reads as a PC product.
@@ -135,7 +138,7 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
     upstream submodule**, not a fork.
   - **A package carries its own libraries** in `lib/<key>/` (`Lib=lib/{key}`, which `app_env.sh` and the
     App's `run.sh` put first on the library path). Not bundled: the **SDL2 family** (SDL2, SDL2_image,
-    _mixer, _ttf - shared, and known to be stable: the launcher's 2.0.14 in `/tmp/lib` on the console, the
+    _mixer, _ttf - shared, and known to be stable: the launcher's 2.0.18 (`autobleem_sdl`) in `/tmp/lib` on the console, the
     launcher's own DLLs on Windows - its folder is on an App's `PATH` - and the system's on the Pis and
     the PC stick), glibc, libstdc++/libgcc_s and the graphics driver stack. The RetroBoot libs pack is
     not used by the ports. Optional network libraries (SDL2_net) are built and bundled, not left out.

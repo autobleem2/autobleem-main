@@ -33,7 +33,7 @@ Size as in todo.md.
 
 | Idea | Size | Value | Notes |
 |---|---|---|---|
-| A newer SDL2 on the console (2.26+): port `wl_shell` back as a fallback (as retroarch-psc's `wl_shell_fallback.patch` did for RetroArch 1.22) and make libwayland >= 1.18 symbols optional | L | med | Brings `SDL_RenderGeometry`, current HIDAPI pad drivers and the CRC16 GUIDs; 2.0.14 is the ceiling today (the console's Weston 1.11 offers only `wl_shell`, libwayland is 1.12) |
+| Done 2026-09-29: the console's SDL2 is our own `autobleem_sdl` 2.0.18 (`wl_shell` ported back as patch 0001, `SDL_RenderGeometry` and the rest of 2.0.16/2.0.18's renderer work included). Still open: SDL 2.0.20+/2.26+, which needs libwayland >= 1.18 symbols made optional (the console has 1.12) - current HIDAPI pad drivers and the CRC16 GUIDs would be the payoff | L | med | 2.0.18 is the new ceiling until this lands |
 | A userland refresh: ship newer libraries than the stock root in the overlay, never the graphics stack | L | low-med | psc-kernel-payload `feature/userland-refresh`; a newer kernel is ruled out (the GPU blob pins 4.4 - the owner, 2026-09-25) |
 | `abfetch` checks certificate dates when the AutoBleem kernel gives a real clock | S | low | No battery clock on a stock console, hence off today |
 | Power Off: detect the OTG host up front instead of three refused suspends before `shutdown -h` | S | low | See `docs/console.md` |

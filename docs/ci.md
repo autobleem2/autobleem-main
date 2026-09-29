@@ -108,7 +108,7 @@ docker run --rm -u $(id -u):$(id -g) -v "$PWD:$PWD" -w "$PWD" \
 Output lands in `build_<target>/` and `dist/<target>/`. `AB_NO_PCSX=1`, `AB_NO_UPX=1`, `AB_NO_LINT=1`,
 `AB_JOBS` are the knobs (the script's header). A tree without `.git` needs `AB_GIT_*` in the environment.
 Changing a toolchain: a build-arg in autobleem-build's `docker/Dockerfile` on develop; `ab-validate` must
-still pass (the console's SDL2 stays at 2.0.14, Wayland + ALSA only).
+still pass (the console's SDL2 stays at `autobleem_sdl` 2.0.18, Wayland + ALSA only).
 
 ## Known issues
 

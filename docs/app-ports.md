@@ -39,7 +39,7 @@ pass is the tester checklist's §12 (todo APPS-1).
 
 ## Libraries
 
-- **Shared, never bundled**: the SDL2 family (the launcher's 2.0.14 in `/tmp/lib` on the console, the
+- **Shared, never bundled**: the SDL2 family (the launcher's 2.0.18, `autobleem_sdl`, in `/tmp/lib` on the console, the
   launcher's own DLLs on Windows, the system's on the Pis and the PC stick), glibc, libstdc++/libgcc_s and
   the graphics stack. Nothing newer than the console's SDL is called unguarded.
 - **Everything else is the App's own**: `lib/<key>/` and `Lib=lib/{key}` in `app.ini`, which `app_env.sh`

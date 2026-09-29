@@ -16,7 +16,8 @@ RUNPATH and their libc linker scripts are rewritten to bare names instead.
 
 ## The image's toolchain stages
 
-1. **psc** - the Stretch sysroot + gcc-6 under `/opt/psc`, a wayland-scanner 1.12, SDL2 (now 2.0.14) +
+1. **psc** - the Stretch sysroot + gcc-6 under `/opt/psc`, a wayland-scanner 1.12, SDL2 (now 2.0.14; superseded
+   2026-09-29 by the console's own `autobleem_sdl` 2.0.18, see `docs/decisions.md`) +
    image/mixer 2.6.3 + ttf 2.20.2 built with the console's backends (Wayland + dummy, GLES via EGL, ALSA,
    udev; no X11/OSS), wrapped as `armv8-sony-linux-gnueabihf-*` so `PSCtoolchainV8.cmake` works unchanged.
 2. **rpi / rpi64** - Debian's `crossbuild-essential-armhf`/`-arm64` with the multiarch `libsdl2*-dev`
@@ -32,7 +33,8 @@ it is bind-mounted and built as the calling uid.
 ## What `ab-validate` gates (end of each stage)
 
 A C++14 + SDL test program must link and fit the target. For the console: ARMv8, nothing above GLIBC_2.24 /
-GLIBCXX_3.4.22, no RPATH, an SDL2 that is 2.0.12/2.0.14 with Wayland and ALSA and without X11 or OSS (the
+GLIBCXX_3.4.22, no RPATH, an SDL2 that is 2.0.12/2.0.14 with Wayland and ALSA and without X11 or OSS (2026-09-29:
+the check now looks for the console's own `autobleem_sdl` 2.0.18, `docker/ab-validate.sh` in autobleem-build) (the
 ALSA check came after a truncated `libasound.so` built an SDL2 with no sound). For the Pis and pcusb: the
 right ELF class and architecture (pcusb's test is executed).
 

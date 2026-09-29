@@ -13,7 +13,7 @@ pcsx-abnxt; each of those keeps the code-level detail, this page keeps the facts
 | Display | Sony's Weston **1.11**, `wl_shell` only (no xdg shell), libwayland **1.12**; no X |
 | Audio | ALSA; no OSS |
 | C runtime | glibc **2.24**, libstdc++ 6.0.22 - a console binary may need at most `GLIBC_2.24` / `GLIBCXX_3.4.22` and no RPATH (`check_psc_binary.sh`) |
-| SDL | our SDL2 **2.0.14** at most (the last with a `wl_shell` window), Wayland + ALSA only, in `Autobleem/lib/libs.tar.gz` -> `/tmp/lib`. Everything on the console - the launcher, both emulators, the tools, the Apps - uses that one set. A newer SDL is an idea (`docs/ideas.md`) |
+| SDL | our own **`autobleem_sdl`** (2026-09-29), **2.0.18** with the `wl_shell` window restored and two GLES2 renderer fixes, Wayland + ALSA only, in `Autobleem/lib/libs.tar.gz` -> `/tmp/lib`. Everything on the console - the launcher, both emulators, the tools, the Apps - uses that one set. 2.0.18 is the ceiling (2.0.20+ needs libwayland >= 1.18, the console has 1.12); declared stable until a wall needs another backport |
 | Toolchain | the autobleem-build image's `/opt/psc`: a Debian Stretch sysroot and Stretch's gcc-6 (C++14). A C++17 App (Amiberry) uses gcc-12 against the same sysroot with libstdc++ linked in |
 | Init | **systemd** - `halt`/`reboot`/`shutdown` are `systemctl`; the board has no real halt (a `shutdown -h` reboots) |
 | Storage | the eMMC is **never written** (decisions.md) - the stick and `/tmp` only; ABFlashKit flashing the kernel on the user's request is the one exception |

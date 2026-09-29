@@ -40,7 +40,7 @@ release process itself, plus a few things that should not ship to anyone.
 | # | Must do before tagging | ID | Team | State |
 |---|---|---|---|---|
 | 1 | **Withdraw alpha2 and the stray alpha3** (tags, GitHub Releases, the site's testing channel), keep the nightly's update check sane, `release.py` skips an existing tag | RELEASE-1 | infrastructure | decided 2026-09-26, to do |
-| 2 | **Bring autobleem-build's master up to develop** (8 commits: SDL2 2.0.14 without OSS, no UPX on Windows, libdbus in the psc sysroot) and make it a release-train step | R2 | infrastructure | owner OK 2026-09-26, to do |
+| 2 | **Bring autobleem-build's master up to develop** (36 commits as of 2026-09-29: SDL2 without OSS, then the console's own `autobleem_sdl` 2.0.18, no UPX on Windows, libdbus in the psc sysroot, more) and make it a release-train step | R2 | infrastructure | owner OK 2026-09-26, to do |
 | 3 | **Give the Store and Unzip real releases** and add them to `release.py`'s stages | R3 | infrastructure | to do |
 | 4 | **First real `promote.yml` run** (dry run first) | RELEASE-2 | infrastructure + owner | after 1-3 |
 | 5 | pc-tools' develop has the content of the 5 master-only commits | R5 | infrastructure | to do |
