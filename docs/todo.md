@@ -62,6 +62,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | HWTEST-12 | **Large files with `-D_FILE_OFFSET_BITS=64`** (psc/rpi builds): a Store download over 2 GB on the console and on a 32-bit Pi. | launcher, console-tools | S | tester | a3 |
 | HWTEST-13 | **The Store's source icons over a real network on the console** (abfetch): a root page with `<link rel=icon>`, the retry after a failed fetch (Refresh), a corrupt cached icon healed. | ext_store | S | tester | a3 |
 | HWTEST-14 | **The L1/R1 scroll sound at the d-pad's volume**, judged by ear on the console. | launcher | S | owner | a3 |
+| HWTEST-15 | **Test sweep over what the owner changed live 2026-09-29**: run the existing suites, fix any that fail, write new tests for the fonts fallback/scope fix, the hold-to-scroll Options rows, the emulator screen-scaling config migration and env hand-over, and the Splash timeout's Skip/0 change. UI checks on the Pi/VM only, never the PSC. | autobleem-core, launcher, pcsx-abnxt | M | tester | a3 |
 
 ## KERNEL - Kernel and kernel payload
 
