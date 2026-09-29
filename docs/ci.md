@@ -27,13 +27,27 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   console-tools, pc-tools, the launcher (`test.yml` native + `publish-launcher.yml`'s build matrix),
   pcsx-ab, pcsx-abnxt. Still hosted: `windows-latest` + MSYS2 for the emulators' Windows builds. The build server's **self-hosted runner**
   (org-scoped, `autobleem-build/docker/runner/compose.yml`, labels `self-hosted,linux,x64,psc-build`) only
-  does what writes the server's disk or needs its Docker: site publishes, the image build, the appliance's
-  disk images, the page, cleanup. Pull requests never reach either self-hosted runner. **The runner audit (2026-09-27)**:
-  every self-hosted job but two is a site write (`AB_REPO_DIR=/home/claude/autobleem-repo` bind-mounted:
+  does what writes the server's disk or needs its Docker: site publishes, the appliance's disk images
+  (through 2026-09-28 - see below), the page, cleanup. Pull requests never reach either self-hosted runner.
+  **2026-09-29: the appliance's `image` job (RPi and PC-stick image building, `assemble.yml`) moved off
+  psc-build to its own 4th runner on `bleemmachine` (label `bleemmachine-image`, user `gha-runner`, same org
+  - `docs/infrastructure.md`'s "PC test machine" row) - psc-build's disk was down to 13G free with the
+  image job's 6.8G base-image cache on it, and bleemmachine had 152G free to spare; while there, pcusb also
+  dropped `--mount`/`--privileged` for `mmdebstrap --mode=unshare` (rootless, bleemmachine's kernel supports
+  unprivileged user namespaces, which psc-build's container-runner could not). Because the `image` job no
+  longer runs on the box that holds `AB_REPO_DIR`, its site-publish step moved too: it now uploads the
+  finished `.img.xz` as a normal `actions/upload-artifact` and `publish-release`/`publish-nightly` (still
+  self-hosted on psc-build, unchanged otherwise) download it and write it to the site, the same
+  artifact-passing plumbing the workflow already used for every other payload - no new ssh/rsync path.
+  Full reasoning and the disk/permission inventory behind the move:
+  `company/status/notes/image-build-move-plan.md` (PLATFORM-11; autobleem-appliance PR #1,
+  `f27683257d51c9f81f84314cb20f2ba00c52476c`). **The runner audit (2026-09-27, image job since moved)**:
+  every self-hosted psc-build job but one is a site write (`AB_REPO_DIR=/home/claude/autobleem-repo` bind-mounted:
   appliance publish-release/publish-nightly, build retroarch.yml publish, manuals, pc-tools site, samples,
   ext_store site, pcsx-ab/abnxt publish, retroarch-psc publish, autobleem-repo page/stack/cleanup/withdraw);
-  the other two need the server's own state (autobleem-build `image.yml` - the daemon's layer cache; the
-  appliance's `image` job - the cached base images). All of them are pinned to the build server by its own
+  the remaining one needs the server's own state (autobleem-build `image.yml` - the daemon's layer cache;
+  note this is autobleem-build's Docker-image build, unrelated to the appliance's now-relocated `image`
+  job). All of them are pinned to the build server by its own
   label, `runs-on: [self-hosted, psc-build]` (2026-09-27, all 10 repos) - never use the general
   `self-hosted,linux,x64` labels for a new job. **psc-build's runner itself runs in a container**, so it
   cannot run a job with `container:` ("Container feature is not supported when runner is already running
@@ -69,7 +83,7 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 | `retroarch-psc` | `upstream.yml` | daily 04:41, dispatch | a new upstream RetroArch release built for the console, tagged, published to `psc/retroarch/` |
 | | `build.yml` | push, `v*`, PR, dispatch | the full RetroArch + sharded cores build (gated by `CI_ENABLED` - see below) |
 | `psc-kernel-payload` | `build.yml` | push, `v*`, PR, dispatch | boot.img + abrootfs, reusing the last release when nothing changed |
-| `autobleem-appliance` | `assemble.yml` | `v*` tags; a component's nightly (repository_dispatch `component-nightly`); daily 03:17 UTC as the safety net; dispatch (channel, version, platforms, images, skip_unchanged) | fetches the components' release or nightly assets, assembles every platform's package, publishes to the site; the `image` job (self-hosted, `AB_IMAGE_BUILD_ENABLED`) builds the Pi and PC stick images, skipped with `images: false` (packages only); an automatic run waits `AB_NIGHTLY_SETTLE_SECONDS` (180) for sibling builds and is skipped when the site's nightly has the same components, platforms and images (`sources.json`); the concurrency group never cancels - one run and one pending, so a burst gives at most two assemblies |
+| `autobleem-appliance` | `assemble.yml` | `v*` tags; a component's nightly (repository_dispatch `component-nightly`); daily 03:17 UTC as the safety net; dispatch (channel, version, platforms, images, skip_unchanged) | fetches the components' release or nightly assets, assembles every platform's package, publishes to the site; the `image` job (self-hosted, `[bleemmachine-image]` since 2026-09-29 - moved off psc-build, see above; `AB_IMAGE_BUILD_ENABLED`) builds the Pi and PC stick images and uploads them as a build artifact (it no longer writes the site directly - `publish-release`/`publish-nightly` download that artifact and publish it), skipped with `images: false` (packages only); an automatic run waits `AB_NIGHTLY_SETTLE_SECONDS` (180) for sibling builds and is skipped when the site's nightly has the same components, platforms and images (`sources.json`); the concurrency group never cancels - one run and one pending, so a burst gives at most two assemblies |
 | `autobleem-repo` | `page.yml` | develop pushes touching the page generator; dispatch | regenerates the download page (self-hosted) |
 | | `cleanup.yml` | daily 01:30, dispatch | the server's Docker and old nightlies pruned, before the assembly |
 | | `withdraw.yml` | dispatch | removes (or restores) a testing or nightly build from the site |
