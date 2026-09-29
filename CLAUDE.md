@@ -69,6 +69,7 @@ generated, never stored - autobleem-repo's CLAUDE.md has its rules.
 | `docs/app-ports.md` | how a third-party program becomes an App - the rules every `app_*` repository follows, and the ports |
 | `docs/versioning.md`, `docs/ci.md`, `docs/code-signing.md` | the version scheme; every workflow; Authenticode through SignPath (parked) |
 | `docs/infrastructure.md` | what runs where (the addresses are in the git-ignored `infrastructure.local.md`) |
+| `docs/test-devices.md` | the test devices one by one (Pi 400, PlayStation Classic, pcusb-test VM): OS, mounts, paths, traps |
 | `docs/tester-checklist.md` | the hardware proofs, for testers |
 | `docs/authors/README.md` | writing an App, an extension, a scanner processor or a Store catalog - for outside authors |
 | `docs/kernel-flash-recovery.md`, `docs/pi-install-guide.md` | recovering a console; installing on a Pi |

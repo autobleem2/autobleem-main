@@ -16,6 +16,8 @@ the names that file fills in.
 | **VMs** | the owner's VirtualBox | trying the PC USB stick image |
 | **Consoles** | the owner's PlayStation Classic(s) | console tests (see `docs/tester-checklist.md`) |
 
+Each test device's hardware, OS and traps (Pi 400, PlayStation Classic, the pcusb-test VM): `docs/test-devices.md`.
+
 `infrastructure.local.md` holds, for each: the address, the account, how to reach it (keys, not passwords -
 passwords are never written down), and the local paths a developer machine uses (toolchain folders, the
 MSYS2 install, where the repositories are checked out).
