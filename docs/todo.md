@@ -51,7 +51,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 
 | ID | What | Where | Size | Who | Ms | State |
 |---|---|---|---|---|---|---|
-| UIREV-1 | Options (and the game editor): L2/R2 page, L1/R1 go to the first/last row; the shoulder buttons never change a value (today R2 sets the row to its last value) (O1) | launcher `gui_options_menu_base.*` | S | dev+tester | - | new |
+| UIREV-1 | Options (and the game editor): L2/R2 page, L1/R1 go to the first/last row; the shoulder buttons never change a value (today R2 sets the row to its last value) (O1) | launcher `gui_options_menu_base.*` | S | dev+tester | - | in progress |
 | UIREV-2 | The d-pad hint arrows are readable on the light hint bars of aergb/autobleem/default/evolution (L1) | core `panel_style.cpp` | S | dev+tester | - | new |
 | UIREV-3 | A footer never runs under its counter: after the smallest font, icons only or shortened labels (C1) | core `panel_style.cpp` | S | dev+tester | - | new |
 | UIREV-4 | Set picker: long titles shortened before the count; the panel keeps one height across the tabs (P1, P2) | launcher `evoui_set_picker.cpp` | S | dev+tester | - | new |
