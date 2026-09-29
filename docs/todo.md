@@ -44,6 +44,40 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | CONSOLE-13 | (2026-09-29: **part merged** - launcher e57dfa4 (2026-09-28): the launcher's carousel hold clears when no direction is held after a busy job, so the row no longer runs on by itself; **left**: the general rule below in core's busy path, its tests and the CLAUDE.md conventions.) (the owner, 2026-09-27 - **first**, BUG-21 reopened) **While a spinner shows, every pad input is ignored - everywhere in AutoBleem.** CONSOLE-12's fix (core 1f94fce, launcher e93e5dd) is not enough: pressing the pad while the spinner is up (after a theme/language change in Options) starts the loop again. The general rule (decisions.md, 2026-09-27): while a spinner/busy job is shown and the system waits, any pad or key input - press, release, hold, axis - is ignored, and when the job ends the input state starts clean (no key held, no hold-repeat carried over), so nothing acts on an input made before or during the wait. Implement it once, in the busy/spinner path (not per screen), cover every screen that shows a spinner, keep CONSOLE-11 (BUG-1) fixed, add tests that press/hold/release during the job and fail on the current code, and document the rule in the launcher's and autobleem-core's CLAUDE.md conventions. | autobleem-core input/busy, launcher Options | S | dev | a2 | in progress |
 | CONSOLE-14 | (the owner, 2026-09-29) **One new look for the whole system** - today's themes are unclear and busy. Direction A ("a dark premium console": graphite and navy, one cyan accent, soft light, a calm centre behind the row and a dark lower third for Play and the menu), one visual language across the launcher's background, panels and footer, the logo, Play, the game-menu icons, the splash screens, the Pi/PC-stick boot splash (plymouth, GRUB), the installer's screens and, later, the site's banner. Backgrounds are generated (FLUX.1-schnell, Apache-2.0; the prompt and seed kept beside each file, no text, logos or Sony marks in them); the logo, Play and the icons are drawn as vectors. The small button icons stay the default theme's. Made and shown to the owner one element at a time. | autobleem-themes, launcher `src/resources/splash`, appliance (plymouth, installer) | L | dev + owner | b1 | new |
 
+## UIREV - Launcher UI review (the owner approved the list, 2026-09-29)
+
+A review of every launcher screen in the five themes and German (2026-09-29). One fix per commit, done in this
+order; each is checked on the Pi (screenshots) before it is closed. Letters in brackets are the review's finding IDs.
+
+| ID | What | Where | Size | Who | Ms | State |
+|---|---|---|---|---|---|---|
+| UIREV-1 | Options (and the game editor): L2/R2 page, L1/R1 go to the first/last row; the shoulder buttons never change a value (today R2 sets the row to its last value) (O1) | launcher `gui_options_menu_base.*` | S | dev+tester | - | new |
+| UIREV-2 | The d-pad hint arrows are readable on the light hint bars of aergb/autobleem/default/evolution (L1) | core `panel_style.cpp` | S | dev+tester | - | new |
+| UIREV-3 | A footer never runs under its counter: after the smallest font, icons only or shortened labels (C1) | core `panel_style.cpp` | S | dev+tester | - | new |
+| UIREV-4 | Set picker: long titles shortened before the count; the panel keeps one height across the tabs (P1, P2) | launcher `evoui_set_picker.cpp` | S | dev+tester | - | new |
+| UIREV-5 | Game Manager: "Failed to delete" is actually shown (M3) | launcher `gui_game_manager_menu.cpp` | S | dev+tester | - | new |
+| UIREV-6 | evolution: the launcher's hint rows clear of the theme's POWER/OPEN art (L2) | launcher `evoui_launcher_screen.cpp`, themes | S | dev+tester | - | new |
+| UIREV-7 | Panel footer labels in the theme's `text` colour, not the launcher's `hint` grey (O6) | core `panel_style.cpp` | S | dev+tester | - | new |
+| UIREV-8 | Sentence-case sweep: system menu, set picker, Options, editor, memory cards, button guide, game menu, resume picker, meta; "RetroArch" spelled right; all 16 languages (S1, P5, O4, E4, C3, B1, B2, G1, R1, L4) | launcher, core, lang | M | dev+tester | - | new |
+| UIREV-9 | Plural-aware counts ("1 game", German "Spiele") (P4, N1) | launcher, lang | S | dev+tester | - | new |
+| UIREV-10 | One on/off style everywhere (the switch image) (O5, E1) | launcher | S | dev+tester | - | new |
+| UIREV-11 | Options: footer hints for Left/Right and L2/R2; the title is "Options" (O2, O3) | launcher `gui_options_menu.*` | S | dev+tester | - | new |
+| UIREV-12 | Software Update result panel: header rule, footer, sized to its content (U1) | launcher `evoui_update.cpp` | S | dev+tester | - | new |
+| UIREV-13 | The Resume icon greyed, with a "No resume points" notice, when a game has none (G2) | launcher | S | dev+tester | - | new |
+| UIREV-14 | Resume picker: its own hint line removed, sentence case, the theme's text colour (R1-R3) | launcher `evoui_stateselector.cpp` | S | dev+tester | - | new |
+| UIREV-15 | Confirm dialogs: one placeholder key per question, Cross names the action (C4) | launcher, core `gui_confirm.cpp` | S | dev+tester | - | new |
+| UIREV-16 | Empty facts hidden ("Last Played", Year 0, Players 0, "Folder: ."), colons consistent (L3, E2, AP3) | launcher | S | dev+tester | - | new |
+| UIREV-17 | App start without a readme: a placeholder, and "Start"/"Back" (AP1, AP2) | launcher `evoui_app_start.cpp` | S | dev+tester | - | new |
+| UIREV-18 | Game editor title falls back to the folder name (E3) | launcher `gui_game_editor_menu.cpp` | S | dev+tester | - | new |
+| UIREV-19 | Hardware Information: values right-aligned, scroll marker clear of the text, counter at the right edge (H1-H3) | core `gui_facts_page.cpp` | S | dev+tester | - | new |
+| UIREV-20 | Game Manager list: the duplicate column dropped or right-aligned; "Free space:" format (M1, M2) | launcher, core `gui.cpp` | S | dev+tester | - | new |
+| UIREV-21 | Keyboard: function-row labels not greyed; the R1 label follows the page (K1, K2) | core `gui_keyboard.cpp` | S | dev+tester | - | new |
+| UIREV-22 | Apps carousel: a fallback cover for an App without art (L7) | launcher carousel | S | dev+tester | - | new |
+| UIREV-23 | Crash notice wording; the "Showing:" banner prefix and double space (L5, L6) | launcher `evoui_launcher_screen.cpp` | S | dev+tester | - | new |
+| UIREV-24 | German fixes: Memory Cards, Spielemanager, Hintergrundmusik (S6, O8) | lang | S | dev+tester | - | new |
+| UIREV-25 | Delete the unused playlists/game-dir menu headers (D1) | launcher `gui/menus` | S | dev | - | new |
+| UIREV-26 | Polish batch: row colours, the repeated "System" heading, captured frame without the empty hint band, memory-card panels over the captured frame, extensions icon column, About credits (S2-S5, C5, C6, X1, A1) | launcher, core | M | dev+tester | - | new |
+
 ## HWTEST - Hardware proofs (the tester checklist)
 
 | ID | What | Where | Size | Who | Ms | State |
@@ -87,7 +121,7 @@ Milestone: **a2 a3 a4 b1 rc** = alpha2, alpha3, alpha4, beta1, rc/2.0.0 (renumbe
 | EMU-5 | pcsx-abnxt's 32-bit Pi build has never run. | pcsx-abnxt | S | tester | a4 | new |
 | EMU-6 | A save state loaded in the first seconds of an HLE boot spins in the HLE BIOS (a PC without a BIOS cannot test resume). | pcsx-abnxt | M | dev | later | new |
 | EMU-7 | Upstream PR candidates (`path_is_absolute`, `PCSX_MEMCARD_COUNT`, soft filter, the 4:3 layer rule, player-2 analogs, `pl_scanlines_by_plat`, the `MENU_SHOW_VOUTMODE` NULL fix). | pcsx-abnxt | M | dev | later | new |
-| EMU-8 | **Not developed any more** (pcsx-ab is retired, the owner 2026-09-27 - no fix unless pcsx-abnxt shares the cause). pcsx-ab: the Windows dev build crashes a moment after loading any state; ~30 implicit prototypes kept at warning level; CDDA in CHDs untested by ear. | pcsx-ab | M | dev | later | closed |
+| EMU-8 | **Not developed any more** (pcsx-ab is retired, the owner 2026-09-27; closed by the owner 2026-09-29 - no fix unless pcsx-abnxt shares the cause). pcsx-ab: the Windows dev build crashes a moment after loading any state; ~30 implicit prototypes kept at warning level; CDDA in CHDs untested by ear. | pcsx-ab | M | dev | later | closed |
 | EMU-9 | Our own RetroArch cores: the console runs RetroBoot 1.2's `km_*` pack; build `cores.txt` (81; about a day on the server), test on hardware, then consider `cores-full.txt`. | retroarch-psc | L | dev | later | new |
 | EMU-11 | **Check on pcsx-abnxt instead** (pcsx-ab is no longer developed, the owner 2026-09-27): the homebrew sample pack needs a PS1 game that boots on pcsx-abnxt; pcsx-ab itself gets no fix. Was: pcsx-ab cannot run Tetrade (PSn00bSDK): after the KSEG1 fix it boots, then goes quiet after the ordering-table clear. Until a redistributable PS1 homebrew boots on the shipped emulator, the sample pack has no PS1 game. Try it on pcsx-abnxt first. | pcsx-ab(nxt), samples | M | dev | b1 | new |
 | EMU-12 | N64 in RetroArch has never been tested with a real game (the homebrew RSP tests crash GLupeN64 inside the core). | retroarch-psc | S | tester | later | new |
