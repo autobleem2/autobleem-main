@@ -280,3 +280,11 @@ their own: **`ab_gui`**, in full **AutoBleem User Interface Library** - a GUI fo
 gamepad with the keyboard as the fallback, on top of lib_ableem, knowing nothing of AutoBleem itself, so other
 programs can be built on it later. Licence: **GPL-3.0-or-later**, the same as the launcher. Its design comes
 first as a document for the owner's OK; the move itself changes nothing on screen.
+
+## No SDL outside lib_ableem (the owner, 2026-09-30, a hard rule)
+
+Only lib_ableem's `ableem` layer (Platform, Renderer, Texture, Font, Audio, Input, Joystick) talks to SDL. `ab_gui`,
+ab_core, ab_classic, the launcher, the extensions, the console tools and every App built on ab_gui never include an
+SDL header and never call an SDL function or use an SDL type - and the `ableem` interface itself exposes no SDL type.
+What is missing goes into lib_ableem first. The reason: the renderer can later be replaced (a GLES2 backend) under
+the same interface without touching ab_gui or the programs.
