@@ -8,6 +8,11 @@ from a read of every repository's documentation on 2026-09-26 - re-plan when a m
 current work is still the road to the next pre-release, which is **alpha2** again. The old plan's
 alpha3/4/5 are now alpha2/3/4; todo.md's milestone column follows.
 
+**Renumbered again 2026-09-30** (the owner): nothing has gone to testers, so the next pre-release is
+**alpha1** - the old alpha1 and alpha2 tags/releases are withdrawn in a repo clean-up (RELEASE-1; RetroArch and
+the Apps keep their own releases), and nightlies are named from `v2.0.0-alpha0` until then. Below, read
+alpha2/3/4 as **alpha1/2/3**; todo.md's milestone column follows at its next edit.
+
 ## Where we are
 
 | | |

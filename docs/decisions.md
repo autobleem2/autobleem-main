@@ -18,6 +18,14 @@ it). Repository-specific rules live in that repository's CLAUDE.md.
 - **alpha2 is withdrawn** (the owner, 2026-09-26): `v2.0.0-alpha2` and the stray `v2.0.0-alpha3` tags and
   releases are deleted; the current work is still the road to the next pre-release, which is called
   **alpha2** again. alpha1 stays (todo RELEASE-1).
+- **alpha1 again - everything so far withdrawn** (the owner, 2026-09-30; supersedes the line above): no build
+  has gone to testers yet, so the next pre-release is **`v2.0.0-alpha1`**. The `v2.0.0-alpha1` and
+  `v2.0.0-alpha2` tags and GitHub Releases of the AutoBleem components (launcher, autobleem-core, the emulators,
+  autobleem-appliance and the other repos tagged with the unified version) and the site's testing channel are
+  withdrawn in a repo clean-up before it; components that already have their own releases (RetroArch, the Apps)
+  keep them. Until alpha1 exists the nightly is named from a base tag **`v2.0.0-alpha0`**
+  (`v2.0.0-alpha0-N-g<sha>`), so the update check keeps ordering nightly < alpha1. Each tag/release deletion on
+  GitHub is confirmed by the owner when it runs (todo RELEASE-1).
 - **No promotion to a higher version before the owner's feature gate and the volunteers' test plans** (the
   owner, 2026-09-27). Before any `promote` - alpha, beta, rc or release - two things must be true:
   1. **Everything the external testers are to test is in the build**: the owner confirms that each of his
