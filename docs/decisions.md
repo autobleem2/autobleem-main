@@ -296,3 +296,9 @@ ab_core, ab_classic, the launcher, the extensions, the console tools and every A
 SDL header and never call an SDL function or use an SDL type - and the `ableem` interface itself exposes no SDL type.
 What is missing goes into lib_ableem first. The reason: the renderer can later be replaced (a GLES2 backend) under
 the same interface without touching ab_gui or the programs.
+
+## A button combination is one button (the owner, 2026-10-01)
+
+Wherever the UI names a button combination (L2+R2, L2+Select and the like), it draws ONE combined glyph, never the
+buttons side by side - in the hint bar, the button guide, the menus and the extensions alike. The reason: it saves
+space and reads the same on every screen. A theme's button set carries the combined glyphs (todo UIREV-42).
