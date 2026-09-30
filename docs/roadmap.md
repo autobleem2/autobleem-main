@@ -12,6 +12,7 @@ alpha3/4/5 are now alpha2/3/4; todo.md's milestone column follows.
 **alpha1** - the old alpha1 and alpha2 tags/releases are withdrawn in a repo clean-up (RELEASE-1; RetroArch and
 the Apps keep their own releases), and nightlies are named from `v2.0.0-alpha0` until then. Below, read
 alpha2/3/4 as **alpha1/2/3**; todo.md's milestone column follows at its next edit.
+**alpha1's scope** (the owner, 2026-09-30): **the whole visual side finished** - the ab_gui plan (G5, G5z), thenext UI iteration (UIREV-35..38, UIREV-40 watermark), the installers' new look (PLATFORM-15) - and **the importantPSC stability problems solved** (CONSOLE-15: the recurring sleep problem, crashes, Wi-Fi drops). When it is readyand the owner is happy, alpha1; the **public** pre-release after it is **alpha2**.
 
 ## Where we are
 
