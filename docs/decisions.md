@@ -302,3 +302,12 @@ the same interface without touching ab_gui or the programs.
 Wherever the UI names a button combination (L2+R2, L2+Select and the like), it draws ONE combined glyph, never the
 buttons side by side - in the hint bar, the button guide, the menus and the extensions alike. The reason: it saves
 space and reads the same on every screen. A theme's button set carries the combined glyphs (todo UIREV-42).
+
+## A footer is one row; the window makes room for it (the owner, 2026-10-01)
+
+Every footer of a classic panel, a compact panel, a dialog or an extension is ONE row of hints. A two-row footer
+"looks awful": a footer that does not fit means the window is too small. So the window makes room. A compact panel
+is as wide as its one-row footer needs (at least today's 800 px), up to the full panel width (the screen less the
+40 px margins). Only when even the full width cannot hold it does the footer step down to the Small font, and only
+then are labels shortened. Never two rows. The launcher's own hint bar (EvolutionUI) has its own rules and is not
+covered by this.
