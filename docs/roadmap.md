@@ -33,7 +33,7 @@ and the owner is happy, **that is alpha1**.
 
 | Milestone | Theme | Gate (what "done" means) | Who | Size |
 |---|---|---|---|---|
-| **alpha1** | The whole visual side finished; the important PSC stability problems solved (the owner, 2026-09-30) | the ab_gui plan (G5, G5z), UIREV-35..38 + UIREV-40, the installers' new look (PLATFORM-15) and CONSOLE-15 (sleep, crashes, Wi-Fi drops) done and the owner happy with them on his devices; the old alpha1/alpha2 releases withdrawn (RELEASE-1) | dev + designer + owner checks | in progress |
+| **alpha1** | The whole visual side finished; the important PSC stability problems solved (the owner, 2026-09-30) | the ab_gui plan (G5, G5z, the screen transitions UIREV-48 and G6 with G6z - the owner 2026-10-01), UIREV-35..38 + UIREV-40, the installers' new look (PLATFORM-15) and CONSOLE-15 (sleep, crashes, Wi-Fi drops) done and the owner happy with them on his devices; the old alpha1/alpha2 releases withdrawn (RELEASE-1) | dev + designer + owner checks | in progress |
 | **alpha2** | Ship what is already built; make the release train work | `promote alpha` runs green end to end; the nightly's features in the testing channel; nothing false shipped on the stick | dev + owner decisions | ~2-3 days |
 | **alpha3** | The console pass | every nightly feature proven on a console on both kernels (stock and AutoBleem); PSC-Bios native backend proven | dev + owner/testers | ~1 week |
 | **alpha4** | The other platforms' pass | Pi (32/64), PC stick (BIOS + UEFI, real hardware), Windows (self-update, a real game), LAN Share - each proven | testers + dev fixes | ~1 week |
