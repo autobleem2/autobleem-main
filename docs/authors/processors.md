@@ -98,6 +98,7 @@ Every processor run gets these environment variables:
 | `AB_ROMS_DIR` | the other systems' ROMs tree |
 | `AB_RDB_DIR` | where RetroArch's own database files live |
 | `AB_TMP` | a scratch directory of your own (`/tmp/abproc/<name>` on the console - RAM, not the stick) |
+| `AB_HOME` (and `HOME`) | your own data folder on the stick (`<root>/Home/processors/<name>`, made for you) - keep settings and caches you want to survive here; build paths from `getenv("AB_HOME")`, never `~` (`fopen` does not expand it). A reinstall or update of AutoBleem leaves it alone |
 | `AB_PLATFORM`, `AB_PLATFORM_KEYS` | this machine's platform key, and the whole ordered list |
 | `AB_LANGUAGE` | the user's chosen language |
 | `AB_VERSION` | the AutoBleem version running it |

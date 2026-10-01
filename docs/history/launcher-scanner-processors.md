@@ -18,7 +18,8 @@ miniz for `.zip` and a vendored libarchive + liblzma for `.7z` and `.rar` since 
   `#DONE` (exit 0) or `#ERROR - ...`. Success needs both `#DONE` and exit 0 (`ableem::ProcessorOutput`).
 - The environment: `AB_PROCESSOR_PROTOCOL=1`, `AB_ROOT`, `AB_GAMES_DIR`, `AB_ROMS_DIR`, `AB_RDB_DIR`,
   `AB_TMP` (`/tmp/abproc/<name>`, off the stick - RAM on the console), `AB_PLATFORM(_KEYS)`, `AB_LANGUAGE`,
-  `AB_VERSION`.
+  `AB_VERSION`, and `HOME` = `AB_HOME` = `<root>/Home/processors/<name>` (2026-10-01: the processor's own data
+  folder on the stick, made when missing - open files there by that path; `~` is not expanded by `fopen`).
 - The rules a processor keeps: `<name>.part` then a rename, the original deleted only after; idempotent;
   inside its target; a line at least every `Timeout=` seconds.
 
