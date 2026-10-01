@@ -302,6 +302,8 @@ the same interface without touching ab_gui or the programs.
 Wherever the UI names a button combination (L2+R2, L2+Select and the like), it draws ONE combined glyph, never the
 buttons side by side - in the hint bar, the button guide, the menus and the extensions alike. The reason: it saves
 space and reads the same on every screen. A theme's button set carries the combined glyphs (todo UIREV-42).
+D-pad directions are NOT a combination (the owner, 2026-10-01: joined arrows do not fit and the chip came out the
+wrong size): Left/Right or Up/Down in a hint stay separate arrows, each in its own normal-size chip.
 
 ## A footer is one row; the window makes room for it (the owner, 2026-10-01)
 
