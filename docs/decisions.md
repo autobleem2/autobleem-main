@@ -304,6 +304,9 @@ buttons side by side - in the hint bar, the button guide, the menus and the exte
 space and reads the same on every screen. A theme's button set carries the combined glyphs (todo UIREV-42).
 D-pad directions are NOT a combination (the owner, 2026-10-01: joined arrows do not fit and the chip came out the
 wrong size): Left/Right or Up/Down in a hint stay separate arrows, each in its own normal-size chip.
+An ALTERNATIVE ("either button", written with "/", e.g. the readme's page switch L2/R2) is not a combination either
+(the owner, 2026-10-01: the App readme showed the L2+R2 picture - "a completely different image"): it is one chip with
+its own "L2/R2" glyph (and "L1/R1"), which a theme's button set carries next to the combined "+" glyphs.
 
 ## A footer is one row; the window makes room for it (the owner, 2026-10-01)
 
