@@ -172,6 +172,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 | SDK-7 | Homebrew PS1 games in the Store (`docs/store-homebrew-plan.md`, researched): four questions for the owner in its section 5. | ext_store, repo | M | owner then dev | later | new |
 | SDK-8 | Scanner processors, next (the launcher's `docs/scanner-processors-next-plan.md`): processors as a Store item kind, launch-time processors (`--prepare`/`--cleanup`), signatures or a trusted list, `Heavy=`. | core, ext_store | L | dev | later | new |
 | SDK-9 | Remove the memcard `backup/` + `restoreAll` recovery path "in a later release" (the quiet stick made it unnecessary). | core | S | dev | later | new |
+| SDK-10 | **Flaky `test_lan_client`** (the owner, 2026-10-01: a row for later): it failed once on the build server (G5fix6, `test_lan_client.cpp:96`, `rig.started` - the test's LAN server rig did not report started in time) and has been green since; find the race (start-up wait/timeout of the rig) so a slow runner cannot fail it | core `tests/core/test_lan_client.cpp`, `ableem_lanserver` | S | dev | later | new |
 
 ## APPS - Apps and the virtual gamepad
 
