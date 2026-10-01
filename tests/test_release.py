@@ -180,6 +180,29 @@ class DryRuns(unittest.TestCase):
         self.assertEqual(len(dispatched), len(release.NIGHTLY_REPOS) + 1)
         self.assertIn('"skip_unchanged": "false"', dispatched[-1])
 
+    def test_preview_builds_the_branch_where_it_exists_and_assembles_from_develop(self):
+        branches = {("autobleem", "feature/ab-gui"): "a" * 40, ("ext_store", "feature/ab-gui"): "b" * 40,
+                    ("proc_unzip", "feature/ab-gui"): "c" * 40}
+        gh = FakeGitHub(branches, [], self.lines.append)
+        release.preview(gh, "feature/ab-gui", "psc pcusb", log=self.lines.append)
+        dispatched = [l for l in self.lines if ": run " in l]
+        self.assertEqual(len(dispatched), 3)
+        self.assertIn('autobleem: run publish-launcher.yml on feature/ab-gui {"channel": "preview"}', dispatched[0])
+        self.assertIn('ext_store: run build.yml on feature/ab-gui {"channel": "preview"}', dispatched[1])
+        # proc_unzip cannot build a preview yet: its nightly is taken even though it has the branch
+        self.assertIn('assemble.yml on develop {"channel": "preview", "platforms": "psc pcusb", '
+                      '"preview_repos": "autobleem ext_store", "branch": "feature/ab-gui"}', dispatched[2])
+        self.assertFalse([l for l in self.lines if "nightly.yml" in l or '"nightly"' in l])
+
+    def test_preview_refuses_develop_and_odd_names(self):
+        gh = FakeGitHub({("autobleem", "develop"): "a" * 40}, [], self.lines.append)
+        for bad in ("develop", "master", "", "a..b", "x y", "-x", "feature/$(id)"):
+            with self.assertRaises(ValueError):
+                release.preview(gh, bad, "psc", log=self.lines.append)
+        with self.assertRaises(ValueError):
+            release.preview(gh, "feature/nowhere", "psc", log=self.lines.append)
+        self.assertFalse([l for l in self.lines if ": run " in l])
+
 
 class ImageRebuildNeeded(unittest.TestCase):
     """image_rebuild_needed() mirrors autobleem-build's image.yml `on: push: paths:` filter - a pure function

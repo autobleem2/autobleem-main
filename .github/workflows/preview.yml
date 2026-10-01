@@ -1,0 +1,51 @@
+# A preview build of a feature branch (PLATFORM-20): every component that has the branch builds it into its
+# rolling `preview` release, then autobleem-appliance assembles the preview with every other component's
+# nightly and publishes preview/<version>/ on the site (tools/release.py preview). What the admin panel's
+# "Preview" panel runs. Never touches the nightly.
+#
+# Needs the autobleem-admin GitHub App, like nightly.yml. Gated by AB_CI_ENABLED.
+name: preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: the feature branch to build (e.g. feature/ab-gui)
+        type: string
+        required: true
+      platforms:
+        description: platforms to assemble (space separated; rpi-armhf rpi-arm64 pcusb psc win)
+        type: string
+        default: 'rpi-armhf rpi-arm64 pcusb psc win'
+      dry_run:
+        description: only print what would be started
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-train
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: vars.AB_CI_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AB_ADMIN_APP_ID }}
+          private-key: ${{ secrets.AB_ADMIN_APP_KEY }}
+          owner: autobleem2
+      - name: Build the preview
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          BRANCH: ${{ inputs.branch }}
+          PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          set -euo pipefail
+          args=(preview --branch "$BRANCH" --platforms "$PLATFORMS")
+          [ "${{ inputs.dry_run }}" = true ] && args+=(--dry-run)
+          python3 tools/release.py "${args[@]}"

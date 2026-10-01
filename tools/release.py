@@ -88,6 +88,11 @@ NIGHTLY_REPOS = ["pcsx-abnxt", "autobleem", "autobleem-console-tools", "autoblee
 # what a component's develop build does not run for (its workflow's paths-ignore): a commit touching only these
 # publishes no nightly, so develop's head stays past the `nightly` tag - and is no reason to rebuild
 IGNORED_PATHS = {"autobleem": ("docs/**", "**.md", "manuals/**")}
+# the components whose workflow can build a feature branch as the rolling `preview` release (its `channel`
+# input, PLATFORM-20); proc_unzip has no such input yet, so a preview always takes its nightly
+PREVIEW_REPOS = [r for r in NIGHTLY_REPOS if r != "proc_unzip"]
+# a branch name a preview takes: what git allows that is also safe in a site folder name
+PREVIEW_BRANCH = re.compile(r"^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._/-]{0,99}\Z")
 ALL_PLATFORMS = "rpi-armhf rpi-arm64 pcusb psc win"
 KINDS = ("alpha", "beta", "rc", "release")
 # -alpha3 is the scheme (docs/versioning.md); -alpha.3 is read too, should one ever be made by hand
@@ -337,6 +342,31 @@ def nightly(gh, platforms, rebuild_all=False, log=print):
     log("nightly refreshed for: " + platforms)
 
 
+# ---------------------------------------------------------------------------------------------- preview
+def preview(gh, branch, platforms, log=print):
+    """A preview build of a feature branch (PLATFORM-20): every component that has the branch builds it into
+    its rolling `preview` release, then the appliance assembles them with every other component's nightly and
+    publishes preview/<version>/ on the site. Never touches a `nightly` release or the nightly folder."""
+    if not PREVIEW_BRANCH.match(branch or "") or branch in ("develop", "master", "main"):
+        raise ValueError("not a feature branch: %r" % branch)
+    built = [r for r in PREVIEW_REPOS if gh.branch_sha(r, branch)]
+    if not built:
+        raise ValueError("no component has a branch %s" % branch)
+    for repo in PREVIEW_REPOS:
+        log("%s: %s" % (repo, "builds %s" % branch if repo in built else "takes its nightly"))
+    since = utc_now()
+    for repo in built:
+        gh.dispatch(repo, WORKFLOWS[repo], branch, {"channel": "preview"})
+    wait_for_runs(gh, {r: ("event=workflow_dispatch&branch=" + branch, since) for r in built}, log=log)
+    # the assembly runs from the appliance's develop (its workflow), with its own concurrency group: a nightly
+    # arriving meanwhile never replaces it
+    since = utc_now()
+    gh.dispatch(APPLIANCE, WORKFLOWS[APPLIANCE], "develop",
+                {"channel": "preview", "platforms": platforms, "preview_repos": " ".join(built), "branch": branch})
+    wait_for_runs(gh, {APPLIANCE: ("event=workflow_dispatch&branch=develop", since)}, log=log)
+    log("preview of %s published for: %s" % (branch, platforms))
+
+
 # ---------------------------------------------------------------------------------------------- promote
 def check_own_version_repos(gh, log=print):
     """OWN_VERSION_REPOS never get the unified tag - they must already have a released v* version of their
@@ -503,6 +533,10 @@ def main():
     n.add_argument("--platforms", default=ALL_PLATFORMS)
     n.add_argument("--all", action="store_true")
     n.add_argument("--dry-run", action="store_true")
+    pv = sub.add_parser("preview")
+    pv.add_argument("--branch", required=True)
+    pv.add_argument("--platforms", default=ALL_PLATFORMS)
+    pv.add_argument("--dry-run", action="store_true")
     for name in ("promote", "next"):
         p = sub.add_parser(name)
         p.add_argument("kind", choices=KINDS)
@@ -519,6 +553,8 @@ def main():
             print(next_tag(gh.tags("autobleem"), args.kind, args.version))
         elif args.cmd == "nightly":
             nightly(gh, " ".join(args.platforms.split()), args.all)
+        elif args.cmd == "preview":
+            preview(gh, args.branch, " ".join(args.platforms.split()))
         else:
             promote(gh, args.kind, args.version)
     except (RuntimeError, ValueError) as e:
