@@ -10,8 +10,9 @@ alpha3/4/5 are now alpha2/3/4; todo.md's milestone column follows.
 
 **Renumbered again 2026-09-30** (the owner): nothing has gone to testers, so the next pre-release is
 **alpha1** - the old alpha1 and alpha2 tags/releases are withdrawn in a repo clean-up (RELEASE-1; RetroArch and
-the Apps keep their own releases), and nightlies are named from `v2.0.0-alpha0` until then. Below, read
-alpha2/3/4 as **alpha1/2/3**; todo.md's milestone column follows at its next edit.
+the Apps keep their own releases), and nightlies are named from `v2.0.0-alpha0` until then. The milestone
+table's **alpha1** row is the current target (2026-10-01); its alpha2/3/4 rows are the older plan, not yet
+renumbered against it.
 **alpha1's scope** (the owner, 2026-09-30): **the whole visual side finished** - the ab_gui plan (G5, G5z), the
 next UI iteration (UIREV-35..38, UIREV-40 watermark), the installers' new look (PLATFORM-15) - and **the important
 PSC stability problems solved** (CONSOLE-15: the recurring sleep problem, crashes, Wi-Fi drops). When that is ready
@@ -32,6 +33,7 @@ and the owner is happy, **that is alpha1**.
 
 | Milestone | Theme | Gate (what "done" means) | Who | Size |
 |---|---|---|---|---|
+| **alpha1** | The whole visual side finished; the important PSC stability problems solved (the owner, 2026-09-30) | the ab_gui plan (G5, G5z), UIREV-35..38 + UIREV-40, the installers' new look (PLATFORM-15) and CONSOLE-15 (sleep, crashes, Wi-Fi drops) done and the owner happy with them on his devices; the old alpha1/alpha2 releases withdrawn (RELEASE-1) | dev + designer + owner checks | in progress |
 | **alpha2** | Ship what is already built; make the release train work | `promote alpha` runs green end to end; the nightly's features in the testing channel; nothing false shipped on the stick | dev + owner decisions | ~2-3 days |
 | **alpha3** | The console pass | every nightly feature proven on a console on both kernels (stock and AutoBleem); PSC-Bios native backend proven | dev + owner/testers | ~1 week |
 | **alpha4** | The other platforms' pass | Pi (32/64), PC stick (BIOS + UEFI, real hardware), Windows (self-update, a real game), LAN Share - each proven | testers + dev fixes | ~1 week |
