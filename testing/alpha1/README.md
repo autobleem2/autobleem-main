@@ -21,8 +21,8 @@ while you do something else.
 
 - A volunteer takes **one section**, not a whole plan. Read its `needs` line first: if you do not have that start
   state, take another section.
-- Until the portal is running, sections are handed out by the maintainers (on the GitHub issues, see "How to
-  report"): they give each volunteer the section of their platform that has the fewest passes so far.
+- The tester portal hands them out: https://autobleem.retromenele.pl/testing/ - **Give me a task** on your
+  platform's card gives you the section that has the fewest passes so far.
 - Target: **3 passes per section per platform per version**. Please do not take a section that already has three
   unless asked; a section you have started is yours for 48 hours, then it goes back.
 - Sections are independent. Where one needs a state another produces (a game on the shelf, a Store download),
@@ -43,15 +43,17 @@ A comment is also welcome on `ok` when a number is asked for (a time, a version,
 
 ## How to report
 
-Until the tester portal exists:
+On the tester portal, https://autobleem.retromenele.pl/testing/ - no login:
 
-1. Copy the section you tested (its YAML block, or just the step ids with your status and comments) into a message.
-2. Open a **GitHub issue** at https://github.com/autobleem2/autobleem-main/issues (title: the platform and the
-   section id, e.g. `alpha1 rpi-install`) and paste it there, naming: the platform, the **version** (the chip under the pad battery plate, or L2 + R2 -> About), your device
-   (Pi model and 32 / 64-bit, PC model and BIOS / UEFI, Windows version), and the section id.
-3. For a `problem`: a photo of the screen helps. The logs are in `System/Logs/` on the stick / card / data folder
+1. **A test task**: answer each step of your section on its page (OK / Problem / Not applicable, a comment on a
+   problem), name your device (Pi model and 32 / 64-bit, PC model and BIOS / UEFI, Windows version) and press
+   **Send my results**. You get an id; the status page looks it up.
+2. **A problem outside a plan**: **Report a problem** - the platform, the **version** (the chip under the pad
+   battery plate, or L2 + R2 -> About), what you did, what you expected and what happened.
+3. For a `problem`: a photo of the screen helps (a GitHub issue at
+   https://github.com/autobleem2/autobleem-main/issues can carry it - name the portal's id there). The logs are in `System/Logs/` on the stick / card / data folder
    (only written after a crash, unless Options -> Diagnostics -> Keep logs on the stick is ON; on a Pi or PC,
-   Hardware Information -> Square saves them). Zip that folder and attach it only if you are happy to share it; it
-   can contain Wi-Fi and game names.
+   Hardware Information -> Square saves them). Zip that folder and attach it to the report form only if you are happy
+   to share it (the form asks you to confirm); it can contain Wi-Fi and game names.
 
 Report only what you saw. A step that fails the same way twice is more useful than a guess about why.
