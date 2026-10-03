@@ -425,6 +425,46 @@ def check_existing_build(gh, repo, tag, log=print):
     return False
 
 
+def resume_tag(gh, kind, version=None, log=print):
+    """The tag of an interrupted promotion of `kind`, or None. next_tag counts from the launcher's tags, and the
+    launcher is tagged in the first stage - so after a promote that stopped half-way (2026-10-03: alpha1 failed at
+    console-tools' sdk-abi) it proposed the next number (alpha2) instead of finishing alpha1. A promotion is
+    finished when the appliance (the last stage) has the tag and its build succeeded; the launcher's newest tag
+    of `kind` without that is the one to finish. (A plain release tag is not resumed this way: next_tag refuses a
+    released version.)"""
+    if kind == "release":
+        return None
+    nxt = next_tag(gh.tags("autobleem"), kind, version)
+    m = re.match(r"^(.*-%s)(\d+)$" % kind, nxt)
+    if not m or int(m.group(2)) < 2:
+        return None
+    prev = "%s%d" % (m.group(1), int(m.group(2)) - 1)
+    if not gh.tag_commit("autobleem", prev):
+        return None
+    if gh.tag_commit(APPLIANCE, prev) and check_existing_build(gh, APPLIANCE, prev, log=log):
+        return None
+    log("%s was not finished (the appliance has no successful build of it) - finishing it, not starting %s"
+        % (prev, nxt))
+    return prev
+
+
+def rerun_failed_build(gh, repo, tag, log=print):
+    """A reused tag's build that failed is run again (its failed jobs), and followed once it is queued - an
+    interrupted promote stopped on exactly such a build (2026-10-03: console-tools' sdk-abi)."""
+    runs = gh.runs(repo, "event=push&branch=" + tag)
+    if not runs or runs[0]["status"] != "completed" or runs[0]["conclusion"] == "success":
+        return
+    run = runs[0]
+    gh.write("POST", "/repos/%s/%s/actions/runs/%d/rerun-failed-jobs" % (ORG, repo, run["id"]), {},
+             "%s: run the failed jobs of %s again" % (repo, run["html_url"]))
+    if gh.dry_run:
+        return
+    for _ in range(30):  # until GitHub shows it queued again, so the wait below follows the new attempt
+        time.sleep(2)
+        if gh.call("GET", "/repos/%s/%s/actions/runs/%d" % (ORG, repo, run["id"]))["status"] != "completed":
+            return
+
+
 def image_rebuild_needed(files):
     """whether autobleem-build's image.yml would run a build for a diff touching `files` - its own
     `on: push: paths:` filter (docker/**, its own workflow file). A diff of 300+ files (the API's page limit,
@@ -481,14 +521,19 @@ def sync_build_image_master(gh, log=print):
 
 def promote(gh, kind, version=None, log=print):
     check_own_version_repos(gh, log=log)
-    tag = next_tag(gh.tags("autobleem"), kind, version)
+    resumed = resume_tag(gh, kind, version, log=log)
+    tag = resumed or next_tag(gh.tags("autobleem"), kind, version)
     branch = release_branch(tag)
-    log("promotion: %s -> %s" % (kind, tag))
+    log("promotion: %s -> %s%s" % (kind, tag, " (resumed)" if resumed else ""))
     repos = [r for stage in STAGES for r in stage] + [APPLIANCE]
-    # where each repository's tag goes: develop for alpha/beta, the release branch for rc and release
+    # where each repository's tag goes: develop for alpha/beta, the release branch for rc and release - and
+    # when finishing an interrupted promotion, where it already went (develop may have moved on since)
     source = {}
     for repo in repos:
-        if kind in ("alpha", "beta"):
+        existing = gh.tag_commit(repo, tag) if resumed else None
+        if existing:
+            source[repo] = existing
+        elif kind in ("alpha", "beta"):
             source[repo] = gh.branch_sha(repo, "develop")
         else:
             sha = gh.branch_sha(repo, branch)
@@ -515,6 +560,7 @@ def promote(gh, kind, version=None, log=print):
             if reuse[repo]:
                 if check_existing_build(gh, repo, tag, log=log):
                     continue
+                rerun_failed_build(gh, repo, tag, log=log)
                 waiting[repo] = ("event=push&branch=" + tag, EPOCH)  # an older, not-yet-finished run
             else:
                 waiting[repo] = ("event=push&branch=" + tag, since)
@@ -550,7 +596,7 @@ def main():
     gh = GitHub(token, dry_run=getattr(args, "dry_run", False))
     try:
         if args.cmd == "next":
-            print(next_tag(gh.tags("autobleem"), args.kind, args.version))
+            print(resume_tag(gh, args.kind, args.version, log=lambda m: None) or next_tag(gh.tags("autobleem"), args.kind, args.version))
         elif args.cmd == "nightly":
             nightly(gh, " ".join(args.platforms.split()), args.all)
         elif args.cmd == "preview":

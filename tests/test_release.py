@@ -318,6 +318,52 @@ class BuildImageMaster(unittest.TestCase):
         self.assertFalse([l for l in self.lines if l.startswith("[dry run] autobleem-build: tag ")])
 
 
+class Resume(unittest.TestCase):
+    """an interrupted promotion (the launcher tagged, the appliance not) is finished, not followed by a new number"""
+
+    class Fake(FakeGitHub):
+        def __init__(self, branches, tags, log, tagged):
+            super().__init__(branches, tags, log)
+            self.tagged = tagged  # {(repo, tag): sha}
+
+        def tag_commit(self, repo, tag):
+            return self.tagged.get((repo, tag))
+
+        def runs(self, repo, query):
+            return []
+
+    def setUp(self):
+        self.lines = []
+        self.branches = {(r, "develop"): "%040d" % i for i, r in enumerate(repos())}
+
+    def test_a_half_done_alpha_is_finished_on_the_commits_it_already_tagged(self):
+        first = release.STAGES[0][0]
+        tagged = {("autobleem", "v2.0.0-alpha1"): "f" * 40, (first, "v2.0.0-alpha1"): "e" * 40}
+        gh = self.Fake(self.branches, ["v2.0.0-alpha1"], self.lines.append, tagged)
+        release.promote(gh, "alpha", log=self.lines.append)
+        self.assertTrue(any("promotion: alpha -> v2.0.0-alpha1 (resumed)" in l for l in self.lines))
+        self.assertFalse([l for l in self.lines if "alpha2" in l and "not starting" not in l])
+        created = [l.split(":")[0].replace("[dry run] ", "") for l in self.lines if " tag v2.0.0-alpha1 " in l]
+        self.assertNotIn("autobleem", created)
+        self.assertNotIn(first, created)
+        self.assertIn(release.APPLIANCE, created)
+
+    def test_a_finished_alpha_is_not_resumed(self):
+        tagged = {(r, "v2.0.0-alpha1"): "f" * 40 for r in repos()}
+
+        class Done(self.Fake):
+            def runs(self, repo, query):
+                return [{"status": "completed", "conclusion": "success"}]
+
+        gh = Done(self.branches, ["v2.0.0-alpha1"], self.lines.append, tagged)
+        self.assertIsNone(release.resume_tag(gh, "alpha"))
+        self.assertIsNone(release.resume_tag(gh, "release"))
+
+    def test_nothing_tagged_yet_means_no_resume(self):
+        gh = self.Fake(self.branches, [], self.lines.append, {})
+        self.assertIsNone(release.resume_tag(gh, "alpha", "2.0.0"))
+
+
 class OwnVersionRepos(unittest.TestCase):
     """proc_unzip, ext_store and autobleem-themes keep their own version numbers: promote() must refuse to
     start (dry run included, since the check is read-only) unless each already has a released v* version -

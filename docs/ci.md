@@ -89,7 +89,7 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 | | `withdraw.yml` | dispatch | removes (or restores) a testing or nightly build from the site |
 | `autobleem-main` | `nightly.yml` | dispatch | `tools/release.py nightly`: rebuild the components whose develop moved (not by documentation only), then assemble unless the chain already did (`--all`: always) |
 | `autobleem-main` | `preview.yml` | dispatch (the admin panel's Preview panel) | `tools/release.py preview --branch B`: every component that has the branch builds it into its rolling `preview` release (the `channel=preview` input of its build), then the appliance assembles `preview/<version>/` with every other component's nightly (PLATFORM-20) |
-| | `promote.yml` | dispatch (kind, version, dry run) | `tools/release.py promote`: alpha/beta/rc/release tags across the components, the appliance last |
+| | `promote.yml` | dispatch (kind, version, dry run) | `tools/release.py promote`: alpha/beta/rc/release tags across the components, the appliance last; run again after a failure it finishes the same tag (`resume_tag`: the launcher tagged, the appliance not built) and reruns a reused tag's failed build |
 
 `nightly.yml` and `promote.yml` start workflows in other repositories, so they need the `autobleem-admin`
 GitHub App (`AB_ADMIN_APP_ID`, `AB_ADMIN_APP_KEY`); the admin panel (`archive/admin-panel-plan.md`) is
