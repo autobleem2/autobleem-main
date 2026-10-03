@@ -11,6 +11,12 @@ assembles the products from those; autobleem-main drives nightlies and promotion
   change a repository's visibility unasked.
 - **The image**: `ghcr.io/autobleem2/autobleem-build:develop` for develop pushes, PRs and nightlies,
   `:latest` for a `v*` tag (a nightly is develop all the way down, compilers included).
+  On the build server the image is **local**: `image.yml` builds it there, in the Docker daemon the self-hosted
+  runner shares (the runner is the `autobleem-runner` container - `myoung34/github-runner` on the host's
+  `docker.sock`), so the jobs there use the local `:develop`/`:latest` and never pull. Its ghcr login is the job's
+  own `GITHUB_TOKEN`, which expires with the job - a later `docker pull` on the server answers "denied", and that is
+  not a fault. The promote moves autobleem-build's master first, so `:latest` is rebuilt before any `v*` tag
+  compiles; autobleem-repo's `cleanup.yml` keeps `:develop` and `:latest` (2026-10-03).
 - **Runners**: the Linux compile jobs go through **`autobleem-build`'s `route.yml`** (a reusable workflow,
   2026-09-27): the laptop runners (`bleemmachine`, `bleemmachine-2`, `bleemmachine-3` - three instances on the one
   laptop, because one runner runs one job at a time and serialized the matrix legs; label `ab-main`, runner
