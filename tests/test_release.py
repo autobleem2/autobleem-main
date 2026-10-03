@@ -34,6 +34,49 @@ class NextTag(unittest.TestCase):
         with self.assertRaises(ValueError):
             release.next_tag(self.TAGS, "alpha", "2.1")
 
+    def test_a_point_release_orders_between_its_number_and_the_next(self):
+        order = [release.tag_order(t) for t in ("v2.0.0-alpha1", "v2.0.0-alpha1.1", "v2.0.0-alpha1.2",
+                                                "v2.0.0-alpha2", "v2.0.0-beta1", "v2.0.0-beta1.1", "v2.0.0-rc1",
+                                                "v2.0.0")]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual(len(set(order)), len(order))
+        self.assertLess(release.tag_order("v2.0.0-alpha10"), release.tag_order("v2.0.0-alpha10.1"))
+        self.assertLess(release.tag_order("v2.0.0-alpha1.10"), release.tag_order("v2.0.0-alpha2"))
+        self.assertEqual(release.parse_tag("v2.0.0-alpha1.2"), ((2, 0, 0), "alpha", 1, 2))
+        self.assertEqual(release.parse_tag("v2.0.0-alpha.3"), ((2, 0, 0), "alpha", 3, 0))
+        self.assertIsNone(release.parse_tag("v2.0.0-alpha1.x"))
+
+    def test_next_point_of_the_current_prerelease(self):
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1"], "alpha", point=True), "v2.0.0-alpha1.1")
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1", "v2.0.0-alpha1.1"], "alpha", point=True),
+                         "v2.0.0-alpha1.2")
+        # the order of the list does not matter, and 10 is above 9
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1.10", "v2.0.0-alpha1.9", "v2.0.0-alpha1"], "alpha",
+                                          point=True), "v2.0.0-alpha1.11")
+        self.assertEqual(release.next_tag(["v2.0.0-alpha1", "v2.0.0-alpha2", "v2.0.0-beta1"], "beta", point=True),
+                         "v2.0.0-beta1.1")
+
+    def test_a_plain_alpha_after_a_point_is_the_next_number(self):
+        tags = ["v2.0.0-alpha1", "v2.0.0-alpha1.1", "v2.0.0-alpha1.2"]
+        self.assertEqual(release.next_tag(tags, "alpha"), "v2.0.0-alpha2")
+        self.assertEqual(release.next_tag(tags, "beta"), "v2.0.0-beta1")
+        self.assertEqual(release.next_tag(tags, "rc"), "v2.0.0-rc1")
+        self.assertEqual(release.next_tag(tags, "release"), "v2.0.0")
+
+    def test_a_point_needs_a_matching_prerelease_in_progress(self):
+        with self.assertRaises(ValueError):
+            release.next_tag(["v2.0.0-alpha1", "v2.0.0-beta1"], "alpha", point=True)  # beta is the current one
+        with self.assertRaises(ValueError):
+            release.next_tag(["v2.0.0-alpha1"], "release", point=True)
+        with self.assertRaises(ValueError):
+            release.next_tag(["v2.0.0-alpha1", "v2.0.0"], "alpha", point=True)  # released already
+        self.assertEqual(release.next_tag(["v2.0.0"], "alpha", "2.1.0"), "v2.1.0-alpha1")
+        with self.assertRaises(ValueError):
+            release.next_tag(["v2.0.0"], "alpha", "2.1.0", point=True)  # nothing to point at yet
+
+    def test_release_branch_of_a_point(self):
+        self.assertEqual(release.release_branch("v2.0.0-rc1.1"), "release/v2.0.0")
+
     def test_release_branch(self):
         self.assertEqual(release.release_branch("v2.0.0-rc2"), "release/v2.0.0")
         self.assertEqual(release.release_branch("v2.0.0"), "release/v2.0.0")
@@ -347,6 +390,36 @@ class Resume(unittest.TestCase):
         self.assertNotIn("autobleem", created)
         self.assertNotIn(first, created)
         self.assertIn(release.APPLIANCE, created)
+
+    def test_a_half_done_point_is_finished_not_followed_by_the_next(self):
+        first = release.STAGES[0][0]
+        tags = ["v2.0.0-alpha1", "v2.0.0-alpha1.1"]
+        tagged = {(r, "v2.0.0-alpha1"): "f" * 40 for r in repos()}
+        tagged[("autobleem", "v2.0.0-alpha1.1")] = "d" * 40
+        tagged[(first, "v2.0.0-alpha1.1")] = "c" * 40
+
+        class Done(self.Fake):
+            def runs(self, repo, query):  # alpha1's builds succeeded; alpha1.1 has none at the appliance
+                return [{"status": "completed", "conclusion": "success"}]
+
+        gh = Done(self.branches, tags, self.lines.append, tagged)
+        self.assertEqual(release.resume_tag(gh, "alpha", point=True), "v2.0.0-alpha1.1")
+        # a plain alpha after it resumes the point too (it is the unfinished one), not alpha2
+        self.assertEqual(release.resume_tag(gh, "alpha"), "v2.0.0-alpha1.1")
+        release.promote(gh, "alpha", log=self.lines.append, point=True)
+        self.assertTrue(any("promotion: alpha -> v2.0.0-alpha1.1 (resumed)" in l for l in self.lines))
+
+    def test_the_first_point_after_a_finished_alpha_starts_clean(self):
+        tagged = {(r, "v2.0.0-alpha1"): "f" * 40 for r in repos()}
+
+        class Done(self.Fake):
+            def runs(self, repo, query):
+                return [{"status": "completed", "conclusion": "success"}]
+
+        gh = Done(self.branches, ["v2.0.0-alpha1"], self.lines.append, tagged)
+        self.assertIsNone(release.resume_tag(gh, "alpha", point=True))
+        release.promote(gh, "alpha", log=self.lines.append, point=True)
+        self.assertTrue(any("promotion: alpha -> v2.0.0-alpha1.1" in l and "resumed" not in l for l in self.lines))
 
     def test_a_finished_alpha_is_not_resumed(self):
         tagged = {(r, "v2.0.0-alpha1"): "f" * 40 for r in repos()}

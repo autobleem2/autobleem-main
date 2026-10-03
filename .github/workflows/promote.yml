@@ -3,6 +3,7 @@
 # the admin panel's promotion buttons run.
 #
 #   alpha / beta  the next vX.Y.Z-alphaN / -betaN tag on develop's head of every component
+#                 `point`: the next point of the current pre-release instead (vX.Y.Z-alpha1 -> -alpha1.1)
 #   rc            release/vX.Y.Z cut from develop (the first rc), vX.Y.Z-rcN tagged on it
 #   release       vX.Y.Z tagged on the release branches, merged into master and back into develop
 #
@@ -23,6 +24,10 @@ on:
         description: X.Y.Z - only for the first pre-release of a new version
         type: string
         default: ''
+      point:
+        description: the next point of the current pre-release (alpha1 -> alpha1.1), not the next number
+        type: boolean
+        default: false
       dry_run:
         description: only print what would be tagged, branched and merged
         type: boolean
@@ -52,5 +57,6 @@ jobs:
           set -euo pipefail
           args=(promote "${{ inputs.kind }}")
           [ -n "${{ inputs.version }}" ] && args+=(--version "${{ inputs.version }}")
+          [ "${{ inputs.point }}" = true ] && args+=(--point)
           [ "${{ inputs.dry_run }}" = true ] && args+=(--dry-run)
           python3 tools/release.py "${args[@]}"

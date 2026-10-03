@@ -6,8 +6,9 @@
       every one), those builds are awaited, then autobleem-appliance assembles the nightly for the platforms -
       a no-op when the site's nightly was built from these same components already (each component's nightly
       starts that assembly itself since 2026-09-26); --all always assembles
-  release.py promote {alpha|beta|rc|release} [--version X.Y.Z] [--dry-run]
+  release.py promote {alpha|beta|rc|release} [--version X.Y.Z] [--point] [--dry-run]
       alpha/beta: the next vX.Y.Z-alphaN / -betaN tag on develop's head of every component
+                  (--point: the next point of the current pre-release instead, v2.0.0-alpha1 -> v2.0.0-alpha1.1)
       rc:         release/vX.Y.Z cut from develop in every component (first rc), vX.Y.Z-rcN tagged on it
       release:    vX.Y.Z tagged on the release branches, merged into master and back into develop
       Before the first tag: autobleem-build's master is moved to develop's head when it is behind (every v*
@@ -17,7 +18,7 @@
       last - its build assembles the components' releases and publishes the channel.
       Refuses to start (even with --dry-run) unless proc_unzip, ext_store and autobleem-themes already have a
       released v* version of their own - they keep their own versioning and are never tagged by this script.
-  release.py next {alpha|beta|rc|release} [--version X.Y.Z]
+  release.py next {alpha|beta|rc|release} [--version X.Y.Z] [--point]
       only prints the tag a promotion would make (what the admin panel shows before its confirmation)
 
 Needs GH_TOKEN: a token that can push tags and branches and dispatch workflows in every repository - the
@@ -95,20 +96,37 @@ PREVIEW_REPOS = [r for r in NIGHTLY_REPOS if r != "proc_unzip"]
 PREVIEW_BRANCH = re.compile(r"^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._/-]{0,99}\Z")
 ALL_PLATFORMS = "rpi-armhf rpi-arm64 pcusb psc win"
 KINDS = ("alpha", "beta", "rc", "release")
-# -alpha3 is the scheme (docs/versioning.md); -alpha.3 is read too, should one ever be made by hand
-TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc|pre)\.?(\d+))?$")
+# -alpha3 is the scheme (docs/versioning.md); -alpha.3 is read too, should one ever be made by hand.
+# -alpha1.1 is a point release of alpha1 (a fix between alpha1 and alpha2): alpha1 < alpha1.1 < alpha2
+TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc|pre)\.?(\d+)(?:\.(\d+))?)?$")
 
 
 # ------------------------------------------------------------------------------------------------ versions
 def parse_tag(tag):
-    """'v2.0.0-alpha3' -> ((2, 0, 0), 'alpha', 3); 'v2.0.0' -> ((2, 0, 0), None, 0); anything else -> None"""
+    """'v2.0.0-alpha3' -> ((2, 0, 0), 'alpha', 3, 0); 'v2.0.0-alpha1.2' -> ((2, 0, 0), 'alpha', 1, 2);
+    'v2.0.0' -> ((2, 0, 0), None, 0, 0); anything else -> None"""
     m = TAG_RE.match(tag)
     if not m:
         return None
-    return (int(m.group(1)), int(m.group(2)), int(m.group(3))), m.group(4), int(m.group(5) or 0)
+    return ((int(m.group(1)), int(m.group(2)), int(m.group(3))), m.group(4), int(m.group(5) or 0),
+            int(m.group(6) or 0))
 
 
-def next_tag(tags, kind, version=None):
+def tag_order(tag):
+    """the sort key of a v* tag: v2.0.0-alpha1 < v2.0.0-alpha1.1 < v2.0.0-alpha2 < v2.0.0-beta1 < v2.0.0-rc1 < v2.0.0
+    (None for anything that is not one)"""
+    p = parse_tag(tag)
+    if not p:
+        return None
+    rank = {"pre": 0, "alpha": 1, "beta": 2, "rc": 3, None: 4}[p[1]]
+    return p[0], rank, p[2], p[3]
+
+
+def point_name(base, kind, n, point):
+    return "v%d.%d.%d-%s%d%s" % (base + (kind, n, ".%d" % point if point else ""))
+
+
+def next_tag(tags, kind, version=None, point=False):
     """The tag a promotion of `kind` makes, given the launcher's existing tags.
 
     The base X.Y.Z is `version` when given, else the newest pre-release's base (the release being prepared)
@@ -123,7 +141,11 @@ def next_tag(tags, kind, version=None):
     v2.0.0-alpha3 - correct today, and exactly why R1's plan deletes the old alpha2 (and psc-kernel-payload's
     alpha3) tags before the new-alpha2 promote runs. Once v2.0.0-alpha2 is deleted from every repository in
     the train (R1 steps 7-10, not this script's job), leaving only v2.0.0-alpha1 on "autobleem", this same
-    logic yields v2.0.0-alpha2 again on its own - no change needed here for that half of R1."""
+    logic yields v2.0.0-alpha2 again on its own - no change needed here for that half of R1.
+
+    A point release (`point`): the next point of the CURRENT pre-release - the newest one of the base, which
+    must be of `kind` - v2.0.0-alpha1 -> v2.0.0-alpha1.1 -> v2.0.0-alpha1.2, the number itself unchanged. Without
+    `point`, a point tag counts like its number: with alpha1 and alpha1.1 the next alpha is alpha2."""
     parsed = [(t, p) for t, p in ((t, parse_tag(t)) for t in tags) if p]
     if version:
         m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)$", version)
@@ -140,7 +162,16 @@ def next_tag(tags, kind, version=None):
         raise ValueError("v%d.%d.%d is released already" % base)
     name = "v%d.%d.%d" % base
     if kind == "release":
+        if point:
+            raise ValueError("a release has no point version - a point is of a pre-release")
         return name
+    if point:
+        current = max([(tag_order(t), p) for t, p in parsed if p[0] == base and p[1] is not None],
+                      default=None)
+        if not current or current[1][1] != kind:
+            raise ValueError("no %s in progress for %s - a point release follows the newest pre-release"
+                             % (kind, name))
+        return point_name(base, kind, current[1][2], current[1][3] + 1)
     n = max([p[2] for _, p in parsed if p[0] == base and p[1] == kind] or [0]) + 1
     return "%s-%s%d" % (name, kind, n)
 
@@ -425,7 +456,7 @@ def check_existing_build(gh, repo, tag, log=print):
     return False
 
 
-def resume_tag(gh, kind, version=None, log=print):
+def resume_tag(gh, kind, version=None, log=print, point=False):
     """The tag of an interrupted promotion of `kind`, or None. next_tag counts from the launcher's tags, and the
     launcher is tagged in the first stage - so after a promote that stopped half-way (2026-10-03: alpha1 failed at
     console-tools' sdk-abi) it proposed the next number (alpha2) instead of finishing alpha1. A promotion is
@@ -434,11 +465,15 @@ def resume_tag(gh, kind, version=None, log=print):
     released version.)"""
     if kind == "release":
         return None
-    nxt = next_tag(gh.tags("autobleem"), kind, version)
-    m = re.match(r"^(.*-%s)(\d+)$" % kind, nxt)
-    if not m or int(m.group(2)) < 2:
+    tags = gh.tags("autobleem")
+    nxt = next_tag(tags, kind, version, point)
+    # the one before it: the newest existing tag of the same pre-release word and base that sorts below it
+    # (alpha2's is alpha1.1 when that exists, else alpha1; alpha1.2's is alpha1.1; alpha1.1's is alpha1)
+    mine = parse_tag(nxt)
+    below = [t for t in tags if (parse_tag(t) or (None, None))[:2] == mine[:2] and tag_order(t) < tag_order(nxt)]
+    if not below:
         return None
-    prev = "%s%d" % (m.group(1), int(m.group(2)) - 1)
+    prev = max(below, key=tag_order)
     if not gh.tag_commit("autobleem", prev):
         return None
     if gh.tag_commit(APPLIANCE, prev) and check_existing_build(gh, APPLIANCE, prev, log=log):
@@ -519,10 +554,10 @@ def sync_build_image_master(gh, log=print):
         log("%s: master moved, no image rebuild to wait for" % BUILD_IMAGE)
 
 
-def promote(gh, kind, version=None, log=print):
+def promote(gh, kind, version=None, log=print, point=False):
     check_own_version_repos(gh, log=log)
-    resumed = resume_tag(gh, kind, version, log=log)
-    tag = resumed or next_tag(gh.tags("autobleem"), kind, version)
+    resumed = resume_tag(gh, kind, version, log=log, point=point)
+    tag = resumed or next_tag(gh.tags("autobleem"), kind, version, point)
     branch = release_branch(tag)
     log("promotion: %s -> %s%s" % (kind, tag, " (resumed)" if resumed else ""))
     repos = [r for stage in STAGES for r in stage] + [APPLIANCE]
@@ -587,6 +622,8 @@ def main():
         p = sub.add_parser(name)
         p.add_argument("kind", choices=KINDS)
         p.add_argument("--version")
+        p.add_argument("--point", action="store_true",
+                       help="the next point of the current pre-release (alpha1 -> alpha1.1), not the next number")
         if name == "promote":
             p.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -596,13 +633,14 @@ def main():
     gh = GitHub(token, dry_run=getattr(args, "dry_run", False))
     try:
         if args.cmd == "next":
-            print(resume_tag(gh, args.kind, args.version, log=lambda m: None) or next_tag(gh.tags("autobleem"), args.kind, args.version))
+            print(resume_tag(gh, args.kind, args.version, log=lambda m: None, point=args.point)
+                  or next_tag(gh.tags("autobleem"), args.kind, args.version, args.point))
         elif args.cmd == "nightly":
             nightly(gh, " ".join(args.platforms.split()), args.all)
         elif args.cmd == "preview":
             preview(gh, args.branch, " ".join(args.platforms.split()))
         else:
-            promote(gh, args.kind, args.version)
+            promote(gh, args.kind, args.version, point=args.point)
     except (RuntimeError, ValueError) as e:
         sys.exit("release.py: %s" % e)
 

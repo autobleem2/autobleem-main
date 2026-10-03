@@ -24,6 +24,12 @@ uses the **same grammar**, driven by its git tag:
   `v2.0.0-alpha1` are. **This section said the opposite until 2026-09-23** (dot-numbered pre-releases,
   `-dev.<sha>` nightlies): that was the plan of 2026-09-22, which the tags never followed. The site orders
   them by its own key (`repo_index.py`'s version key: `alpha < beta < rc < release`, numbers numerically).
+- **A point release is a fix between two pre-releases**: `vX.Y.Z-alphaN.P` (`-betaN.P`, `-rcN.P`) - the pre-release
+  number then a dot and the point (`v2.0.0-alpha1.1`). It sorts above its number and below the next:
+  `alpha1 < alpha1.1 < alpha1.2 < alpha2 < beta1 < … < rc1 < v2.0.0`, points numerically (`.10` above `.9`).
+  `release.py promote alpha --point` (and `next alpha --point`) makes the next point of the current pre-release;
+  plain `promote alpha` still makes the next number, `alpha2`, after `alpha1.1`. A point is a complete promotion
+  (every component tagged, the appliance last) like any other; the testing channel then offers it.
 - **A nightly is named after the launcher's describe and what it was built from** - `git describe --tags
   --exclude nightly --match 'v*'` of the launcher's develop, then `-n` and six hex digits of the fingerprint
   of every component's nightly assets (autobleem-appliance's `assemble.yml`; since 2026-09-23 - named after
