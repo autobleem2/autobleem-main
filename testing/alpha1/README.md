@@ -1,5 +1,9 @@
 # Volunteer test plans for AutoBleem v2.0.0-alpha1
 
+**Testers: read the `.md` (on GitHub) or print the `.pdf`** - `psc`, `rpi`, `pcusb`, `win`. The `.yaml` files are
+their source (the tester portal's format); `python3 tools/test_plan_docs.py testing/alpha1 --pdf` makes the `.md`
+and `.pdf` from them again after a change - never edit those by hand.
+
 One plan per platform, in the format of the tester portal plan (`docs/tester-portal-plan.md`): a list of
 **sections** of about 10 minutes, each with a `needs` line (the start state), and steps `{id, do, expect}`.
 
