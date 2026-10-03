@@ -1,4 +1,4 @@
-# The volunteer test plans (testing/<version>/<platform>.yaml) -> the download site's testplans/<version>/ on every
+# The volunteer test plans (testing/<version>/<platform>.yaml, and each one's printable <platform>.pdf) -> the download site's testplans/<version>/ on every
 # push to develop that changes one (tester portal: autobleem-repo intake/README.md has the contract). Modelled on
 # autobleem-manuals' build.yml publish job: the self-hosted runner is the build server, the site is its disk;
 # `repo_publish.sh --local testplans` copies each plan into the folder its own `version:` line names and re-runs the
@@ -9,7 +9,7 @@ name: testplans
 on:
   push:
     branches: [develop]
-    paths: ['testing/**/*.yaml']
+    paths: ['testing/**/*.yaml', 'testing/**/*.pdf']
   workflow_dispatch:
 
 jobs:
@@ -33,8 +33,8 @@ jobs:
         # cannot nest in this runner), the site tree bind-mounted at its own path
         run: |
           set -euo pipefail
-          ls testing/*/*.yaml
+          ls testing/*/*.yaml testing/*/*.pdf
           docker run --rm \
             -v "$PWD:$PWD" -w "$PWD" -v "$AB_REPO_DIR:$AB_REPO_DIR" -e REPO_DIR="$AB_REPO_DIR" \
             ghcr.io/autobleem2/autobleem-build:latest \
-            bash autobleem-repo-tools/tools/repo_publish.sh --local testplans testing/*/*.yaml
+            bash autobleem-repo-tools/tools/repo_publish.sh --local testplans testing/*/*.yaml testing/*/*.pdf
