@@ -1,0 +1,40 @@
+# The volunteer test plans (testing/<version>/<platform>.yaml, and each one's printable <platform>.pdf) -> the download site's testplans/<version>/ on every
+# push to develop that changes one (tester portal: autobleem-repo intake/README.md has the contract). Modelled on
+# autobleem-manuals' build.yml publish job: the self-hosted runner is the build server, the site is its disk;
+# `repo_publish.sh --local testplans` copies each plan into the folder its own `version:` line names and re-runs the
+# site's page generator (testplans/index.json and the testing/ pages). Develop only - never a feature branch.
+# Gated by AB_CI_ENABLED.
+name: testplans
+
+on:
+  push:
+    branches: [develop]
+    paths: ['testing/**/*.yaml', 'testing/**/*.pdf']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: vars.AB_CI_ENABLED == 'true' && github.ref == 'refs/heads/develop'
+    runs-on: [self-hosted, psc-build]
+    # a site write is never cancelled mid-way by a newer push: one publish at a time, queued, not cancelled
+    concurrency:
+      group: site-testplans-publish
+      cancel-in-progress: false
+    env:
+      AB_REPO_DIR: /home/claude/autobleem-repo
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: autobleem2/autobleem-repo
+          path: autobleem-repo-tools
+      - name: Publish the plans to the site
+        # --local: this runner is the build server; a sibling container over the socket (a container job
+        # cannot nest in this runner), the site tree bind-mounted at its own path
+        run: |
+          set -euo pipefail
+          ls testing/*/*.yaml testing/*/*.pdf
+          docker run --rm \
+            -v "$PWD:$PWD" -w "$PWD" -v "$AB_REPO_DIR:$AB_REPO_DIR" -e REPO_DIR="$AB_REPO_DIR" \
+            ghcr.io/autobleem2/autobleem-build:latest \
+            bash autobleem-repo-tools/tools/repo_publish.sh --local testplans testing/*/*.yaml testing/*/*.pdf
