@@ -17,8 +17,8 @@ while you do something else.
 
 - A volunteer takes **one section**, not a whole plan. Read its `needs` line first: if you do not have that start
   state, take another section.
-- Until the portal is running, sections are handed out by the maintainers (on Discord / by the issue form's
-  contact): they give each volunteer the section of their platform that has the fewest passes so far.
+- Until the portal is running, sections are handed out by the maintainers (on the GitHub issues, see "How to
+  report"): they give each volunteer the section of their platform that has the fewest passes so far.
 - Target: **3 passes per section per platform per version**. Please do not take a section that already has three
   unless asked; a section you have started is yours for 48 hours, then it goes back.
 - Sections are independent. Where one needs a state another produces (a game on the shelf, a Store download),
@@ -42,8 +42,8 @@ A comment is also welcome on `ok` when a number is asked for (a time, a version,
 Until the tester portal exists:
 
 1. Copy the section you tested (its YAML block, or just the step ids with your status and comments) into a message.
-2. Send it with the **issue form** on the AutoBleem site (when it is live), or in the project's Discord,
-   naming: the platform, the **version** (the chip under the pad battery plate, or L2 + R2 -> About), your device
+2. Open a **GitHub issue** at https://github.com/autobleem2/autobleem-main/issues (title: the platform and the
+   section id, e.g. `alpha1 rpi-install`) and paste it there, naming: the platform, the **version** (the chip under the pad battery plate, or L2 + R2 -> About), your device
    (Pi model and 32 / 64-bit, PC model and BIOS / UEFI, Windows version), and the section id.
 3. For a `problem`: a photo of the screen helps. The logs are in `System/Logs/` on the stick / card / data folder
    (only written after a crash, unless Options -> Diagnostics -> Keep logs on the stick is ON; on a Pi or PC,
