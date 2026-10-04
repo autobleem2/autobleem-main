@@ -35,7 +35,8 @@ Version=1.1.0
 # resolved the same way as an App's Exec=
 Exec=bin/{key}/unzip
 # what it can be given: games-folder, roms-folder (the whole tree, once per scan, before anything else -
-# a "preprocessor"), ps1, rom (one game folder or one ROM file at a time)
+# a "preprocessor"), ps1, rom (one game folder or one ROM file at a time), mods (the Mods/ folder of PE mod
+# packages, once per scan - see "Mods" below)
 Kinds=games-folder
 # optional: file name patterns it is interested in (* and ?, case-insensitive); empty = every file
 Match=*.zip;*.7z;*.rar
@@ -59,6 +60,7 @@ proc --version
 proc --ismine --ps1 <game folder>            (or --rom <file> --system <name>, for a Kinds=rom processor)
 proc --start --games <tree>                  (or --roms <tree>, for Kinds=roms-folder)
 proc --start --ps1 <game folder>             (or --rom <file> --system <name>)
+proc --start --mods <Mods folder>            (Kinds=mods only)
 ```
 
 - **`--version`** exits 0 and prints one line: `#<Name> V<version> - <description>`.
@@ -96,6 +98,8 @@ Every processor run gets these environment variables:
 | `AB_ROOT` | the data root |
 | `AB_GAMES_DIR` | the PS1 games tree |
 | `AB_ROMS_DIR` | the other systems' ROMs tree |
+| `AB_MODS_DIR` | the folder PE mod packages (`*.mod`) are dropped into (`Mods/` on the data root) |
+| `AB_APPS_DIR` | the Apps folder (`Apps/` on the data root) - where a `Kinds=mods` processor writes the Apps it makes |
 | `AB_RDB_DIR` | where RetroArch's own database files live |
 | `AB_TMP` | a scratch directory of your own (`/tmp/abproc/<name>` on the console - RAM, not the stick) |
 | `AB_HOME` (and `HOME`) | your own data folder on the stick (`<root>/Home/processors/<name>`, made for you) - keep settings and caches you want to survive here; build paths from `getenv("AB_HOME")`, never `~` (`fopen` does not expand it). A reinstall or update of AutoBleem leaves it alone |
@@ -113,6 +117,25 @@ launcher's own "Scanner processors" screen is where a player edits that. A proce
 it has already processed and that has not changed since (tracked by a small state file), so a processor
 never repeats needless work on every scan. Anything a processor changes is also picked up by the scan's own
 change detection, the same as any other change to the games tree.
+
+## `Kinds=mods`: packages that become Apps
+
+`Kinds=mods` is for a processor that turns the PE mod packages (`*.mod`, dropped into the `Mods/` folder next to
+`Apps/`) into Apps. It is the only kind whose target is not the games or ROMs tree, and it is the only one that
+may write outside its target: into `Apps/` (`AB_APPS_DIR`), each App in a folder of its own.
+
+- The core makes `Mods/` where a `Kinds=mods` processor is installed for this machine (the PlayStation Classic's
+  package), and nowhere else.
+- It is started **once per scan**, as `proc --start --mods <Mods folder>` (`AB_MODS_DIR` is the same folder), when
+  the folder holds a file `Match=` takes and has changed since the processor last ran on it (names and sizes, as for
+  every target). It is never asked `--ismine` by the core - it converts every package in the folder in that one run,
+  and skips what it already converted, so a second run on its own output does nothing.
+- When `Apps/` is not what it was after the run, the launcher reads its Apps again - the new Apps show without a
+  restart (`Category=PE` puts them in the "PE apps" row of the Apps picker too).
+- A dropped `.mod` is a change the games watcher and the start-up check see, like a file a processor's `Match=`
+  names in the games tree: the next scan converts it.
+- It sits in the PS1 sequence: the Scanner processors screen lists it on the PS1 tab, and like every new processor
+  it starts switched off.
 
 ## Checking your processor before you publish it
 
