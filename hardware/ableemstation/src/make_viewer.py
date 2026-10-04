@@ -4,7 +4,7 @@ Renders: headless Chrome screenshots of the same page into ../files/renders/. Ru
 make_stickers.py:  python make_viewer.py
 The universal case (make_universal.py):  python make_viewer.py universal  - the same page with the board (&m=pi23|pi4|pi5),
 the front panel (&front=usb|blank) and the roof (&roof=active) to pick, into ../files/universal/.
-Both pages: &led=rgb (the RGB pixel's shell), &cw=<colourway>, and "Download ZIP" - the 3MFs, Orca profiles, stickers
+Both pages: &led=rgb (the RGB pixel's shell), &cw=<colourway>, &shell=0 / &base=0 (hidden), and "Download ZIP" - the 3MFs, Orca profiles, stickers
 and wiring of the option on screen plus a BUILD.txt with its settings, all inlined, built in the browser (&zipcheck=1 is
 the self-test this script runs)."""
 import base64
@@ -89,9 +89,16 @@ HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 :root{--bg:#161b21;--ink:#eef3f6;--dim:#93a3b3;--cyan:#36d9e0;--panel:#1f262e}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
 canvas{display:block}
-.ui{position:absolute;left:16px;top:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px)}
-.ui b{font-size:18px;margin-right:8px;letter-spacing:.5px}
+.ui{position:absolute;left:16px;top:12px;right:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.ui b{font-size:18px;letter-spacing:.5px;align-self:center;margin-right:6px}
+.grp{max-width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(31,38,46,.78);border:1px solid #2a343e;border-radius:8px;padding:6px 8px 8px}
+.grp[hidden]{display:none}
+.grp>i{font-style:normal;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.grp>i span{text-transform:none;letter-spacing:0;color:var(--ink)}
+.grp>div{display:flex;flex-wrap:wrap;gap:6px}
 .ui button{background:var(--panel);color:var(--ink);border:1px solid #33404c;border-radius:4px;padding:6px 10px;cursor:pointer;font:inherit}
+.ui button.sw{width:30px;height:30px;padding:0;display:grid;place-items:center}
+.ui button.sw i{width:18px;height:18px;border-radius:3px;display:block}
 .ui button.on{border-color:var(--cyan);color:var(--cyan)}
 .ui button.dl{background:var(--cyan);color:#0d1216;border-color:var(--cyan);font-weight:600}
 .hint{position:absolute;left:16px;bottom:12px;color:var(--dim);font-size:12px}
@@ -100,10 +107,17 @@ body.shot .ui,body.shot .hint{display:none}
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
 <div class="ui"><b>ABleemStation</b>
+<div class="grp"><i>Preview</i><div>
 <button data-v="iso" class="on">3/4</button><button data-v="front">Front</button><button data-v="back">Back</button>
 <button data-v="right">Right</button><button data-v="top">Top</button><button data-v="left">Side</button><button data-v="under">Bottom</button>
-<span id="um" style="display:contents"></span><button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="rg" title="a WS2812B pixel instead of the 5 mm LED">RGB LED</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span>
-<button id="zp" class="dl" title="the files to print this option: 3MF, Orca profiles, stickers, wiring, notes">Download ZIP</button></div>
+<button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button>
+<button id="hs">Hide shell</button><button id="hb">Hide base</button></div></div>
+<div class="grp" id="gm" hidden><i>Raspberry Pi model</i><div id="um"></div></div>
+<div class="grp"><i>Options</i><div><span id="uo" style="display:contents"></span>
+<button id="rg" title="a WS2812B pixel instead of the 5 mm LED">RGB LED</button><button id="sb">LED: standby</button></div></div>
+<div class="grp"><i>Theme · <span id="cwn"></span></i><div id="cw"></div></div>
+<div class="grp"><i>Download</i><div>
+<button id="zp" class="dl" title="the files to print this option: 3MF, Orca profiles, stickers, wiring, notes">Download ZIP</button></div></div></div>
 <div class="hint" id="hint">Drag to orbit · wheel to zoom</div>
 <script type="module">
 import * as THREE from "three";
@@ -170,6 +184,7 @@ if (U) {
     m.visible = false; U[n] = m; scene.add(m);
   }
 }
+let hideShell = q.shell === "0", hideBase = q.base === "0";
 let model = q.m || "pi4", front = q.front || "blank", roof = q.roof === "active", piOn = false, rgb = q.led === "rgb", standby = false, cwKey = CW[0][0];
 function setShell() {
   const g = SH["shell" + (U && roof ? "-active" : "") + (rgb ? "-rgb" : "")] || SH.shell;
@@ -181,14 +196,16 @@ function setU() {
   for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
   U[front === "usb" ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;
   if (U["usb-sockets"]) U["usb-sockets"].visible = front === "usb";
+  if (hideBase) for (const k of Object.keys(U)) if (/^(set-|front-|usb-)/.test(k)) U[k].visible = false;   // the panels stand on the base
   mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
   setShell();
   document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
   document.getElementById("fu").classList.toggle("on", front === "usb"); document.getElementById("ar").classList.toggle("on", roof);
 }
 if (U) {
-  document.getElementById("um").innerHTML = Object.entries(P.models).map(([k, v]) => `<button data-m="${k}">${v}</button>`).join("")
-    + `<button id="fu">Front USB</button><button id="ar">Active roof</button>`;
+  document.getElementById("um").innerHTML = Object.entries(P.models).map(([k, v]) => `<button data-m="${k}">${v}</button>`).join("");
+  document.getElementById("uo").innerHTML = `<button id="fu">Front USB</button><button id="ar">Active roof</button>`;
+  document.getElementById("gm").hidden = false;
   document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { model = b.dataset.m; setU(); showBottom(); });
   document.getElementById("fu").onclick = () => { front = front === "usb" ? "blank" : "usb"; setU(); };
   document.getElementById("ar").onclick = () => { roof = !roof; setU(); };
@@ -244,6 +261,13 @@ document.getElementById("pi").onclick = () => setPi(!mesh.pi.visible);
 document.getElementById("xr").onclick = () => setXr(!xr);
 document.getElementById("sb").onclick = () => setStandby(!standby);
 document.getElementById("rg").onclick = () => { rgb = !rgb; setShell(); };
+// hide the shell (with its buttons and lens) to see inside, or the base (with the panels that stand on it)
+function setParts() {
+  mesh.shell.visible = !hideShell; if (mesh.caps) mesh.caps.visible = !hideShell; mesh.base.visible = !hideBase; setU();
+  document.getElementById("hs").classList.toggle("on", hideShell); document.getElementById("hb").classList.toggle("on", hideBase);
+}
+document.getElementById("hs").onclick = () => { hideShell = !hideShell; setParts(); };
+document.getElementById("hb").onclick = () => { hideBase = !hideBase; setParts(); };
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0]; cwKey = c[0];
   MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
@@ -251,13 +275,14 @@ function colorway(key) {
   for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
     if (m.userData.key !== k) { m.material.map = tex(k); m.material.needsUpdate = true; m.userData.key = k; } }
   document.querySelectorAll("#cw button").forEach(b => b.classList.toggle("on", b.dataset.k === c[0]));
+  document.getElementById("cwn").textContent = c[1];
 }
-document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" title="${c[1]}" style="display:flex;gap:6px;align-items:center">`
-  + `<i style="width:12px;height:12px;border-radius:2px;background:#${c[2]};box-shadow:inset 0 -5px 0 #${c[3]}"></i>${c[1]}</button>`).join("");
+document.getElementById("cw").innerHTML = CW.map(c => `<button class="sw" data-k="${c[0]}" title="${c[1]}" aria-label="${c[1]}">`
+  + `<i style="background:#${c[2]};box-shadow:inset 0 -7px 0 #${c[3]}"></i></button>`).join("");
 document.querySelectorAll("#cw button").forEach(b => b.onclick = () => colorway(b.dataset.k));
 colorway(q.cw || "classic");
 document.getElementById("hint").textContent += ` · ${P.hint || "Raspberry Pi 3B/3B+"} · ${P.W} x ${P.D} x ${P.H} mm`;
-setU(); setShell(); showBottom();
+setU(); setShell(); showBottom(); setParts();
 view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true); if (q.standby) setStandby(true);
 // ---- Download ZIP: only the files that print the option on screen, and a note with its settings. The zip is built
 // here (stored, no compression - the 3MFs and PNGs are compressed already), so the page needs no server
