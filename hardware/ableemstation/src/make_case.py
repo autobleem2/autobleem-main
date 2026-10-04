@@ -42,7 +42,7 @@ LENS_R, LENS_FL_R, LENS_FL = 3.0, 4.0, 1.0   # LED lens: shaft radius (through t
 LED_LEN = 8.6                       # a 5 mm LED from its rim to its tip
 STRIP_W, STRIP_T = 10.6, 2.4        # the RGB pixel's slot: strip width + clearance, strip + LED + tape thickness
 VENT_PITCH, VENT_W, VENT_N = 7.0, 2.4, 7   # roof labyrinth: slot pitch, slot width, number of slots
-BOSSES = [(12.0, 12.0), (10.0, 84.0), (131.0, 66.0), (130.0, 95.0)]
+BOSSES = [(12.5, 14.5), (10.0, 84.0), (131.0, 66.0), (128.5, 90.5)]   # off the cut corners, checked in main()
 
 
 def outline(inset=0.0):
@@ -232,6 +232,13 @@ def main():
         print("overlap cap x shell: %.2f mm3" % (c & parts["shell"]).volume)
     for name in ("shell", "shell-rgb"):
         print("overlap lens x %s: %.2f mm3" % (name, (lens_in & parts[name]).volume))
+    # every screw must sit inside: the insert hole clear of the walls (0.8 mm of boss left), the countersink inside the
+    # plate's edge (0.5 mm left) - a boss too close to a wall or a cut corner fails here, not on the printer
+    inner, plate = prism(outline(WALL + 0.8), 0, H), prism(outline(WALL + FIT + 0.5), -1, BASE_T + 2)
+    for x, y in BOSSES:
+        out = (cyl_z(x, y, 0, 2.0, H - ROOF) - inner).volume + (cyl_z(x, y, 0, 3.2, BASE_T) - plate).volume
+        print("screw at (%g, %g): %s" % (x, y, "ok" if out < 0.01 else "TOO CLOSE TO A WALL (%.2f mm3 outside)" % out))
+        assert out < 0.01, "boss (%g, %g) too close to a wall" % (x, y)
     # the filament change: the first layer that starts at or above the waist (shell printed roof-down)
     change = {}
     for name, first, lh in (("0.16", 0.2, 0.16), ("0.24", 0.24, 0.24)):
