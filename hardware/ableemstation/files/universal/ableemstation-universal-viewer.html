@@ -31,7 +31,11 @@ r.toneMapping = THREE.ACESFilmicToneMapping; r.shadowMap.enabled = true; r.shado
 document.body.appendChild(r.domElement);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x161b21);
 const cam = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 1, 3000);
-const ctl = new OrbitControls(cam, r.domElement); ctl.enableDamping = true;
+// z is up: set before the controls exist, or they orbit round the wrong axis and the model tumbles
+THREE.Object3D.DEFAULT_UP.set(0, 0, 1); cam.up.set(0, 0, 1);
+const ctl = new OrbitControls(cam, r.domElement);
+Object.assign(ctl, { enableDamping: true, dampingFactor: .12, rotateSpeed: .7, zoomSpeed: .9, panSpeed: .8,
+  screenSpacePanning: true, minDistance: 120, maxDistance: 900, maxPolarAngle: Math.PI * .62 });
 scene.add(new THREE.HemisphereLight(0xdfefff, 0x20262e, 1.1));
 const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-160, -220, 260); key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -200, right: 200, top: 200, bottom: -200 }); scene.add(key);
@@ -39,7 +43,6 @@ const rim = new THREE.DirectionalLight(0x36d9e0, .9); rim.position.set(220, 200,
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: .35 }));
 floor.receiveShadow = true; floor.position.z = -.01; scene.add(floor);
 const grid = new THREE.GridHelper(600, 30, 0x2a333d, 0x222a32); grid.rotation.x = Math.PI / 2; scene.add(grid);
-THREE.Object3D.DEFAULT_UP.set(0, 0, 1); cam.up.set(0, 0, 1);
 const loader = new STLLoader(), mesh = {};
 function b64(s) { const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a.buffer; }
 const MAT = {
