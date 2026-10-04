@@ -38,15 +38,19 @@ COLORWAYS = [
     ("midnight", "Midnight Neon", "1f2125", "1f2125", "121316", "ff46aa"),
     ("purple", "Atomic Purple", "7a5ca8", "3b2a57", "2a1e3e", "e6e0f0"),
     ("mint", "Mint", "a9d6c6", "2e3742", "2e3742", "f1f1ec"),
+    # a nod to the grey 1994 consoles - colours only, with the special edition stickers (stickers/special/)
+    ("grey94", "Grey 94 Special Edition", "cfcdc8", "9c9a96", "6e6d6a", "85848a", "special"),
 ]
 stl = {f[:-4]: base64.b64encode(open(os.path.join(VIEW, f), "rb").read()).decode()
        for f in sorted(os.listdir(VIEW)) if f.endswith(".stl")}
 import json as _j
 prm = _j.load(open(os.path.join(VIEW, "params.json")))
 deco = {}
-for f in sorted(os.listdir(os.path.join(FILES, "stickers"))):
-    if f.startswith("sticker-") and f.endswith(".png") and (f[:-4] in ("sticker-top", "sticker-front") or "side" in prm or "bottom" in prm):
-        deco[f[:-4]] = base64.b64encode(open(os.path.join(FILES, "stickers", f), "rb").read()).decode()
+for sub in ("", "special"):
+    d = os.path.join(FILES, "stickers", sub)
+    for f in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        if f.startswith("sticker-") and f.endswith(".png") and (f[:-4] in ("sticker-top", "sticker-front") or "side" in prm or "bottom" in prm):
+            deco[(sub + "/" if sub else "") + f[:-4]] = base64.b64encode(open(os.path.join(d, f), "rb").read()).decode()
 
 HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ABleemStation case</title>
@@ -158,13 +162,15 @@ if (DATA.lens) { const g = loader.parse(b64(DATA.lens)); g.computeVertexNormals(
 function setStandby(on) { if (MAT.lens) MAT.lens.emissive.set(on ? 0xff8a1e : 0x3cff6e);
   document.getElementById("sb").classList.toggle("on", on); }
 // stickers as decals on the recesses (when the sticker art exists)
-const tl = new THREE.TextureLoader();
+const tl = new THREE.TextureLoader(), TEX = {}, DEC = {};
+function tex(key) { if (!TEX[key]) { const t = tl.load("data:image/png;base64," + DECO[key]); t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8; TEX[key] = t; } return TEX[key]; }
 function decal(name, w, h, pos, bx, by, parent) {
   if (!DECO[name]) return null;
-  const t = tl.load("data:image/png;base64," + DECO[name]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const t = tex(name);
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: .4 }));
   const X = new THREE.Vector3(...bx), Y = new THREE.Vector3(...by), Z = new THREE.Vector3().crossVectors(X, Y);
-  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); (parent || mesh.shell).add(m); return m;
+  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); (parent || mesh.shell).add(m); m.userData.key = name; DEC[name] = m; return m;
 }
 // read from the front of the console: text runs along -x, "up" on the roof is -y (away from the viewer)
 decal("sticker-top", P.top.w, P.top.h, P.top.c, [-1, 0, 0], [0, -1, 0]);
@@ -201,6 +207,9 @@ document.getElementById("sb").onclick = () => setStandby(!document.getElementByI
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0];
   MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
+  const set = c[6] ? c[6] + "/" : "";                      // a colourway may bring its own sticker set
+  for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
+    if (m.userData.key !== k) { m.material.map = tex(k); m.material.needsUpdate = true; m.userData.key = k; } }
   document.querySelectorAll("#cw button").forEach(b => b.classList.toggle("on", b.dataset.k === c[0]));
 }
 document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" title="${c[1]}" style="display:flex;gap:6px;align-items:center">`
@@ -274,7 +283,7 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 cdir = os.path.join(shots, "colors")
 os.makedirs(cdir, exist_ok=True)
 tiles = []
-for key, label, *_ in COLORWAYS:
+for key, label, *_rest in COLORWAYS:
     png = os.path.join(cdir, key + ".png")
     subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--hide-scrollbars",
                     "--window-size=1280,800", "--virtual-time-budget=8000", "--screenshot=" + png,

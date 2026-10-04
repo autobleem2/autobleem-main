@@ -163,5 +163,7 @@ Two versions of the front light, the same buttons:
   must measure 61 mm. The roof and the front have 0.4 mm recesses the stickers sit in.
 - Cricut (Print Then Cut): upload the PNGs from `stickers/cricut-144dpi/`. If Design Space shows a different size,
   set it by hand: top 61 x 17 mm, front 43 x 4.6 mm, side 80 x 8 mm, bottom 54 x 34 mm.
+- Special edition: `stickers/special/` is the same set in "Grey 94" colours (light grey, dark text, four colour
+  accents) for the Grey 94 Special Edition colourway - colours only, no third-party marks.
 - Bottom plate: one per board - `sticker-bottom` (Pi 3), `sticker-bottom-pi4`, `sticker-bottom-pi5` - with a light box
   for the serial number: write it in with a permanent marker before sticking it on.
