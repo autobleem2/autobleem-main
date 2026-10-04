@@ -74,6 +74,7 @@ generated, never stored - autobleem-repo's CLAUDE.md has its rules.
 | `docs/authors/README.md` | writing an App, an extension, a scanner processor or a Store catalog - for outside authors |
 | `docs/kernel-flash-recovery.md`, `docs/pi-install-guide.md` | recovering a console; installing on a Pi |
 | `docs/store-homebrew-plan.md` | an open plan: homebrew PS1 games in the Store |
+| `hardware/ableemstation/` | ABleemStation, a 3D-printable retro-console case for the Raspberry Pi 3: the generators, STEP / STL / 3MF, the stickers, Orca profiles |
 | `docs/history/*.md` | how each platform and the big features came to be |
 | `docs/archive/` | finished plans, reduced to what they decided (the full texts are in git history) |
 
