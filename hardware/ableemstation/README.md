@@ -79,9 +79,10 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
 
 ## Hidden vents and the LED
 
-- **Roof**: each slot you see is 1 mm deep; under it a 0.8 mm channel leads sideways to the inner slot, half a
-  pitch over. Air passes, the eye does not - looking in, you see the channel's floor. The roof is 3.2 mm for it;
-  printed roof-down, the channel's ceiling bridges only ~3.5 mm.
+- **Roof**: the slots run straight through the 3.2 mm roof at 45 degrees, down towards the front, so each slot's
+  inner end lies 3.2 mm in front of its outer end - more than the slot is wide (2.4 mm). Air passes, the eye does
+  not: looking down, or from in front, you see the slot's sloping wall. Printed roof-down, a 45 degree wall needs no
+  bridge (an earlier labyrinth with a bridged channel printed shut).
 - **Side** (opposite the USB): slots through the wall with a baffle 1.8 mm behind them, closed at both ends and
   open below, so the air turns down under it and the inside stays out of sight.
 - **LED**: the clear lens is pushed into the front hole from inside (its flange sits in a counterbore), and the
@@ -141,7 +142,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 
 | Qty | Part |
 |---|---|
-| 4 | M3 heat-set insert, short (4 mm hole, 5-6 mm long), pressed into the shell's bosses |
+| 4 | M3 heat-set insert, Voron's standard M3 x 5 x 4 (the bosses have a 4.7 mm hole, 6 mm deep), pressed into the shell's bosses |
 | 4 | M3 x 8 countersunk screw (base -> inserts) |
 | 4 | M2.5 x 5 screw (Pi -> standoffs, self-tapping) |
 | 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, into the bracket's pockets, legs bent back |
