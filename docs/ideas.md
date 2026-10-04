@@ -61,6 +61,7 @@ Size as in todo.md.
 | A `pcusb64` target key (a 64-bit PC stick) | M | low-med | `archive/app-format-plan.md` |
 | The Atari VCS 800 port | L | low-med | The launcher's `docs/atari-vcs-plan.md`; blocked on one hardware probe (todo PLATFORM-7) |
 | The appliance fetches the emulators' binaries from their releases instead of keeping them in `payload_linux/Autobleem/bin/emu*` | M | low | Compile once, assemble many |
+| ABleemStation universal: an M.2 SSD inside the case as extra games storage - a cradle on the base in the free strip beside the board (about 48 x 70-90 mm, 21 mm high: M.2 2230 / 2242 on a flat adapter; 2280 only just fits). Pi 5: NVMe over PCIe (a flat adapter on a longer FFC, beside the board, so the Active Cooler stays; Gen 2, can boot from it). Pi 4: a USB adapter - USB 2.0 wired under the board like the front USB, or USB 3.0 through a U-plug / a panel with a cable pass-through. Pi 2 / 3: USB 2.0 only, an M.2 SATA drive for the lower current | M | low-med | The owner, 2026-10-04: "some day"; a base variant + its fit check; how the launcher would use a second games location is open |
 | LAN Share: CHD output for a read disc; HTTPS or a password (only if ever reachable from outside); drive read offset and audio correction for redump-exact dumps | L | low | autobleem-pc-tools `docs/lan-share-plan.md` |
 
 ## Project tooling
