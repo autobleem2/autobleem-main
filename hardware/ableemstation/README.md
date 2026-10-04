@@ -1,8 +1,9 @@
 # ABleemStation - a retro-console case for the Raspberry Pi 3B / 3B+
 
 A 3D-printable case that turns a Raspberry Pi 3 running AutoBleem into a small console under the TV:
-140 x 105 x 26.8 mm (just tall enough for the Pi's USB stack), cut corners in the ab2.0.0 style, cooling slots in
-the roof and the side, working POWER / RESET buttons and a front LED, and ABleemStation stickers.
+140 x 105 x 27.6 mm (just tall enough for the Pi's USB stack), cut corners in the ab2.0.0 style, hidden cooling
+vents in the roof and the side (no line of sight into the case), working POWER / RESET buttons, a front LED behind
+a clear lens (a plain LED or an RGB pixel that shows green / orange like the PlayStation Classic), and stickers.
 Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, explode, show the Pi, X-ray, colourways).
 
 ![colourways](files/renders/colorways.png)
@@ -11,10 +12,10 @@ Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, exp
 
 | File | What |
 |---|---|
-| `ableemstation-{shell,base,button}.step` | the parts for CAD (Fusion, FreeCAD, SolidWorks); `ableemstation-assembly.step` = everything in place |
-| `ableemstation-{shell,base,button}.stl` | the parts for the slicer |
-| `ableemstation-{shell,base,button}.3mf` | the same, already turned the way they print (shell roof-down, button flange-down) |
-| `ableemstation-all-parts.3mf` | everything to print in one file: shell, base, 2 buttons (the slicer's auto-arrange spreads them) |
+| `ableemstation-{shell,shell-rgb,base,button,lens}.step` | the parts for CAD (Fusion, FreeCAD, SolidWorks); `ableemstation-assembly.step` = everything in place |
+| `ableemstation-{shell,shell-rgb,base,button,lens}.stl` | the parts for the slicer (`shell` = plain LED, `shell-rgb` = RGB pixel) |
+| `ableemstation-{shell,shell-rgb,base,button,lens}.3mf` | the same, already turned the way they print (shell roof-down, button and lens flange-down) |
+| `ableemstation-all-parts.3mf`, `-all-parts-rgb.3mf` | everything to print in one file, per LED version: shell, base, 2 buttons, the lens |
 | `ableemstation-viewer.html` | the 3D viewer (three.js from a CDN, so it needs internet) |
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
@@ -46,8 +47,9 @@ python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also 
 ## Printing (ASA or PLA, no supports)
 
 - **shell**: upside down (roof on the bed). Two colours: a filament change at the layer that starts the dark band -
-  **15.88 mm** with 0.16 mm layers, **15.80 mm** with 0.24 mm layers. Everything above it is the lower band.
+  **16.68 mm** with 0.16 mm layers, **16.80 mm** with 0.24 mm layers (`make_case.py` prints both). Everything above it is the lower band.
 - **base**: flat, standoffs up. **button** x 2: standing on the flange.
+- **lens**: clear PETG, standing on the flange, 100 % infill and slow, so it stays as clear as it can.
 - ASA: a closed, warm chamber; let the parts cool on the bed.
 
 The Orca profiles target a Voron Trident 300 (0.4 nozzle, Klipper) set up on Orca's "MyKlipper 0.4 nozzle" printer;
@@ -60,6 +62,21 @@ use them with a calibrated ASA filament profile (temperatures, flow ratio and sh
 
 In Orca, the colour change goes on the layer slider in the preview ("+" -> Change filament for a second spool in a
 multi-material unit, or Add pause for a manual swap; `M600` only if the printer has that macro).
+
+## Hidden vents and the LED
+
+- **Roof**: each slot you see is 1 mm deep; under it a 0.8 mm channel leads sideways to the inner slot, half a
+  pitch over. Air passes, the eye does not - looking in, you see the channel's floor. The roof is 3.2 mm for it;
+  printed roof-down, the channel's ceiling bridges only ~3.5 mm.
+- **Side** (opposite the USB): slots through the wall with a baffle 1.8 mm behind them, closed at both ends and
+  open below, so the air turns down under it and the inside stays out of sight.
+- **LED**: the clear lens is pushed into the front hole from inside (its flange sits in a counterbore), and the
+  LED stays hidden behind it:
+  - `shell`: a plain 5 mm LED in the holder tube, its tip 0.3 mm behind the lens;
+  - `shell-rgb`: one **WS2812B** pixel cut from an LED strip (10 mm wide), slid into the slot behind the lens from
+    below, the LED facing the lens, the three wires out at the bottom. It keeps its last colour while it has 5 V -
+    so a small service on the Pi sets green at boot and orange at shutdown, and the orange stays on through the
+    standby, as on the PlayStation Classic.
 
 ## Parts
 
