@@ -165,8 +165,14 @@ for prof in (P, BASE, PROTO):
     info = "sync_info = \nuser_id = \nsetting_id = \nbase_id = GP004\nupdated_time = %d\n" % int(time.time())
     targets = [COPY]
     if install:
-        if os.path.exists(os.path.join(ORCA, name + ".json")):
-            print("in Orca already, left as it is:", name)
+        # a preset in Orca is updated only while it is still what this script wrote last (the copy in the repo); one
+        # changed in Orca by hand is left as it is
+        def read(folder):
+            f = os.path.join(folder, name + ".json")
+            return open(f, encoding="utf-8").read().replace("\r\n", "\n") if os.path.exists(f) else None
+        in_orca = read(ORCA)
+        if in_orca is not None and in_orca not in (read(COPY), text):
+            print("changed in Orca by hand, left as it is:", name)
         else:
             targets.append(ORCA)
     for folder in targets:
