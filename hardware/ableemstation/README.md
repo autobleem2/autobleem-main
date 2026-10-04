@@ -19,7 +19,8 @@ Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, exp
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
 | `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |
-| `wiring.svg`, `wiring.png` | the wiring diagram + what to buy (`src/make_wiring.py`) |
+| `wiring.svg`, `wiring.png` | the wiring diagram + what to buy, plain LED (`src/make_wiring.py`) |
+| `wiring-rgb.svg`, `wiring-rgb.png` | the same with a WS2812B RGB pixel instead of the LED |
 | `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
@@ -68,21 +69,29 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
 | 4 | M3 x 8 countersunk screw (base -> inserts) |
 | 4 | M2.5 x 5 screw (Pi -> standoffs, self-tapping) |
 | 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, into the bracket's pockets, legs bent back |
-| 1 | 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), into the front holder |
-| 1 | 2-pin male header 2.54 mm, soldered into the RUN pads |
-| 6 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
+| 1 | the front light, either: a 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), or one WS2812B pixel cut from a 5 V, 10 mm strip + 330 Ω resistor |
+| 6-7 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
 | 4 | rubber feet Ø 12 mm |
 
 ## Wiring (BCM numbers, physical pins in brackets)
 
+Two versions of the front light, the same buttons:
+
 ![wiring](files/wiring.png)
 
+![wiring, RGB pixel](files/wiring-rgb.png)
 
 - **POWER**: GPIO3 (pin 5) to GND (pin 9); `dtoverlay=gpio-shutdown` in `config.txt` - press to shut down, press
   again to wake the Pi from halt.
-- **RESET**: across the Pi 3's **RUN** pads (solder a 2-pin header).
-- **LED**: GPIO14 / TXD (pin 8) -> 330 Ω -> LED -> GND (pin 6); with `enable_uart=1` it is lit while the Pi runs.
-  Green / red / yellow / orange LEDs are the brightest on 3.3 V; a blue / white / cyan one wants 100 Ω instead.
+- **RESET**: GPIO23 (pin 16) to GND (pin 20);
+  `dtoverlay=gpio-key,gpio=23,active_low=1,gpio_pull=up,keycode=164` in `config.txt`. Keycode 164 is the key the
+  PlayStation Classic's Reset button sends, so AutoBleem treats it the same way: in a game it goes back to the menu,
+  in an App it closes the App. It is a software reset, not a power cycle.
+- **LED** (plain version): GPIO14 / TXD (pin 8) -> 330 Ω -> LED -> GND (pin 6); with `enable_uart=1` it is lit while
+  the Pi runs. Green / red / yellow / orange LEDs are the brightest on 3.3 V; a blue / white / cyan one wants 100 Ω.
+- **RGB pixel** (RGB version): 5V (pin 2), GND (pin 6), DIN <- 330 Ω <- GPIO10 / SPI MOSI (pin 19), with
+  `dtparam=spi=on`. A small service on the Pi sets the colour - green while it runs, orange at shutdown; the pixel
+  keeps its last colour as long as it has 5 V, so the standby stays orange like on the console.
 
 ## Stickers
 
