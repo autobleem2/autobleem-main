@@ -3,7 +3,10 @@ The page works by double-click. Hash options: #view=front|back|right|top|iso, &e
 Renders: headless Chrome screenshots of the same page into ../files/renders/. Run after make_case.py and
 make_stickers.py:  python make_viewer.py
 The universal case (make_universal.py):  python make_viewer.py universal  - the same page with the board (&m=pi23|pi4|pi5),
-the front panel (&front=usb|blank) and the roof (&roof=active) to pick, into ../files/universal/."""
+the front panel (&front=usb|blank) and the roof (&roof=active) to pick, into ../files/universal/.
+Both pages: &led=rgb (the RGB pixel's shell), &cw=<colourway>, and "Download ZIP" - the 3MFs, Orca profiles, stickers
+and wiring of the option on screen plus a BUILD.txt with its settings, all inlined, built in the browser (&zipcheck=1 is
+the self-test this script runs)."""
 import base64
 import os
 import shutil
@@ -52,6 +55,34 @@ for sub in ("", "special"):
         if f.startswith("sticker-") and f.endswith(".png") and (f[:-4] in ("sticker-top", "sticker-front") or "side" in prm or "bottom" in prm):
             deco[(sub + "/" if sub else "") + f[:-4]] = base64.b64encode(open(os.path.join(d, f), "rb").read()).decode()
 
+
+# the print files the page's "Download ZIP" picks from, by their path in the zip (the page takes only what the option
+# on screen needs): the 3MFs, the Orca profiles, the stickers of both sets, the wiring diagrams, the README
+def b64file(path):
+    return base64.b64encode(open(path, "rb").read()).decode()
+
+
+pack = {"README.md": b64file(os.path.join(FILES, "..", "README.md"))}
+parts3mf = ["base", "shell", "shell-rgb"] if not VARIANT else (
+    ["uni-base", "uni-shell", "uni-shell-rgb", "uni-shell-active", "uni-shell-active-rgb"]
+    + ["panel-" + f[len("ableemstation-panel-"):-4] for f in sorted(os.listdir(OUT)) if f.startswith("ableemstation-panel-") and f.endswith(".3mf")])
+for n in parts3mf:
+    pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(OUT, "ableemstation-%s.3mf" % n))
+for n in ("button", "lens"):                       # the same parts for both cases, in files/
+    pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(FILES, "ableemstation-%s.3mf" % n))
+for f in sorted(os.listdir(os.path.join(FILES, "orca"))):
+    pack["orca/" + f] = b64file(os.path.join(FILES, "orca", f))
+for n in ("wiring", "wiring-rgb"):
+    pack["wiring/%s.png" % n] = b64file(os.path.join(FILES, n + ".png"))
+for sub in ("", "special"):
+    d = os.path.join(FILES, "stickers", sub)
+    for root, _dirs, fs in os.walk(d):
+        if sub == "" and os.path.relpath(root, d).startswith("special"):
+            continue
+        for f in fs:
+            rel = os.path.relpath(os.path.join(root, f), os.path.join(FILES, "stickers")).replace("\\", "/")
+            pack["stickers/" + rel] = b64file(os.path.join(root, f))
+
 HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ABleemStation case</title>
 <style>
@@ -62,6 +93,7 @@ canvas{display:block}
 .ui b{font-size:18px;margin-right:8px;letter-spacing:.5px}
 .ui button{background:var(--panel);color:var(--ink);border:1px solid #33404c;border-radius:4px;padding:6px 10px;cursor:pointer;font:inherit}
 .ui button.on{border-color:var(--cyan);color:var(--cyan)}
+.ui button.dl{background:var(--cyan);color:#0d1216;border-color:var(--cyan);font-weight:600}
 .hint{position:absolute;left:16px;bottom:12px;color:var(--dim);font-size:12px}
 body.shot .ui,body.shot .hint{display:none}
 </style>
@@ -70,13 +102,14 @@ body.shot .ui,body.shot .hint{display:none}
 <div class="ui"><b>ABleemStation</b>
 <button data-v="iso" class="on">3/4</button><button data-v="front">Front</button><button data-v="back">Back</button>
 <button data-v="right">Right</button><button data-v="top">Top</button><button data-v="left">Side</button><button data-v="under">Bottom</button>
-<span id="um" style="display:contents"></span><button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+<span id="um" style="display:contents"></span><button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="rg" title="a WS2812B pixel instead of the 5 mm LED">RGB LED</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+<button id="zp" class="dl" title="the files to print this option: 3MF, Orca profiles, stickers, wiring, notes">Download ZIP</button></div>
 <div class="hint" id="hint">Drag to orbit · wheel to zoom</div>
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
-const DATA = __DATA__, DECO = __DECO__, P = __PARAMS__, CW = __COLORS__;
+const DATA = __DATA__, DECO = __DECO__, P = __PARAMS__, CW = __COLORS__, PACK = __PACK__;
 const q = Object.fromEntries(location.hash.slice(1).split("&").filter(Boolean).map(s => s.split("=")));
 if (q.shot) document.body.classList.add("shot");
 const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -117,6 +150,9 @@ if (mesh.pi) mesh.pi.visible = false;
   MAT.shell.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZB)];
   const dark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZB)] });
   const low = new THREE.Mesh(mesh.shell.geometry, dark); low.castShadow = low.receiveShadow = true; mesh.shell.add(low); MAT.dark = dark; mesh.low = low; }
+// the shells to swap: the passive or the active-cooler roof, the 5 mm LED's tube or the RGB pixel's slot
+const SH = { shell: mesh.shell.geometry };
+for (const n of Object.keys(DATA)) if (/^shell-/.test(n)) { const g = loader.parse(b64(DATA[n])); g.computeVertexNormals(); SH[n] = g; }
 // the universal case: a panel set and a ghost per board, two front panels, the active roof
 const U = P.models ? {} : null;
 if (U) {
@@ -126,24 +162,27 @@ if (U) {
   MAT.panel = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: .55, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZP)] });
   MAT.panelDark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZP)] });
   MAT.metal = new THREE.MeshStandardMaterial({ color: 0xb8bec4, roughness: .35, metalness: .8 });
-  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|usb-|shell-active)/.test(n)) {
+  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|usb-)/.test(n)) {
     const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
-    if (n === "shell-active") { U.active = g; continue; }
     const ghost = /^(pi-|usb-)/.test(n);
     const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : ghost ? MAT.metal : MAT.panel); m.castShadow = m.receiveShadow = true;
     if (!ghost) { const lo = new THREE.Mesh(g, MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
     m.visible = false; U[n] = m; scene.add(m);
   }
-  U.passive = mesh.shell.geometry;
 }
-let model = q.m || "pi4", front = q.front || "blank", roof = q.roof === "active", piOn = false;
+let model = q.m || "pi4", front = q.front || "blank", roof = q.roof === "active", piOn = false, rgb = q.led === "rgb", standby = false, cwKey = CW[0][0];
+function setShell() {
+  const g = SH["shell" + (U && roof ? "-active" : "") + (rgb ? "-rgb" : "")] || SH.shell;
+  mesh.shell.geometry = g; mesh.low.geometry = g;
+  document.getElementById("rg").classList.toggle("on", rgb); setStandby(standby);
+}
 function setU() {
   if (!U) return;
   for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
   U[front === "usb" ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;
   if (U["usb-sockets"]) U["usb-sockets"].visible = front === "usb";
   mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
-  const g = roof ? U.active : U.passive; mesh.shell.geometry = g; mesh.low.geometry = g;
+  setShell();
   document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
   document.getElementById("fu").classList.toggle("on", front === "usb"); document.getElementById("ar").classList.toggle("on", roof);
 }
@@ -158,8 +197,8 @@ if (U) {
 if (DATA.lens) { const g = loader.parse(b64(DATA.lens)); g.computeVertexNormals();
   MAT.lens = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x3cff6e, emissiveIntensity: 1.4, roughness: .3 });
   mesh.shell.add(new THREE.Mesh(g, MAT.lens)); }
-// the LED: green while running, orange in standby (the RGB version shows both, like the PlayStation Classic)
-function setStandby(on) { if (MAT.lens) MAT.lens.emissive.set(on ? 0xff8a1e : 0x3cff6e);
+// the LED: green while running; in standby the 5 mm LED goes dark, the RGB pixel turns orange (like the PlayStation Classic)
+function setStandby(on) { standby = on; if (MAT.lens) MAT.lens.emissive.set(on ? (rgb ? 0xff8a1e : 0x000000) : 0x3cff6e);
   document.getElementById("sb").classList.toggle("on", on); }
 // stickers as decals on the recesses (when the sticker art exists)
 const tl = new THREE.TextureLoader(), TEX = {}, DEC = {};
@@ -203,9 +242,10 @@ document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => view(b.data
 document.getElementById("ex").onclick = () => setEx(!ex);
 document.getElementById("pi").onclick = () => setPi(!mesh.pi.visible);
 document.getElementById("xr").onclick = () => setXr(!xr);
-document.getElementById("sb").onclick = () => setStandby(!document.getElementById("sb").classList.contains("on"));
+document.getElementById("sb").onclick = () => setStandby(!standby);
+document.getElementById("rg").onclick = () => { rgb = !rgb; setShell(); };
 function colorway(key) {
-  const c = CW.find(x => x[0] === key) || CW[0];
+  const c = CW.find(x => x[0] === key) || CW[0]; cwKey = c[0];
   MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
   const set = c[6] ? c[6] + "/" : "";                      // a colourway may bring its own sticker set
   for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
@@ -217,20 +257,122 @@ document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" 
 document.querySelectorAll("#cw button").forEach(b => b.onclick = () => colorway(b.dataset.k));
 colorway(q.cw || "classic");
 document.getElementById("hint").textContent += ` · ${P.hint || "Raspberry Pi 3B/3B+"} · ${P.W} x ${P.D} x ${P.H} mm`;
-setU(); showBottom();
+setU(); setShell(); showBottom();
 view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true); if (q.standby) setStandby(true);
+// ---- Download ZIP: only the files that print the option on screen, and a note with its settings. The zip is built
+// here (stored, no compression - the 3MFs and PNGs are compressed already), so the page needs no server
+function pick() {
+  const c = CW.find(x => x[0] === cwKey), set = c[6] ? `stickers/${c[6]}/` : "stickers/";
+  const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
+  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? "uni-base" : "base"}.3mf`,
+    "3mf/ableemstation-button.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
+  if (U) f.push(`3mf/ableemstation-panel-back-${model}.3mf`, `3mf/ableemstation-panel-right-${model}${front === "usb" ? "-front" : ""}.3mf`,
+    `3mf/ableemstation-panel-front-${front}.3mf`);
+  f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
+  for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
+    f.push(set + n + ".svg", set + n + ".png", `${set}cricut-144dpi/ableemstation-${n}.png`);
+  f.push(set + "ableemstation-stickers-A4.pdf", set + "ableemstation-stickers-A4-preview.png");
+  const miss = f.filter(k => !PACK[k]); if (miss.length) console.warn("not in the page:", miss);
+  return f.filter(k => PACK[k]);
+}
+function zipName() { return `ableemstation-${U ? `${model}-${front === "usb" ? "usb" : "blank"}-${roof ? "active" : "passive"}` : "pi3"}-${rgb ? "rgb" : "led"}-${cwKey}.zip`; }
+function note(names) {
+  const c = CW.find(x => x[0] === cwKey), L = P.layer_change_mm, PC = P.panel_change_mm, M = U ? P.models[model] : "Raspberry Pi 3B / 3B+";
+  const has = s => names.filter(n => n.startsWith("3mf/") && n.includes(s)).map(n => "  " + n.slice(4)).join("\n");
+  const S = [
+    [`ABleemStation${U ? " universal" : ""} - your build`, "",
+     `Board:   ${M}`, ...(U ? [`Front:   ${front === "usb" ? "2 x USB-A (the front-usb panel, the sockets on the base)" : "blank panel"}`,
+       `Roof:    ${roof ? "active - over the Raspberry Pi 5 Active Cooler" : "passive (hidden vents)"}`] : []),
+     `Light:   ${rgb ? "RGB pixel (one WS2812B cut from a 5 V, 10 mm strip)" : "5 mm diffused LED"}`, `Colours: ${c[1]}`],
+    ["PRINT (no supports; README.md has the details)",
+     `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm (0.24 mm):`,
+     "  the top colour first, the band colour after the change.", has("shell"),
+     ...(U ? [`- panels, standing on their bottom edge, "ABleemStation - ASA", with a brim. Filament change at ${PC["0.16"].toFixed(2)} mm / ${PC["0.24"].toFixed(2)} mm:`,
+       "  the band colour first, the top colour after the change.", has("panel-")] : []),
+     `- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base"),
+     `- button x 2, standing on the flange, "ABleemStation - ASA".`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],
+    ["COLOURS (the nearest ASA you can get)",
+     `  top #${c[2]}   band (below the colour line) #${c[3]}   base #${c[4]}   buttons #${c[5]}   lens: clear PETG`],
+    ["ORCA: orca/ - the process profiles (import them, or copy the .json + .info pairs into Orca's user process folder).",
+     `  "ABleemStation - ASA Prototype" is a fast print that still answers "does it fit".`],
+    [`STICKERS: stickers/${c[6] ? " (the special edition set)" : ""} - print the A4 PDF at 100 % on vinyl, or use the cricut-144dpi PNGs.`,
+     ...(U ? [`  The bottom plate is the ${M} one: write the serial number in with a permanent marker before you stick it on.`] : [])],
+    [`WIRING: wiring/${rgb ? "wiring-rgb" : "wiring"}.png`,
+     rgb ? "  RGB pixel: 5V (pin 2), GND (pin 6), DIN <- 330 ohm <- GPIO10 (pin 19); config.txt: dtparam=spi=on"
+         : "  LED: GPIO14 (pin 8) -> 330 ohm -> LED -> GND (pin 6); config.txt: enable_uart=1",
+     "  POWER: " + (U && model === "pi5" ? "to the board's J2 pads (GPIO3 cannot wake a Pi 5)" : "GPIO3 (pin 5) + GND (pin 9); config.txt: dtoverlay=gpio-shutdown"),
+     "  RESET: GPIO23 (pin 16) + GND (pin 20); config.txt: dtoverlay=gpio-key,gpio=23,active_low=1,gpio_pull=up,keycode=164"],
+    ["PARTS FOR THIS OPTION (the full list: README.md, Parts)",
+     "  4 x M3 heat-set insert, 4 x M3 x 8 countersunk, 4 x M2.5 x 5, 2 x 6 x 6 mm tactile switch (5 mm), 4 rubber feet, jumper wires",
+     rgb ? "  1 x WS2812B pixel + 330 ohm resistor" : "  1 x 5 mm diffused LED + 330 ohm resistor (100 ohm for blue / white / cyan)",
+     ...(U && front === "usb" ? ["  2 x USB-A female socket, THT 180 degrees, + a 4-wire cable each"] : []),
+     ...(U && roof ? [`  Raspberry Pi 5 Active Cooler${model === "pi5" ? "" : " (the active roof is made for it - a " + M + " does not need it)"}`] : [])],
+    ["FILES IN THIS ZIP", ...names.map(n => "  " + n)]];
+  return S.map(s => s.join("\n")).join("\n\n") + "\n";
+}
+const CRC = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+function crc32(a) { let c = 0xFFFFFFFF; for (let i = 0; i < a.length; i++) c = CRC[(c ^ a[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zip(files) {                                      // [[name, Uint8Array]] -> a zip Blob (stored entries, UTF-8 names)
+  const enc = new TextEncoder(), out = [], cd = []; let off = 0;
+  const d = new Date(), dt = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(),
+    tm = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const put = (v, fields) => fields.forEach(([o, x, s]) => s === 4 ? v.setUint32(o, x, true) : v.setUint16(o, x, true));
+  for (const [name, data] of files) {
+    const n = enc.encode(name), c = crc32(data), h = new DataView(new ArrayBuffer(30)), e = new DataView(new ArrayBuffer(46));
+    put(h, [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [10, tm, 2], [12, dt, 2], [14, c, 4], [18, data.length, 4],
+      [22, data.length, 4], [26, n.length, 2]]);
+    put(e, [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [12, tm, 2], [14, dt, 2], [16, c, 4], [20, data.length, 4],
+      [24, data.length, 4], [28, n.length, 2], [42, off, 4]]);
+    out.push(h, n, data); cd.push(e, n); off += 30 + n.length + data.length;
+  }
+  const size = cd.reduce((s, x) => s + x.byteLength, 0), end = new DataView(new ArrayBuffer(22));
+  put(end, [[0, 0x06054b50, 4], [8, files.length, 2], [10, files.length, 2], [12, size, 4], [16, off, 4]]);
+  return new Blob([...out, ...cd, end], { type: "application/zip" });
+}
+function buildZip() {
+  const files = pick().map(k => [k.replace(/^stickers\/special\//, "stickers/"), new Uint8Array(b64(PACK[k]))]);
+  files.unshift(["BUILD.txt", new TextEncoder().encode(note(files.map(x => x[0])))]);
+  return zip(files);
+}
+document.getElementById("zp").onclick = () => {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(buildZip()); a.download = zipName();
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+// self-test (#zipcheck=1): the zip goes into the page as base64, for make_viewer's check
+if (q.zipcheck) buildZip().arrayBuffer().then(b => { const u = new Uint8Array(b); let s = "";
+  for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode(...u.subarray(i, i + 32768));
+  const p = document.createElement("pre"); p.id = "zipcheck"; p.dataset.name = zipName(); p.textContent = btoa(s); document.body.appendChild(p); });
 addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth, innerHeight); });
 (function loop() { ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
 </script></body></html>"""
 
 import json  # noqa: E402
-open(PAGE, "w", encoding="utf-8", newline="\n").write(HTML.replace("__DATA__", json.dumps(stl)).replace("__DECO__", json.dumps(deco)).replace("__PARAMS__", json.dumps(prm)).replace("__COLORS__", json.dumps(COLORWAYS)))
+open(PAGE, "w", encoding="utf-8", newline="\n").write(HTML.replace("__DATA__", json.dumps(stl)).replace("__DECO__", json.dumps(deco)).replace("__PARAMS__", json.dumps(prm)).replace("__COLORS__", json.dumps(COLORWAYS)).replace("__PACK__", json.dumps(pack)))
 print("viewer:", PAGE)
+
+# the download check: the page builds the zip of one option, headless Chrome dumps it, and every file in it must be
+# readable and the same bytes as its source
+import io, re, zipfile  # noqa: E401,E402
+for hashq in (("m=pi5&front=usb&roof=active&led=rgb&cw=grey94", "m=pi23&cw=classic") if VARIANT else ("led=rgb&cw=grey94", "cw=classic")):
+    dom = subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--virtual-time-budget=15000",
+                          "--dump-dom", "file:///" + PAGE.replace("\\", "/") + "#zipcheck=1&shot=1&" + hashq],
+                         check=True, capture_output=True, text=True, encoding="utf-8").stdout
+    m = re.search(r'<pre id="zipcheck" data-name="([^"]+)">([A-Za-z0-9+/=]+)</pre>', dom)
+    assert m, "the page built no zip for #" + hashq
+    z = zipfile.ZipFile(io.BytesIO(base64.b64decode(m.group(2))))
+    assert z.testzip() is None, "a damaged file in the zip"
+    names = z.namelist()
+    for n in names:
+        src = [k for k in pack if k == n or k == n.replace("stickers/", "stickers/special/", 1)]
+        if n != "BUILD.txt":
+            assert any(base64.b64decode(pack[k]) == z.read(n) for k in src), "zip entry differs from its source: " + n
+    assert sum(n.startswith("3mf/") for n in names) >= (7 if VARIANT else 4) and "BUILD.txt" in names, names
+    print("zip %s: %d files, %.1f MB" % (m.group(1), len(names), len(base64.b64decode(m.group(2))) / 1e6))
 
 shots = os.path.join(OUT, "renders")
 os.makedirs(shots, exist_ok=True)
 SHOTS = (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back", "view=back"), ("4-right", "view=right"),
-         ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1"), ("7-front-standby", "view=front&standby=1"))
+         ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1"), ("7-front-standby", "view=front&standby=1&led=rgb"))
 if VARIANT:
     SHOTS = (("1-iso", "view=iso"), ("2-back-pi23", "view=back&m=pi23"), ("3-back-pi4", "view=back&m=pi4"),
              ("4-back-pi5", "view=back&m=pi5"), ("5-right-pi23", "view=right&m=pi23"), ("6-right-pi4", "view=right&m=pi4"),

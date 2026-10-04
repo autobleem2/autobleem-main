@@ -4,7 +4,10 @@ A 3D-printable case that turns a Raspberry Pi 3 running AutoBleem into a small c
 140 x 105 x 27.6 mm (just tall enough for the Pi's USB stack), cut corners in the ab2.0.0 style, hidden cooling
 vents in the roof and the side (no line of sight into the case), working POWER / RESET buttons, a front LED behind
 a clear lens (a plain LED or an RGB pixel that shows green / orange like the PlayStation Classic), and stickers.
-Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, explode, show the Pi, X-ray, colourways).
+Open `files/ableemstation-viewer.html` (or `files/universal/ableemstation-universal-viewer.html`) in a browser for the 3D
+model (orbit, explode, show the Pi, X-ray, colourways, the 5 mm LED or the RGB pixel). **Download ZIP** there saves
+only what the option on screen needs: its 3MFs, the Orca profiles, its stickers, the wiring diagram and a `BUILD.txt`
+with the filament changes, colours and parts - all built in the browser from files inside the page.
 
 Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **universal** case for the Pi 2B, 3B,
 3B+, 4B and 5, whose port walls are separate panels printed per board ([Universal case](#universal-case-pi-2--3--4--5)).
@@ -19,7 +22,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `ableemstation-{shell,shell-rgb,base,button,lens}.stl` | the parts for the slicer (`shell` = plain LED, `shell-rgb` = RGB pixel) |
 | `ableemstation-{shell,shell-rgb,base,button,lens}.3mf` | the same, already turned the way they print (shell roof-down, button and lens flange-down) |
 | `ableemstation-all-parts.3mf`, `-all-parts-rgb.3mf` | everything to print in one file, per LED version: shell, base, 2 buttons, the lens |
-| `ableemstation-viewer.html` | the 3D viewer (three.js from a CDN, so it needs internet) |
+| `ableemstation-viewer.html` | the 3D viewer with the "Download ZIP" of the option on screen (three.js from a CDN, so it needs internet) |
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
 | `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |

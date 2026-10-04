@@ -55,5 +55,13 @@
   "pi4": "sticker-bottom-pi4",
   "pi5": "sticker-bottom-pi5"
  },
+ "layer_change_mm": {
+  "0.16": 16.68,
+  "0.24": 16.8
+ },
+ "panel_change_mm": {
+  "0.16": 10.92,
+  "0.24": 10.8
+ },
  "hint": "Raspberry Pi 2B / 3B / 3B+ / 4B / 5 - universal"
 }

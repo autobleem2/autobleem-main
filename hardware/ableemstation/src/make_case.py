@@ -230,8 +230,8 @@ def main():
     export_step(asm, os.path.join(OUT, "ableemstation-assembly.step"))
     viewer = os.path.join(OUT, "viewer")
     os.makedirs(viewer, exist_ok=True)
-    for name, p in (("shell", parts["shell"]), ("base", parts["base"]), ("caps", Compound(children=caps)), ("pi", pi),
-                    ("lens", lens_in)):
+    for name, p in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"]),
+                    ("caps", Compound(children=caps)), ("pi", pi), ("lens", lens_in)):
         export_stl(p, os.path.join(viewer, name + ".stl"), tolerance=0.05, angular_tolerance=0.2)
     for f in os.listdir(viewer):
         if f.endswith(".glb"):

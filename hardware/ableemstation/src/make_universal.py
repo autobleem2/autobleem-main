@@ -262,11 +262,12 @@ def main():
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
     assert not bad, "%d fit check(s) failed" % bad
 
-    # the viewer: the passive shell, the base, caps, lens, each board's panel set and ghost, both front panels
+    # the viewer: the four shells, the base, caps, lens, each board's panel set and ghost, both front panels
     view = os.path.join(OUT, "viewer")
     caps = [Pos(x, CAP_REST, BTN_Z) * button() for x in BTN_X]
     lens_in = Pos(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z) * lens()
-    vparts = {"shell": shells["uni-shell"], "shell-active": shells["uni-shell-active"], "base": b,
+    vparts = {"shell": shells["uni-shell"], "shell-active": shells["uni-shell-active"], "shell-rgb": shells["uni-shell-rgb"],
+              "shell-active-rgb": shells["uni-shell-active-rgb"], "base": b,
               "caps": Compound(children=caps), "lens": lens_in,
               "front-usb": panels["front-usb"], "front-blank": panels["front-blank"], "usb-sockets": usb}
     for model in ("pi23", "pi4", "pi5"):
@@ -282,6 +283,8 @@ def main():
                # ports), the rating plate on the base's underside between the feet, the screws and the microSD window
                "side": {"c": [-0.05, 60, 5.2], "w": 80, "h": 8}, "bottom": {"c": [89, 57, -0.05], "w": 54, "h": 34},
                "bottoms": {"pi23": "sticker-bottom", "pi4": "sticker-bottom-pi4", "pi5": "sticker-bottom-pi5"},
+               # the filament changes, for the print notes in the viewer's download
+               "layer_change_mm": {k: first_layer_at(H - BAND, f, lh) for k, (f, lh) in LAYERS.items()}, "panel_change_mm": pchange,
                "hint": "Raspberry Pi 2B / 3B / 3B+ / 4B / 5 - universal"},
               open(os.path.join(view, "params.json"), "w", newline="\n"), indent=1)
     print("written to", OUT)
