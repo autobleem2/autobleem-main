@@ -1,14 +1,19 @@
 """ABleemStation: a self-contained WebGL viewer (three.js from jsDelivr, the case STLs inlined as base64) + quick renders.
 The page works by double-click. Hash options: #view=front|back|right|top|iso, &explode=1, &pi=1, &shot=1 (no UI).
 Renders: headless Chrome screenshots of the same page into ../files/renders/. Run after make_case.py and
-make_stickers.py:  python make_viewer.py"""
+make_stickers.py:  python make_viewer.py
+The universal case (make_universal.py):  python make_viewer.py universal  - the same page with the board (&m=pi23|pi4|pi5),
+the front panel (&front=usb|blank) and the roof (&roof=active) to pick, into ../files/universal/."""
 import base64
 import os
 import shutil
 import subprocess
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.normpath(os.path.join(HERE, "..", "files"))
+FILES = os.path.normpath(os.path.join(HERE, "..", "files"))
+VARIANT = sys.argv[1] if len(sys.argv) > 1 else ""
+OUT = os.path.join(FILES, VARIANT) if VARIANT else FILES
 VIEW = os.path.join(OUT, "viewer")
 def find_chrome():
     """headless Chrome: $CHROME, else chrome / google-chrome on PATH, else the default Windows install"""
@@ -20,7 +25,7 @@ def find_chrome():
 
 
 CHROME = find_chrome()
-PAGE = os.path.join(OUT, "ableemstation-viewer.html")
+PAGE = os.path.join(OUT, "ableemstation-%sviewer.html" % (VARIANT + "-" if VARIANT else ""))
 
 # colourways: top (above the waist), band (below it - the filament change), base plate, button caps (ASA colours
 # that exist off the shelf; the LED stays cyan)
@@ -34,13 +39,13 @@ COLORWAYS = [
     ("purple", "Atomic Purple", "7a5ca8", "3b2a57", "2a1e3e", "e6e0f0"),
     ("mint", "Mint", "a9d6c6", "2e3742", "2e3742", "f1f1ec"),
 ]
-stl = {n: base64.b64encode(open(os.path.join(VIEW, n + ".stl"), "rb").read()).decode()
-       for n in ("shell", "base", "caps", "pi", "lens") if os.path.exists(os.path.join(VIEW, n + ".stl"))}
+stl = {f[:-4]: base64.b64encode(open(os.path.join(VIEW, f), "rb").read()).decode()
+       for f in sorted(os.listdir(VIEW)) if f.endswith(".stl")}
 import json as _j
 prm = _j.load(open(os.path.join(VIEW, "params.json")))
 deco = {}
 for n in ("sticker-top", "sticker-front"):
-    p = os.path.join(OUT, "stickers", n + ".png")
+    p = os.path.join(FILES, "stickers", n + ".png")
     if os.path.exists(p):
         deco[n] = base64.b64encode(open(p, "rb").read()).decode()
 
@@ -62,8 +67,8 @@ body.shot .ui,body.shot .hint{display:none}
 <div class="ui"><b>ABleemStation</b>
 <button data-v="iso" class="on">3/4</button><button data-v="front">Front</button><button data-v="back">Back</button>
 <button data-v="right">Right</button><button data-v="top">Top</button>
-<button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
-<div class="hint" id="hint">Drag to orbit · wheel to zoom · Raspberry Pi 3B/3B+</div>
+<span id="um" style="display:contents"></span><button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+<div class="hint" id="hint">Drag to orbit · wheel to zoom</div>
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -94,18 +99,47 @@ const MAT = {
   caps: new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .5 }),
   pi: new THREE.MeshStandardMaterial({ color: 0x2f8a4e, roughness: .6 }),
 };
-for (const n of ["shell", "base", "caps", "pi"]) {
+for (const n of ["shell", "base", "caps", "pi"]) { if (!DATA[n]) continue;
   const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
   const m = new THREE.Mesh(g, MAT[n]); m.castShadow = m.receiveShadow = true; mesh[n] = m; scene.add(m);
 }
-mesh.pi.visible = false;
+if (mesh.pi) mesh.pi.visible = false;
 // two-tone shell: below the waist groove the dark filament (printed upside down = a filament change at that layer);
 // drawn as two clipped copies so the colour line is sharp
 { r.localClippingEnabled = true;
   const ZB = P.BAND - .6;
   MAT.shell.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZB)];
   const dark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZB)] });
-  const low = new THREE.Mesh(mesh.shell.geometry, dark); low.castShadow = low.receiveShadow = true; mesh.shell.add(low); MAT.dark = dark; }
+  const low = new THREE.Mesh(mesh.shell.geometry, dark); low.castShadow = low.receiveShadow = true; mesh.shell.add(low); MAT.dark = dark; mesh.low = low; }
+// the universal case: a panel set and a ghost per board, two front panels, the active roof
+const U = P.models ? {} : null;
+if (U) {
+  MAT.panel = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6 });
+  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|shell-active)/.test(n)) {
+    const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
+    if (n === "shell-active") { U.active = g; continue; }
+    const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : MAT.panel); m.castShadow = m.receiveShadow = true;
+    m.visible = false; U[n] = m; (n.startsWith("pi-") ? scene : mesh.shell).add(m);
+  }
+  U.passive = mesh.shell.geometry;
+}
+let model = q.m || "pi4", front = q.front || "blank", roof = q.roof === "active", piOn = false;
+function setU() {
+  if (!U) return;
+  for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
+  U[front === "usb" ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;
+  mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
+  const g = roof ? U.active : U.passive; mesh.shell.geometry = g; mesh.low.geometry = g;
+  document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
+  document.getElementById("fu").classList.toggle("on", front === "usb"); document.getElementById("ar").classList.toggle("on", roof);
+}
+if (U) {
+  document.getElementById("um").innerHTML = Object.entries(P.models).map(([k, v]) => `<button data-m="${k}">${v}</button>`).join("")
+    + `<button id="fu">Front USB</button><button id="ar">Active roof</button>`;
+  document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { model = b.dataset.m; setU(); });
+  document.getElementById("fu").onclick = () => { front = front === "usb" ? "blank" : "usb"; setU(); };
+  document.getElementById("ar").onclick = () => { roof = !roof; setU(); };
+}
 // the front LED behind its clear lens, lit
 if (DATA.lens) { const g = loader.parse(b64(DATA.lens)); g.computeVertexNormals();
   MAT.lens = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x3cff6e, emissiveIntensity: 1.4, roughness: .3 });
@@ -135,8 +169,8 @@ let ex = false, xr = false;
 function setEx(on) { ex = on; mesh.shell.position.z = on ? 55 : 0; const zc = P.BAND - .6 + (on ? 55 : 0);
   MAT.shell.clippingPlanes[0].constant = -zc; MAT.dark.clippingPlanes[0].constant = zc; mesh.caps.position.y = on ? 22 : 0; mesh.caps.position.z = on ? 55 : 0;
   document.getElementById("ex").classList.toggle("on", on); }
-function setPi(on) { mesh.pi.visible = on; document.getElementById("pi").classList.toggle("on", on); }
-function setXr(on) { xr = on; for (const m of [MAT.shell, MAT.dark]) { m.transparent = on; m.opacity = on ? .28 : 1; m.depthWrite = !on; m.needsUpdate = true; }
+function setPi(on) { piOn = on; mesh.pi.visible = on; document.getElementById("pi").classList.toggle("on", on); }
+function setXr(on) { xr = on; for (const m of [MAT.shell, MAT.dark, MAT.panel].filter(Boolean)) { m.transparent = on; m.opacity = on ? .28 : 1; m.depthWrite = !on; m.needsUpdate = true; }
   document.getElementById("xr").classList.toggle("on", on); if (on) setPi(true); }
 document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => view(b.dataset.v));
 document.getElementById("ex").onclick = () => setEx(!ex);
@@ -145,14 +179,15 @@ document.getElementById("xr").onclick = () => setXr(!xr);
 document.getElementById("sb").onclick = () => setStandby(!document.getElementById("sb").classList.contains("on"));
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0];
-  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
+  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) MAT.panel.color.set("#" + c[3]); MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
   document.querySelectorAll("#cw button").forEach(b => b.classList.toggle("on", b.dataset.k === c[0]));
 }
 document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" title="${c[1]}" style="display:flex;gap:6px;align-items:center">`
   + `<i style="width:12px;height:12px;border-radius:2px;background:#${c[2]};box-shadow:inset 0 -5px 0 #${c[3]}"></i>${c[1]}</button>`).join("");
 document.querySelectorAll("#cw button").forEach(b => b.onclick = () => colorway(b.dataset.k));
 colorway(q.cw || "classic");
-document.getElementById("hint").textContent += ` · ${P.W} x ${P.D} x ${P.H} mm`;
+document.getElementById("hint").textContent += ` · ${P.hint || "Raspberry Pi 3B/3B+"} · ${P.W} x ${P.D} x ${P.H} mm`;
+setU();
 view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true); if (q.standby) setStandby(true);
 addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth, innerHeight); });
 (function loop() { ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
@@ -164,9 +199,14 @@ print("viewer:", PAGE)
 
 shots = os.path.join(OUT, "renders")
 os.makedirs(shots, exist_ok=True)
-for name, hashq in (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back", "view=back"), ("4-right", "view=right"),
-                    ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1"),
-                    ("7-front-standby", "view=front&standby=1")):
+SHOTS = (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back", "view=back"), ("4-right", "view=right"),
+         ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1"), ("7-front-standby", "view=front&standby=1"))
+if VARIANT:
+    SHOTS = (("1-iso", "view=iso"), ("2-back-pi23", "view=back&m=pi23"), ("3-back-pi4", "view=back&m=pi4"),
+             ("4-back-pi5", "view=back&m=pi5"), ("5-right-pi23", "view=right&m=pi23"), ("6-right-pi4", "view=right&m=pi4"),
+             ("7-front-usb", "view=front&front=usb"), ("8-exploded", "view=iso&explode=1&pi=1&m=pi5&roof=active"),
+             ("9-xray-active", "view=iso&xray=1&m=pi5&roof=active"), ("10-top-active", "view=top&roof=active"))
+for name, hashq in SHOTS:
     png = os.path.join(shots, name + ".png")
     subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--hide-scrollbars",
                     "--window-size=1280,800", "--virtual-time-budget=8000", "--screenshot=" + png,
@@ -174,6 +214,8 @@ for name, hashq in (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back",
                    check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print("render:", png)
 
+if VARIANT:
+    sys.exit(0)
 # one 3/4 render per colourway + a sheet with all of them
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 cdir = os.path.join(shots, "colors")

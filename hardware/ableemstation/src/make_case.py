@@ -82,7 +82,8 @@ def pi_ghost():
 
 
 # ---- shell
-def shell(led="led5"):
+def shell(led="led5", vents=None):
+    """vents: the roof field (centre x, centre y, slot length, slot count); the default sits over the Pi 3's SoC"""
     s = prism(outline(), 0, H)
     s = chamfer(s.edges().group_by(Axis.Z)[-1], 2.0)                         # soft top edge
     s -= prism(outline(WALL), -1, H - ROOF + 1)
@@ -96,14 +97,14 @@ def shell(led="led5"):
     # hidden roof vents over the SoC, a labyrinth through the 3.2 mm roof: the outer slot (1.0 deep) opens into a
     # channel (0.8) that leads sideways to the inner slot, half a pitch over - from outside you see the channel's
     # floor, never the inside. Printed roof-down, the channel's ceiling bridges only ~3.5 mm.
-    cx, cy = BX + 32, BY + 29
+    cx, cy, vl, vn = vents or (BX + 32, BY + 29, 52.0, VENT_N)
     off = VENT_PITCH / 2
-    for i in range(VENT_N):
-        y = cy + (i - (VENT_N - 1) / 2) * VENT_PITCH - off / 2
+    for i in range(vn):
+        y = cy + (i - (vn - 1) / 2) * VENT_PITCH - off / 2
         # (each cut overlaps the next by 0.1 mm: touching faces would leave a mesh with zero-thickness seams)
-        s -= box(cx - 26, y - VENT_W / 2, H - 1.05, 52, VENT_W, 2)                        # outer slot
-        s -= box(cx - 26, y - VENT_W / 2, H - 1.85, 52, off + VENT_W, 0.9)                # channel
-        s -= box(cx - 26, y + off - VENT_W / 2, H - ROOF - 1, 52, VENT_W, ROOF - 1.75 + 1)  # inner slot
+        s -= box(cx - vl / 2, y - VENT_W / 2, H - 1.05, vl, VENT_W, 2)                        # outer slot
+        s -= box(cx - vl / 2, y - VENT_W / 2, H - 1.85, vl, off + VENT_W, 0.9)                # channel
+        s -= box(cx - vl / 2, y + off - VENT_W / 2, H - ROOF - 1, vl, VENT_W, ROOF - 1.75 + 1)  # inner slot
     # side vents opposite the USB (air in): slots through the wall with a baffle 1.8 mm behind them, hanging from the
     # roof and closed at both ends, open below - the air turns down under it; you see the baffle, not the inside
     for i in range(8):

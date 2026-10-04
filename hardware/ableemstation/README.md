@@ -1,10 +1,13 @@
-# ABleemStation - a retro-console case for the Raspberry Pi 3B / 3B+
+# ABleemStation - a retro-console case for the Raspberry Pi
 
 A 3D-printable case that turns a Raspberry Pi 3 running AutoBleem into a small console under the TV:
 140 x 105 x 27.6 mm (just tall enough for the Pi's USB stack), cut corners in the ab2.0.0 style, hidden cooling
 vents in the roof and the side (no line of sight into the case), working POWER / RESET buttons, a front LED behind
 a clear lens (a plain LED or an RGB pixel that shows green / orange like the PlayStation Classic), and stickers.
 Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, explode, show the Pi, X-ray, colourways).
+
+Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **universal** case for the Pi 2B, 3B,
+3B+, 4B and 5, whose port walls are separate panels printed per board ([Universal case](#universal-case-pi-2--3--4--5)).
 
 ![colourways](files/renders/colorways.png)
 
@@ -22,6 +25,7 @@ Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, exp
 | `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |
 | `wiring.svg`, `wiring.png` | the wiring diagram + what to buy, plain LED (`src/make_wiring.py`) |
 | `wiring-rgb.svg`, `wiring-rgb.png` | the same with a WS2812B RGB pixel instead of the LED |
+| `universal/` | the universal case: shells, panels, viewer, renders ([Universal case](#universal-case-pi-2--3--4--5)) |
 | `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
@@ -36,8 +40,10 @@ sticker PNGs (`CHROME=<path>` if it is not found).
 ```
 cd src
 python make_case.py          # parts: STEP, STL, 3MF; the fit check (the Pi must overlap the case by 0 mm3)
+python make_universal.py     # the universal case: shells + panels to files/universal/, fit checks per board
 python make_stickers.py      # stickers: SVG, PNG, the A4 PDF, the Cricut PNGs
 python make_viewer.py        # the viewer + the renders (after the two above)
+python make_viewer.py universal   # the universal case's viewer + renders
 python make_wiring.py        # the wiring diagram
 python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also copies them into Orca's user folder)
 ```
@@ -78,6 +84,39 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
     so a small service on the Pi sets green at boot and orange at shutdown, and the orange stays on through the
     standby, as on the PlayStation Classic.
 
+## Universal case (Pi 2 / 3 / 4 / 5)
+
+The boards share the 85 x 56 mm outline, the mounting holes and the GPIO header, so the base, the buttons, the lens
+and most of the shell are the Pi 3 case's. What differs are the ports on two edges - and the front can take USB:
+
+| Opening | Panels (`files/universal/ableemstation-panel-*`) |
+|---|---|
+| back (power, HDMI, audio) | `back-pi23` (micro-USB, HDMI, audio) · `back-pi4` (USB-C, 2 x micro-HDMI, audio) · `back-pi5` (USB-C, 2 x micro-HDMI) · `back-blank` |
+| side (USB, Ethernet) | `right-pi23` · `right-pi4` (Ethernet and USB swapped) · `right-pi5` · each also `-front` (one USB block closed, see below) · `right-blank` (to drill yourself) |
+| front (between the buttons and the LED) | `front-blank` · `front-usb` (two USB-A sockets) |
+
+- **Fitting a panel**: before the base goes on, slide the panel up into its opening from below. A tongue on its inner
+  half runs in grooves in the sides and the roof; a foot inside rests on the base plate, so the screwed-on base
+  locks every panel. Swapping a board = swapping two panels.
+- **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
+  the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
+  `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
+- **Front USB**: two THT "USB-A female, 180°" sockets push into the panel's sleeves from behind (a drop of glue keeps
+  them). Their cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
+  the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
+  the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
+  one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
+- **Printing**: panels lie flat, outer face down (4.9 mm tall; `front-usb` 12 mm), in the dark band colour like a
+  port bezel - `ableemstation-panels-all.3mf` has every panel on one plate. Shells, base, buttons and lens as for
+  the Pi 3 case (the base, buttons and lens files are the same).
+- **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
+  button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.
+  RESET, the LED and the RGB pixel are wired the same on every board.
+- Port positions come from Raspberry Pi Ltd's mechanical drawings (3B+, 4B, 5); `make_universal.py` checks every
+  board against every shell and its panels (0 mm3 overlap) and fails if one touches.
+
+![universal, Pi 4 back panel](files/universal/renders/3-back-pi4.png)
+
 ## Parts
 
 | Qty | Part |
@@ -89,6 +128,7 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
 | 1 | the front light, either: a 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), or one WS2812B pixel cut from a 5 V, 10 mm strip + 330 Ω resistor |
 | 6-7 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
 | 4 | rubber feet Ø 12 mm |
+| (2) | universal case, front USB: USB-A female socket, THT 180°, + 4-wire cable (about 15 cm) per socket |
 
 ## Wiring (BCM numbers, physical pins in brackets)
 
