@@ -278,6 +278,10 @@ def main():
     json.dump({"W": W, "D": D, "H": H, "BAND": BAND, "LED": [LED_X, D - 0.2, BTN_Z], "LED_R": LENS_R,
                "top": {"c": [43, 85, H - 0.35], "w": 61, "h": 17}, "front": {"c": [36, D - 0.35, BTN_Z - 9.5], "w": 43, "h": 4.6},
                "models": {"pi23": "Pi 2B / 3B / 3B+", "pi4": "Pi 4B", "pi5": "Pi 5"},
+               # the stickers without a recess: the side stripe on the dark band of the vent side (the side away from the
+               # ports), the rating plate on the base's underside between the feet, the screws and the microSD window
+               "side": {"c": [-0.05, 60, 5.2], "w": 80, "h": 8}, "bottom": {"c": [89, 57, -0.05], "w": 54, "h": 34},
+               "bottoms": {"pi23": "sticker-bottom", "pi4": "sticker-bottom-pi4", "pi5": "sticker-bottom-pi5"},
                "hint": "Raspberry Pi 2B / 3B / 3B+ / 4B / 5 - universal"},
               open(os.path.join(view, "params.json"), "w", newline="\n"), indent=1)
     print("written to", OUT)

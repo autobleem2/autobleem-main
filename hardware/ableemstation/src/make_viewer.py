@@ -44,10 +44,9 @@ stl = {f[:-4]: base64.b64encode(open(os.path.join(VIEW, f), "rb").read()).decode
 import json as _j
 prm = _j.load(open(os.path.join(VIEW, "params.json")))
 deco = {}
-for n in ("sticker-top", "sticker-front"):
-    p = os.path.join(FILES, "stickers", n + ".png")
-    if os.path.exists(p):
-        deco[n] = base64.b64encode(open(p, "rb").read()).decode()
+for f in sorted(os.listdir(os.path.join(FILES, "stickers"))):
+    if f.startswith("sticker-") and f.endswith(".png") and (f[:-4] in ("sticker-top", "sticker-front") or "side" in prm or "bottom" in prm):
+        deco[f[:-4]] = base64.b64encode(open(os.path.join(FILES, "stickers", f), "rb").read()).decode()
 
 HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ABleemStation case</title>
@@ -147,7 +146,7 @@ function setU() {
 if (U) {
   document.getElementById("um").innerHTML = Object.entries(P.models).map(([k, v]) => `<button data-m="${k}">${v}</button>`).join("")
     + `<button id="fu">Front USB</button><button id="ar">Active roof</button>`;
-  document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { model = b.dataset.m; setU(); });
+  document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { model = b.dataset.m; setU(); showBottom(); });
   document.getElementById("fu").onclick = () => { front = front === "usb" ? "blank" : "usb"; setU(); };
   document.getElementById("ar").onclick = () => { roof = !roof; setU(); };
 }
@@ -160,20 +159,31 @@ function setStandby(on) { if (MAT.lens) MAT.lens.emissive.set(on ? 0xff8a1e : 0x
   document.getElementById("sb").classList.toggle("on", on); }
 // stickers as decals on the recesses (when the sticker art exists)
 const tl = new THREE.TextureLoader();
-function decal(name, w, h, pos, bx, by) {
-  if (!DECO[name]) return;
+function decal(name, w, h, pos, bx, by, parent) {
+  if (!DECO[name]) return null;
   const t = tl.load("data:image/png;base64," + DECO[name]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: .4 }));
   const X = new THREE.Vector3(...bx), Y = new THREE.Vector3(...by), Z = new THREE.Vector3().crossVectors(X, Y);
-  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); mesh.shell.add(m);
+  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); (parent || mesh.shell).add(m); return m;
 }
 // read from the front of the console: text runs along -x, "up" on the roof is -y (away from the viewer)
 decal("sticker-top", P.top.w, P.top.h, P.top.c, [-1, 0, 0], [0, -1, 0]);
 decal("sticker-front", P.front.w, P.front.h, P.front.c, [-1, 0, 0], [0, 0, 1]);
+// the vent side (x = 0): read standing beside it - text along -y; the underside: text along +x, "up" towards the back
+if (P.side) decal("sticker-side", P.side.w, P.side.h, P.side.c, [0, -1, 0], [0, 0, 1]);
+const BOT = {};
+if (P.bottom) for (const [k, n] of Object.entries(P.bottoms)) {
+  BOT[k] = decal(n, P.bottom.w, P.bottom.h, P.bottom.c, [1, 0, 0], [0, -1, 0], mesh.base); if (BOT[k]) BOT[k].visible = false; }
+function showBottom() { for (const [k, m] of Object.entries(BOT)) if (m) m.visible = k === model; }
 const C = new THREE.Vector3(P.W / 2, P.D / 2, P.H / 2.2);
-const VIEWS = { iso: [-150, 260, 190], front: [70, 380, 60], back: [70, -300, 60], right: [380, 52, 70], top: [70, 60, 400] };
+const VIEWS = { iso: [-150, 260, 190], front: [70, 380, 60], back: [70, -300, 60], right: [380, 52, 70], top: [70, 60, 400],
+  left: [-240, 52, 30], under: [70, -10, -300] };
+// a light from below, only for the underside view (the room's lights all come from above)
+const below = new THREE.DirectionalLight(0xffffff, 2.4); below.position.set(40, 120, -300); below.visible = false; scene.add(below);
 function view(v) {
-  const p = VIEWS[v] || VIEWS.iso; cam.position.set(p[0], p[1], p[2]); ctl.target.copy(C); ctl.update();
+  const p = VIEWS[v] || VIEWS.iso; ctl.maxPolarAngle = v === "under" ? Math.PI : Math.PI * .62;
+  floor.visible = grid.visible = v !== "under"; below.visible = v === "under";
+  cam.position.set(p[0], p[1], p[2]); ctl.target.copy(C); ctl.update();
   document.querySelectorAll("[data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
 let ex = false, xr = false;
@@ -198,7 +208,7 @@ document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" 
 document.querySelectorAll("#cw button").forEach(b => b.onclick = () => colorway(b.dataset.k));
 colorway(q.cw || "classic");
 document.getElementById("hint").textContent += ` · ${P.hint || "Raspberry Pi 3B/3B+"} · ${P.W} x ${P.D} x ${P.H} mm`;
-setU();
+setU(); showBottom();
 view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true); if (q.standby) setStandby(true);
 addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth, innerHeight); });
 (function loop() { ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
@@ -216,7 +226,8 @@ if VARIANT:
     SHOTS = (("1-iso", "view=iso"), ("2-back-pi23", "view=back&m=pi23"), ("3-back-pi4", "view=back&m=pi4"),
              ("4-back-pi5", "view=back&m=pi5"), ("5-right-pi23", "view=right&m=pi23"), ("6-right-pi4", "view=right&m=pi4"),
              ("7-front-usb", "view=front&front=usb"), ("8-exploded", "view=iso&explode=1&pi=1&m=pi5&roof=active&front=usb"),
-             ("9-xray-active", "view=iso&xray=1&m=pi5&roof=active"), ("10-top-active", "view=top&roof=active"))
+             ("9-xray-active", "view=iso&xray=1&m=pi5&roof=active"), ("10-top-active", "view=top&roof=active"),
+             ("11-side-stickers", "view=left"), ("12-bottom-sticker", "view=under&m=pi4"))
 for name, hashq in SHOTS:
     png = os.path.join(shots, name + ".png")
     subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--hide-scrollbars",
@@ -226,6 +237,37 @@ for name, hashq in SHOTS:
     print("render:", png)
 
 if VARIANT:
+    # the sticker placement sheet: where each sticker goes, with the stickers themselves
+    from PIL import Image, ImageDraw, ImageFont  # noqa: E402
+    try:
+        fb = ImageFont.truetype(os.path.join(HERE, "fonts", "RedHatText-SemiBold.ttf"), 30)
+        fs = ImageFont.truetype(os.path.join(HERE, "fonts", "RedHatText-Medium.ttf"), 22)
+    except OSError:
+        fb = fs = ImageFont.load_default()
+    shots_ = [("1-iso", "1 roof + 2 front: in their recesses"), ("11-side-stickers", "3 side: on the dark band, the vent side"),
+              ("12-bottom-sticker", "4 bottom: on the base, between the feet")]
+    tiles = [(Image.open(os.path.join(shots, n + ".png")).convert("RGB").crop((190, 110, 1090, 710)), t) for n, t in shots_]
+    stk = os.path.join(FILES, "stickers")
+    names = [("sticker-top", "1 roof - 61 x 17 mm"), ("sticker-front", "2 front - 43 x 4.6 mm"), ("sticker-side", "3 side - 80 x 8 mm"),
+             ("sticker-bottom", "4 bottom, Pi 2 / 3 - 54 x 34"), ("sticker-bottom-pi4", "4 bottom, Pi 4"), ("sticker-bottom-pi5", "4 bottom, Pi 5")]
+    sheet = Image.new("RGB", (2760, 1400), (22, 27, 33))
+    d = ImageDraw.Draw(sheet)
+    d.text((40, 30), "ABleemStation universal - the stickers and where they go", font=fb, fill=(238, 243, 246))
+    for i, (im, t) in enumerate(tiles):
+        sheet.paste(im, (40 + i * 910, 90))
+        d.text((40 + i * 910, 700), t, font=fs, fill=(54, 217, 224))
+    x, y = 40, 780
+    for n, t in names:
+        im = Image.open(os.path.join(stk, n + ".png")).convert("RGBA")
+        sc = 300 / im.height if "bottom" in n else (130 / im.height if im.height * 4 > im.width else 440 / im.width)
+        im = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
+        if n == "sticker-bottom":                      # the three rating plates on a row of their own
+            x, y = 40, 1010
+        sheet.paste(im, (x, y), im)
+        d.text((x, y + im.height + 12), t, font=fs, fill=(147, 163, 179))
+        x += im.width + 60
+    sheet.save(os.path.join(OUT, "sticker-placement.png"), optimize=True)
+    print("placement:", os.path.join(OUT, "sticker-placement.png"))
     sys.exit(0)
 # one 3/4 render per colourway + a sheet with all of them
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402

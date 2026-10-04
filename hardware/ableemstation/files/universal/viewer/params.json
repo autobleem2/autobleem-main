@@ -32,5 +32,28 @@
   "pi4": "Pi 4B",
   "pi5": "Pi 5"
  },
+ "side": {
+  "c": [
+   -0.05,
+   60,
+   5.2
+  ],
+  "w": 80,
+  "h": 8
+ },
+ "bottom": {
+  "c": [
+   89,
+   57,
+   -0.05
+  ],
+  "w": 54,
+  "h": 34
+ },
+ "bottoms": {
+  "pi23": "sticker-bottom",
+  "pi4": "sticker-bottom-pi4",
+  "pi5": "sticker-bottom-pi5"
+ },
  "hint": "Raspberry Pi 2B / 3B / 3B+ / 4B / 5 - universal"
 }
