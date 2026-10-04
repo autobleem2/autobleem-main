@@ -48,6 +48,10 @@ Order=100
 Timeout=600
 # false: it only reads, so it is never interrupted for a game launch or RetroArch
 Modifies=true
+# optional: on = switched ON the first time the launcher meets it (default: off - it does nothing until the user
+# turns it on in Scanner processors). Only that first time: from then on sequence.ini has it, and a user who
+# switches it off keeps it off. For a processor that must work from the start (the one bundled for PE mods).
+Default=off
 ```
 
 ## The protocol
@@ -134,8 +138,9 @@ may write outside its target: into `Apps/` (`AB_APPS_DIR`), each App in a folder
   restart (`Category=PE` puts them in the "PE apps" row of the Apps picker too).
 - A dropped `.mod` is a change the games watcher and the start-up check see, like a file a processor's `Match=`
   names in the games tree: the next scan converts it.
-- It sits in the PS1 sequence: the Scanner processors screen lists it on the PS1 tab, and like every new processor
-  it starts switched off.
+- It sits in the PS1 sequence: the Scanner processors screen lists it on the PS1 tab. Like every new processor
+  it starts switched off, unless its `processor.ini` says `Default=on` (the bundled `pe` does: a dropped `.mod`
+  becomes an App without a trip to that screen; a player who switches it off keeps it off).
 
 ## Checking your processor before you publish it
 
