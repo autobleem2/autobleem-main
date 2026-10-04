@@ -266,8 +266,9 @@ function pick() {
   const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
   const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? "uni-base" : "base"}.3mf`,
     "3mf/ableemstation-button.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
-  if (U) f.push(`3mf/ableemstation-panel-back-${model}.3mf`, `3mf/ableemstation-panel-right-${model}${front === "usb" ? "-front" : ""}.3mf`,
-    `3mf/ableemstation-panel-front-${front}.3mf`);
+  if (U) for (const ears of ["", "-ears"])                 // each panel plain and with its breakaway ears
+    f.push(`3mf/ableemstation-panel-back-${model}${ears}.3mf`, `3mf/ableemstation-panel-right-${model}${front === "usb" ? "-front" : ""}${ears}.3mf`,
+      `3mf/ableemstation-panel-front-${front}${ears}.3mf`);
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
   for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
     f.push(set + n + ".svg", set + n + ".png", `${set}cricut-144dpi/ableemstation-${n}.png`);
@@ -288,7 +289,8 @@ function note(names) {
      `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm (0.24 mm):`,
      "  the top colour first, the band colour after the change.", has("shell"),
      ...(U ? [`- panels, standing on their bottom edge, "ABleemStation - ASA", with a brim. Filament change at ${PC["0.16"].toFixed(2)} mm / ${PC["0.24"].toFixed(2)} mm:`,
-       "  the band colour first, the top colour after the change.", has("panel-")] : []),
+       "  the band colour first, the top colour after the change. The -ears files are the same panels with breakaway ears",
+       "  that hold them upright: bend them off cold, trim the bridges flush (README).", has("panel-")] : []),
      `- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base"),
      `- button x 2, standing on the flange, "ABleemStation - ASA".`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],
     ["COLOURS (the nearest ASA you can get)",
@@ -366,7 +368,7 @@ for hashq in (("m=pi5&front=usb&roof=active&led=rgb&cw=grey94", "m=pi23&cw=class
         src = [k for k in pack if k == n or k == n.replace("stickers/", "stickers/special/", 1)]
         if n != "BUILD.txt":
             assert any(base64.b64decode(pack[k]) == z.read(n) for k in src), "zip entry differs from its source: " + n
-    assert sum(n.startswith("3mf/") for n in names) >= (7 if VARIANT else 4) and "BUILD.txt" in names, names
+    assert sum(n.startswith("3mf/") for n in names) >= (10 if VARIANT else 4) and "BUILD.txt" in names, names
     print("zip %s: %d files, %.1f MB" % (m.group(1), len(names), len(base64.b64decode(m.group(2))) / 1e6))
 
 shots = os.path.join(OUT, "renders")

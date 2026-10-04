@@ -121,7 +121,11 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   colours on the same line: **10.92 mm** with 0.16 mm layers, **10.80 mm** with 0.24 mm (`make_universal.py` prints
   both). Dark first, then the top colour. The tab's underside starts at 45 degrees - no supports; they are 2.4 mm thick
   where they stand, so use a brim (the Orca profiles' mouse ears or a 5 mm brim).
-  `ableemstation-panels-all.3mf` has every panel on one plate. Shells, `uni-base`, buttons and lens as for the Pi 3 case
+  `ableemstation-panels-all.3mf` has every panel on one plate.
+  **Breakaway ears**: every panel also comes as `panel-…-ears.3mf` (and `panels-all-ears.3mf`) - at each end a fin
+  across the panel on a two-layer foot holds it upright while it prints. The fin stands 0.3 mm off the tongue's end
+  on two small bridges: bend it off by hand when the print is cold and trim what is left of the bridges flush with a
+  knife, so the tongue slides into its groove (the tongue's end hides in the groove, so nothing shows). Shells, `uni-base`, buttons and lens as for the Pi 3 case
   (the buttons and lens files are the same).
 - **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
   button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.

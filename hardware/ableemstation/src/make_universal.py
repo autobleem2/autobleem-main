@@ -186,6 +186,34 @@ def write_3mf(name, part):
     m.write(os.path.join(OUT, "ableemstation-%s.3mf" % name))
 
 
+# breakaway ears: a panel prints standing on a 2.4 mm edge, about 10 times as tall as it is thick, so each end gets an
+# outrigger - a fin across the panel on a two-layer foot - that holds it upright and comes off by hand afterwards. The
+# fin stands 0.3 mm off the tongue's end and hangs on two small bridges there: the tongue's end lives in the wall's
+# groove, so what is left of a bridge never shows (trim it flush with a knife so the tongue slides in)
+EAR_T, EAR_GAP, EAR_OUT, EAR_FOOT = 1.2, 0.3, 8.0, (6.5, 0.4)   # fin thickness, gap, reach each side, foot length + height
+EAR_H = 0.6                                                     # fin height, of the panel's
+
+
+def ears(name):
+    """the two outriggers of an opening's panel, with their bridges (world space, like panel())"""
+    wall, a0, a1, _, _, _ = OPENINGS[name]
+    top = (ZT + TD) * EAR_H
+    vc = WALL - TG / 2                                         # the tongue's middle, across the wall
+    fin = [(-EAR_OUT, 0), (WALL + EAR_OUT, 0), (WALL + EAR_OUT, EAR_FOOT[1]), (vc + 0.6, top), (vc - 0.6, top),
+           (-EAR_OUT, EAR_FOOT[1])]
+    foot = [(-EAR_OUT, 0), (WALL + EAR_OUT, 0), (WALL + EAR_OUT, EAR_FOOT[1]), (-EAR_OUT, EAR_FOOT[1])]
+    e = None
+    for end, out in ((a0 - TD, -1), (a1 + TD, 1)):             # the tongue's two ends; out = away from the panel
+        f0 = end + out * EAR_GAP if out > 0 else end - EAR_GAP - EAR_T
+        part = wprofile(wall, f0, EAR_T, fin)
+        part += wprofile(wall, f0 if out > 0 else f0 - EAR_FOOT[0] + EAR_T, EAR_FOOT[0], foot)
+        for z in (3.0, top - 3.0):                             # two bridges, 1 x 0.8 mm, across the gap into the tongue
+            u = end - EAR_GAP - 0.05 if out < 0 else end - 0.05
+            part += wbox(wall, u, WALL - TG + 0.1, z, EAR_GAP + 0.1, TG - 0.2, 0.8)
+        e = part if e is None else e + part
+    return e
+
+
 def standing(name, p):
     """a panel as it prints: standing on its bottom edge, its length along x"""
     return on_bed(Rot(0, 0, 90) * p if name.startswith("right") else p)
@@ -227,6 +255,22 @@ def main():
         m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
         x, row = x + bb.X + 8, max(row, bb.Y)
     m.write(os.path.join(OUT, "ableemstation-panels-all.3mf"))
+    # the same panels with their breakaway ears; the ears touch a panel only through the bridges
+    eared, m, x, y, row = {}, Mesher(), 0.0, 0.0, 0.0
+    for n, p in panels.items():
+        e = ears(n.split("-")[0])
+        bridges = (e & p).volume
+        assert 0 < bridges < 3.0, "panel %s: the ears touch it with %.2f mm3, not just through the bridges" % (n, bridges)
+        eared[n] = standing(n, p + e)
+        write_3mf("panel-%s-ears" % n, eared[n])
+    print("panels with ears: %s (bridges %.2f mm3 per panel)" % (", ".join(eared), bridges))
+    for n, p in eared.items():
+        bb = p.bounding_box().size
+        if x and x + bb.X > 250:
+            x, y, row = 0.0, y + row + 4, 0.0
+        m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
+        x, row = x + bb.X + 4, max(row, bb.Y)
+    m.write(os.path.join(OUT, "ableemstation-panels-all-ears.3mf"))
     # the panels' filament change: printed bottom-up, the first layer at or above the shell's colour line
     # (the shell prints roof-down: its change at H - BAND from the roof is the line H - change from the bottom)
     pchange = {k: first_layer_at(H - first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()}
