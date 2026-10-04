@@ -117,20 +117,59 @@ def right_cuts(model, front_usb=False):
     return c
 
 
-# front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part, 14.5 x 7 mm shell, pins out of its back) lie in
-# cradles on a pedestal of the base, their fronts 0.3 mm behind the panel; the panel has only the plug windows, in a
-# 1.4 mm recess (1 mm of panel left) so a plug still goes in its full depth
-USB_X, USB_Z, USB_L = (74.0, 94.0), 17.0, 14.5
-USB_W, USB_H = 14.6, 7.2
+# front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part: a 13.1 x 5.7 x 14.1 mm shell, two mounting
+# legs under it about 10 mm from its front, four pins down at its back) snap into cradles on a pedestal of the base,
+# their fronts 0.3 mm behind the panel; the panel has only the plug windows, in a 1.4 mm recess (1 mm of panel left)
+# so a plug still goes in its full depth
+USB_X, USB_Z, USB_L = (74.0, 94.0), 17.0, 14.1
+USB_W, USB_H = 13.1, 5.7
 USB_FRONT = D - WALL - 0.3
+USB_LEG_D, USB_PIN_D = 10.0, 12.3   # from the socket's front: its mounting legs; where the pins' pocket starts
+USB_FIT = 0.15                      # clearance each side in the cradle
+SNAP_T, SNAP_HOOK, SNAP_FREE = 1.2, 0.5, 5.0   # snap finger thickness, hook overhang, finger root below the floor
 
 
 def usb_sockets():
+    """the sockets as ghosts for the fit check: shell + legs + pins (typical sizes where none were measured)"""
     s = None
     for x in USB_X:
-        b = box(x - USB_W / 2, USB_FRONT - USB_L, USB_Z - USB_H / 2, USB_W, USB_L, USB_H)
+        z0 = USB_Z - USB_H / 2
+        b = box(x - USB_W / 2, USB_FRONT - USB_L, z0, USB_W, USB_L, USB_H)
+        for sx in (-1, 1):                                                                  # mounting legs, 3 mm down
+            b += box(x + sx * (USB_W / 2 - 0.5) - 0.5, USB_FRONT - USB_LEG_D - 0.4, z0 - 3.0, 1.0, 0.8, 3.01)
+        b += box(x - 4.0, USB_FRONT - USB_L + 0.5, z0 - 3.5, 8.0, 1.0, 3.51)                 # the pins, 3.5 mm down
         s = b if s is None else s + b
     return s
+
+
+def usb_cradle(x):
+    """one socket's snap-in cradle: a floor block under its front part, a slot that takes the mounting legs (it sets
+    the socket's length position), a pocket for the pins, and two snap fingers whose hooks close over the shell's top
+    edges. The fingers stand free of the floor block (a 0.8 mm gap) from SNAP_FREE under the floor up, so they flex
+    over 11 mm - a strain under 1 % for ASA when the socket pushes them 0.5 mm apart"""
+    z0 = USB_Z - USB_H / 2                     # the socket's underside = the cradle floor
+    yf = USB_FRONT                             # the socket's front
+    y_back = yf - USB_L - 1.0                  # the pedestal runs 1 mm past the shell's back
+    y_front = yf - 2.8                         # and stops 2.8 mm short of its front (clear of the front panel's foot)
+    wi = USB_W / 2 + USB_FIT                   # the cradle's half width = the fingers' inner face
+    core = wi - 0.8                            # the floor block's half width (the relief gap beside it)
+    zr = z0 - SNAP_FREE                        # the fingers' root
+    c = box(x - wi - SNAP_T, y_back, BASE_T - 0.01, 2 * (wi + SNAP_T), y_front - y_back, zr - BASE_T + 0.01)   # plinth
+    c += box(x - core, y_back, zr - 0.01, 2 * core, y_front - y_back, z0 - zr + 0.01)                        # floor block
+    c -= box(x - core - 1, yf - USB_LEG_D - 1.5, z0 - 4.0, 2 * core + 2, 3.0, 5)          # the legs' slot (+-1.5 mm)
+    c -= box(x - core - 1, y_back - 1, z0 - 5.0, 2 * core + 2, yf - USB_PIN_D - y_back + 1, 6)   # the pins' pocket
+    h0 = z0 + USB_H + 0.15                     # the hook's underside, just over the shell's top
+    for sx in (-1, 1):
+        prof = [(wi, zr), (wi + SNAP_T, zr), (wi + SNAP_T, h0 + 0.7), (wi + 0.05, h0 + 0.7),
+                (wi - SNAP_HOOK, h0 + 0.15), (wi - SNAP_HOOK, h0), (wi, h0)]          # finger + hook, 45-degree lead-in
+        pts = [(x + sx * u, z) for u, z in prof]
+        if sx < 0:
+            pts.reverse()
+        f0, f1 = yf - 8.5, y_front                                                     # over the floor block's front part
+        pl = Plane(origin=(0, f0, 0), x_dir=(1, 0, 0), z_dir=(0, -1, 0))
+        # (dir given: a polygon's winding alone decides which way extrude() goes)
+        c += extrude(pl * Polygon(*pts, align=None), amount=f1 - f0, dir=(0, 1, 0))
+    return c
 
 
 def front_usb_panel():
@@ -147,11 +186,8 @@ def uni_base():
     for name, (wall, a0, a1, (f0, f1), _, _) in OPENINGS.items():
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT, f1 - f0 + 0.6, 2.5 + 0.65, 3)                # the seat
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT - 1.2, f1 - f0 + 0.6, 1.5, 3)                 # room for the 45-degree start
-    z0 = USB_Z - USB_H / 2
     for x in USB_X:
-        b += box(x - USB_W / 2 - 1.6, USB_FRONT - USB_L + 1.0, BASE_T - 0.01, USB_W + 3.2, USB_L - 1.0 - 2.6 - 0.2,
-                 z0 - BASE_T + 0.01 + USB_H / 2)                                                # pedestal + cradle walls
-        b -= box(x - USB_W / 2 - 0.1, USB_FRONT - USB_L - 1, z0 - 0.1, USB_W + 0.2, USB_L + 2, USB_H)   # the cradle
+        b += usb_cradle(x)                                                                      # snap-in cradles
     return b
 
 
@@ -334,6 +370,14 @@ def main():
     v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
     bad += v > 0.01
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
+    # the snap: each cradle's hooks must reach over the shell's top edges (else the socket lifts out)
+    z0 = USB_Z - USB_H / 2
+    for x in USB_X:
+        for sx in (-1, 1):
+            probe = box(x + sx * (USB_W / 2 - 0.2) - 0.05, USB_FRONT - 5.55, z0 + USB_H + 0.25, 0.1, 0.1, 0.1)
+            hooked = (probe & b).volume > 1e-5
+            bad += not hooked
+            print("USB snap at x=%g, %s side: %s" % (x, "left" if sx < 0 else "right", "hooked" if hooked else "NO HOOK"))
     assert not bad, "%d fit check(s) failed" % bad
 
     # the viewer: the four shells, the base, caps, lens, each board's panel set and ghost, both front panels

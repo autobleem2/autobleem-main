@@ -112,8 +112,8 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
-- **Front USB**: two THT "USB-A female, 180°" sockets lie in cradles on the base's pedestal (a drop of glue keeps
-  them), their fronts just behind `front-usb`, which has only the two plug windows - each in a 1.4 mm recess, so a
+- **Front USB**: two THT "USB-A female, 180°" sockets (shell 13.1 x 5.7 x 14.1 mm) snap into cradles on the base's pedestal: press one in from above until both hooks click over its top edges; its legs drop into a slot that sets its depth (no glue; to take one out, spread the two fingers). Their fronts sit
+  just behind `front-usb`, which has only the two plug windows - each in a 1.4 mm recess, so a
   plug still goes in its full depth. With `front-blank` the pedestal is hidden, so there is one base for both.
   The sockets' cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
