@@ -34,7 +34,8 @@ COLORWAYS = [
     ("purple", "Atomic Purple", "7a5ca8", "3b2a57", "2a1e3e", "e6e0f0"),
     ("mint", "Mint", "a9d6c6", "2e3742", "2e3742", "f1f1ec"),
 ]
-stl = {n: base64.b64encode(open(os.path.join(VIEW, n + ".stl"), "rb").read()).decode() for n in ("shell", "base", "caps", "pi")}
+stl = {n: base64.b64encode(open(os.path.join(VIEW, n + ".stl"), "rb").read()).decode()
+       for n in ("shell", "base", "caps", "pi", "lens") if os.path.exists(os.path.join(VIEW, n + ".stl"))}
 import json as _j
 prm = _j.load(open(os.path.join(VIEW, "params.json")))
 deco = {}
@@ -61,7 +62,7 @@ body.shot .ui,body.shot .hint{display:none}
 <div class="ui"><b>ABleemStation</b>
 <button data-v="iso" class="on">3/4</button><button data-v="front">Front</button><button data-v="back">Back</button>
 <button data-v="right">Right</button><button data-v="top">Top</button>
-<button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+<button id="ex">Explode</button><button id="pi">Show Pi</button><button id="xr">X-ray</button><button id="sb">LED: standby</button><span id="cw" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
 <div class="hint" id="hint">Drag to orbit · wheel to zoom · Raspberry Pi 3B/3B+</div>
 <script type="module">
 import * as THREE from "three";
@@ -105,9 +106,13 @@ mesh.pi.visible = false;
   MAT.shell.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZB)];
   const dark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZB)] });
   const low = new THREE.Mesh(mesh.shell.geometry, dark); low.castShadow = low.receiveShadow = true; mesh.shell.add(low); MAT.dark = dark; }
-// the front LED, lit
-{ const led = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 3, 24), new THREE.MeshStandardMaterial({ color: 0x36d9e0, emissive: 0x36d9e0, emissiveIntensity: 2.2 }));
-  led.rotation.x = Math.PI / 2; led.position.set(...P.LED); mesh.shell.add(led); }
+// the front LED behind its clear lens, lit
+if (DATA.lens) { const g = loader.parse(b64(DATA.lens)); g.computeVertexNormals();
+  MAT.lens = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x3cff6e, emissiveIntensity: 1.4, roughness: .3 });
+  mesh.shell.add(new THREE.Mesh(g, MAT.lens)); }
+// the LED: green while running, orange in standby (the RGB version shows both, like the PlayStation Classic)
+function setStandby(on) { if (MAT.lens) MAT.lens.emissive.set(on ? 0xff8a1e : 0x3cff6e);
+  document.getElementById("sb").classList.toggle("on", on); }
 // stickers as decals on the recesses (when the sticker art exists)
 const tl = new THREE.TextureLoader();
 function decal(name, w, h, pos, bx, by) {
@@ -137,6 +142,7 @@ document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => view(b.data
 document.getElementById("ex").onclick = () => setEx(!ex);
 document.getElementById("pi").onclick = () => setPi(!mesh.pi.visible);
 document.getElementById("xr").onclick = () => setXr(!xr);
+document.getElementById("sb").onclick = () => setStandby(!document.getElementById("sb").classList.contains("on"));
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0];
   MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
@@ -147,7 +153,7 @@ document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" 
 document.querySelectorAll("#cw button").forEach(b => b.onclick = () => colorway(b.dataset.k));
 colorway(q.cw || "classic");
 document.getElementById("hint").textContent += ` · ${P.W} x ${P.D} x ${P.H} mm`;
-view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true);
+view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.xray) setXr(true); if (q.standby) setStandby(true);
 addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth, innerHeight); });
 (function loop() { ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
 </script></body></html>"""
@@ -159,7 +165,8 @@ print("viewer:", PAGE)
 shots = os.path.join(OUT, "renders")
 os.makedirs(shots, exist_ok=True)
 for name, hashq in (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back", "view=back"), ("4-right", "view=right"),
-                    ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1")):
+                    ("5-exploded", "view=iso&explode=1&pi=1"), ("6-xray", "view=iso&xray=1"),
+                    ("7-front-standby", "view=front&standby=1")):
     png = os.path.join(shots, name + ".png")
     subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--hide-scrollbars",
                     "--window-size=1280,800", "--virtual-time-budget=8000", "--screenshot=" + png,
