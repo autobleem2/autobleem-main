@@ -19,6 +19,7 @@ Open `files/ableemstation-viewer.html` in a browser for the 3D model (orbit, exp
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
 | `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |
+| `wiring.svg`, `wiring.png` | the wiring diagram + what to buy (`src/make_wiring.py`) |
 | `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
@@ -35,6 +36,7 @@ cd src
 python make_case.py          # parts: STEP, STL, 3MF; the fit check (the Pi must overlap the case by 0 mm3)
 python make_stickers.py      # stickers: SVG, PNG, the A4 PDF, the Cricut PNGs
 python make_viewer.py        # the viewer + the renders (after the two above)
+python make_wiring.py        # the wiring diagram
 python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also copies them into Orca's user folder)
 ```
 
@@ -65,16 +67,22 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
 | 4 | M3 heat-set insert, short (4 mm hole, 5-6 mm long), pressed into the shell's bosses |
 | 4 | M3 x 8 countersunk screw (base -> inserts) |
 | 4 | M2.5 x 5 screw (Pi -> standoffs, self-tapping) |
-| 2 | 6 x 6 mm tact switch, 5 mm tall, into the bracket's pockets, legs bent back |
-| 1 | 5 mm LED + 330 Ω resistor, into the front holder |
+| 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, into the bracket's pockets, legs bent back |
+| 1 | 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), into the front holder |
+| 1 | 2-pin male header 2.54 mm, soldered into the RUN pads |
+| 6 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
 | 4 | rubber feet Ø 12 mm |
 
 ## Wiring (BCM numbers, physical pins in brackets)
 
-- **POWER**: GPIO3 (pin 5) to GND (pin 6); `dtoverlay=gpio-shutdown` in `config.txt` - press to shut down, press
+![wiring](files/wiring.png)
+
+
+- **POWER**: GPIO3 (pin 5) to GND (pin 9); `dtoverlay=gpio-shutdown` in `config.txt` - press to shut down, press
   again to wake the Pi from halt.
 - **RESET**: across the Pi 3's **RUN** pads (solder a 2-pin header).
-- **LED**: GPIO14 / TXD (pin 8) -> 330 Ω -> LED -> GND (pin 9); with `enable_uart=1` it is lit while the Pi runs.
+- **LED**: GPIO14 / TXD (pin 8) -> 330 Ω -> LED -> GND (pin 6); with `enable_uart=1` it is lit while the Pi runs.
+  Green / red / yellow / orange LEDs are the brightest on 3.3 V; a blue / white / cyan one wants 100 Ω instead.
 
 ## Stickers
 
