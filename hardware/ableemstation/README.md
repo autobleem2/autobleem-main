@@ -130,6 +130,9 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   (further in the first 1.2 mm, where the first layers squash wider) on two small bridges: hold the panel next to
   the ear, twist the fin off sideways when the print is cold, and trim what is left of the bridges flush with a
   knife, so the tongue slides into its groove (the tongue's end hides in the groove, so nothing shows).
+  **Assembly**: two noses on the base reach over each panel's tab, so a panel stands upright on its own while the
+  shell goes on: hold the panel tilted inwards, slip its tab under the noses, then stand it upright (its weight,
+  outside the tab, keeps the tab against the noses).
   The same files carry **tab props**: a row of fins on a two-layer foot under the tab inside the panel, one layer of
   air below the tab and 0.5 mm off the panel, so they touch nothing - pull the row out when the print is cold.
   Shells, `uni-base`, buttons and lens as for the Pi 3 case (the buttons and lens files are the same).
