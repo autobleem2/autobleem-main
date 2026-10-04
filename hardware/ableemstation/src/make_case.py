@@ -1,9 +1,10 @@
 """ABleemStation - a 3D-printable retro-console case for the Raspberry Pi 3B / 3B+ (build123d, all sizes in mm).
 
 Parts (each prints without supports):
-  shell   the top: walls + roof, printed upside down; port windows, hidden vents (labyrinth slots in the roof over
+  shell   the top: walls + roof, printed upside down; port windows, hidden vents (45-degree slots in the roof over
           the SoC, side slots behind an inner baffle - no line of sight into the case), front POWER / RESET holes, the
-          LED holder behind the lens, sticker recesses, 4 bosses for M3 heat-set inserts (OD 4.0 hole, 6 deep)
+          LED holder behind the lens, sticker recesses, 4 bosses for M3 heat-set inserts (Voron's M3 x 5 x 4: a 4.7 mm
+          hole, 6 deep)
   base    the floor plate that sits inside the shell: Pi standoffs (M2.5 self-tap), the switch bracket for two
           6x6 mm tact switches, countersunk M3 holes, feet recesses, a slot to reach the microSD
   button  POWER / RESET cap (print 2)
@@ -18,7 +19,7 @@ Writes STEP + STL + 3MF per part, the assembly STEP and the viewer's meshes to .
 import json
 import os
 
-from build123d import (Align, Axis, Box, Compound, Cylinder, Kind, Location, Polygon, Pos, Rot, chamfer,
+from build123d import (Align, Axis, Box, Compound, Cylinder, Kind, Location, Plane, Polygon, Pos, Rot, chamfer,
                        Mesher, export_step, export_stl, extrude, offset)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +29,7 @@ MIN = (Align.MIN, Align.MIN, Align.MIN)
 
 # ---- main sizes
 W, D = 140.0, 105.0                 # outer: x = width, y = depth (back = 0 -> front)
-WALL, ROOF, CUT = 2.4, 3.2, 16.0    # wall, roof (3.2: room for the vent labyrinth), the cut corners (ab2.0.0)
+WALL, ROOF, CUT = 2.4, 3.2, 16.0    # wall, roof (3.2: the vent slots' 45-degree run hides the inside), the cut corners (ab2.0.0)
 BASE_T, FIT = 3.0, 0.3              # floor plate thickness, its gap to the walls
 STAND = 3.0                         # Pi standoff height above the plate (clears the microSD socket under the board)
 BX, BY = W - WALL - 2.0 - 85.0, WALL + 1.0      # the Pi board's corner: USB 2 mm past the board edge, HDMI 1 mm
@@ -41,7 +42,8 @@ CAP_L, CAP_REST = 6.4, D - WALL - 1.5  # button cap length; its back end at rest
 LENS_R, LENS_FL_R, LENS_FL = 3.0, 4.0, 1.0   # LED lens: shaft radius (through the wall), flange radius + thickness
 LED_LEN = 8.6                       # a 5 mm LED from its rim to its tip
 STRIP_W, STRIP_T = 10.6, 2.4        # the RGB pixel's slot: strip width + clearance, strip + LED + tape thickness
-VENT_PITCH, VENT_W, VENT_N = 7.0, 2.4, 7   # roof labyrinth: slot pitch, slot width, number of slots
+VENT_PITCH, VENT_W, VENT_N = 7.0, 2.4, 7   # roof vents: slot pitch, slot width (horizontal), number of slots
+INSERT_R, INSERT_DEPTH = 2.35, 6.0          # the M3 heat-set insert's hole (Voron's standard M3 x 5 x 4 insert)
 BOSSES = [(12.5, 14.5), (10.0, 84.0), (131.0, 66.0), (128.5, 90.5)]   # off the cut corners, checked in main()
 
 
@@ -94,17 +96,22 @@ def shell(led="led5", vents=None):
     s -= box(BX + 10.6 - 6, -1, BT - 2.0, 12, WALL + 2, 7.5)                              # micro-USB plug
     s -= box(BX + 32 - 11, -1, BT - 2.5, 22, WALL + 2, 11.5)                              # HDMI plug
     s -= cyl_y(BX + 53.5, -1, BT + 3, 4.5, WALL + 2)                                      # audio plug
-    # hidden roof vents over the SoC, a labyrinth through the 3.2 mm roof: the outer slot (1.0 deep) opens into a
-    # channel (0.8) that leads sideways to the inner slot, half a pitch over - from outside you see the channel's
-    # floor, never the inside. Printed roof-down, the channel's ceiling bridges only ~3.5 mm.
+    # hidden roof vents over the SoC: slots straight through the 3.2 mm roof at 45 degrees, each running down towards
+    # the front, so its inner end lies 3.2 mm in front of its outer end - more than the slot is wide: looking down,
+    # or from in front of the console, you see the slot's sloping wall, never the inside. Printed roof-down, a 45
+    # degree wall needs no bridge (the old labyrinth's channel was bridged, and the sagging bridge closed it).
     cx, cy, vl, vn = vents or (BX + 32, BY + 29, 52.0, VENT_N)
-    off = VENT_PITCH / 2
+    run = ROOF + 2                                  # the slot's sideways run over its height (1 mm above and below)
     for i in range(vn):
-        y = cy + (i - (vn - 1) / 2) * VENT_PITCH - off / 2
-        # (each cut overlaps the next by 0.1 mm: touching faces would leave a mesh with zero-thickness seams)
-        s -= box(cx - vl / 2, y - VENT_W / 2, H - 1.05, vl, VENT_W, 2)                        # outer slot
-        s -= box(cx - vl / 2, y - VENT_W / 2, H - 1.85, vl, off + VENT_W, 0.9)                # channel
-        s -= box(cx - vl / 2, y + off - VENT_W / 2, H - ROOF - 1, vl, VENT_W, ROOF - 1.75 + 1)  # inner slot
+        y = cy + (i - (vn - 1) / 2) * VENT_PITCH - ROOF / 2      # the outer opening, so the field stays centred
+        slot = Polygon((y, H + 1), (y + VENT_W, H + 1), (y + VENT_W + run, H - ROOF - 1), (y + run, H - ROOF - 1), align=None)
+        # (dir given: the polygon's winding alone would extrude it towards -x, away from the field)
+        s -= extrude(Plane(origin=(cx - vl / 2, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)) * slot, amount=vl, dir=(1, 0, 0))
+        # each slot must be open at both of the roof's faces, along its whole length - checked here, not on the printer
+        for x in (cx - vl / 2 + 2, cx, cx + vl / 2 - 2):
+            for dy, z in ((1, H - 0.3), (ROOF + 1, H - ROOF + 0.3)):
+                assert (s & box(x - 0.5, y + dy + VENT_W / 2 - 0.3, z - 0.15, 1, 0.6, 0.3)).volume < 1e-3, \
+                    "roof vent %d not open at (%g, %g)" % (i, x, z)
     # side vents opposite the USB (air in): slots through the wall with a baffle 1.8 mm behind them, hanging from the
     # roof and closed at both ends, open below - the air turns down under it; you see the baffle, not the inside
     for i in range(8):
@@ -131,13 +138,16 @@ def shell(led="led5", vents=None):
     else:
         tube = LED_LEN + 0.3 + LENS_FL + 0.2
         s += cyl_y(LED_X, D - WALL - tube, BTN_Z, LENS_FL_R + 1.6, tube)
+        # its upper half filled up to the roof, the tube's full width: printed roof-down, the tube grows out of the
+        # roof instead of starting in mid-air
+        s += box(LED_X - LENS_FL_R - 1.6, D - WALL - tube, BTN_Z, 2 * (LENS_FL_R + 1.6), tube, H - ROOF - BTN_Z + 0.5)
         s -= cyl_y(LED_X, D - WALL - tube - 1, BTN_Z, 2.6, tube + 1)                      # the LED (5 mm)
     s -= cyl_y(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z, LENS_FL_R + 0.2, LENS_FL + 0.3)     # the lens flange
     s -= cyl_y(LED_X, D - WALL - 1, BTN_Z, LENS_R + 0.1, WALL + 2)                         # the lens shaft
     # bosses for M3 heat-set inserts, from the plate up to the roof
     for x, y in BOSSES:
         s += cyl_z(x, y, BASE_T, 4.2, H - ROOF - BASE_T + 0.5)
-        s -= cyl_z(x, y, BASE_T - 1, 2.0, 7)
+        s -= cyl_z(x, y, BASE_T - 1, INSERT_R, INSERT_DEPTH + 1)
     return s
 
 
@@ -253,7 +263,7 @@ def main():
     # plate's edge (0.5 mm left) - a boss too close to a wall or a cut corner fails here, not on the printer
     inner, plate = prism(outline(WALL + 0.8), 0, H), prism(outline(WALL + FIT + 0.5), -1, BASE_T + 2)
     for x, y in BOSSES:
-        out = (cyl_z(x, y, 0, 2.0, H - ROOF) - inner).volume + (cyl_z(x, y, 0, 3.2, BASE_T) - plate).volume
+        out = (cyl_z(x, y, 0, INSERT_R, H - ROOF) - inner).volume + (cyl_z(x, y, 0, 3.2, BASE_T) - plate).volume
         print("screw at (%g, %g): %s" % (x, y, "ok" if out < 0.01 else "TOO CLOSE TO A WALL (%.2f mm3 outside)" % out))
         assert out < 0.01, "boss (%g, %g) too close to a wall" % (x, y)
     change = {name: first_layer_at(H - BAND, first, lh) for name, (first, lh) in LAYERS.items()}

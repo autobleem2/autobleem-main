@@ -330,7 +330,7 @@ function note(names) {
      "  POWER: " + (U && model === "pi5" ? "to the board's J2 pads (GPIO3 cannot wake a Pi 5)" : "GPIO3 (pin 5) + GND (pin 9); config.txt: dtoverlay=gpio-shutdown"),
      "  RESET: GPIO23 (pin 16) + GND (pin 20); config.txt: dtoverlay=gpio-key,gpio=23,active_low=1,gpio_pull=up,keycode=164"],
     ["PARTS FOR THIS OPTION (the full list: README.md, Parts)",
-     "  4 x M3 heat-set insert, 4 x M3 x 8 countersunk, 4 x M2.5 x 5, 2 x 6 x 6 mm tactile switch (5 mm), 4 rubber feet, jumper wires",
+     "  4 x M3 heat-set insert (Voron M3 x 5 x 4), 4 x M3 x 8 countersunk, 4 x M2.5 x 5, 2 x 6 x 6 mm tactile switch (5 mm), 4 rubber feet, jumper wires",
      rgb ? "  1 x WS2812B pixel + 330 ohm resistor" : "  1 x 5 mm diffused LED + 330 ohm resistor (100 ohm for blue / white / cyan)",
      ...(U && front === "usb" ? ["  2 x USB-A female socket, THT 180 degrees, + a 4-wire cable each"] : []),
      ...(U && roof ? [`  Raspberry Pi 5 Active Cooler${model === "pi5" ? "" : " (the active roof is made for it - a " + M + " does not need it)"}`] : [])],
