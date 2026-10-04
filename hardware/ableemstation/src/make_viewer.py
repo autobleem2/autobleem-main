@@ -117,15 +117,19 @@ if (mesh.pi) mesh.pi.visible = false;
 // the universal case: a panel set and a ghost per board, two front panels, the active roof
 const U = P.models ? {} : null;
 if (U) {
-  // panels print standing with the shell's filament change: the same two colours, the same line (shared planes)
-  MAT.panel = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: .55, clippingPlanes: MAT.shell.clippingPlanes });
-  MAT.panelDark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: MAT.dark.clippingPlanes });
-  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|shell-active)/.test(n)) {
+  // panels print standing with the shell's filament change: the same two colours, the same line; they stand on the
+  // base, so they stay put when the shell is lifted off
+  const ZP = P.BAND - .6;
+  MAT.panel = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: .55, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZP)] });
+  MAT.panelDark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZP)] });
+  MAT.metal = new THREE.MeshStandardMaterial({ color: 0xb8bec4, roughness: .35, metalness: .8 });
+  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|usb-|shell-active)/.test(n)) {
     const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
     if (n === "shell-active") { U.active = g; continue; }
-    const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : MAT.panel); m.castShadow = m.receiveShadow = true;
-    if (!n.startsWith("pi-")) { const lo = new THREE.Mesh(g, MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
-    m.visible = false; U[n] = m; (n.startsWith("pi-") ? scene : mesh.shell).add(m);
+    const ghost = /^(pi-|usb-)/.test(n);
+    const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : ghost ? MAT.metal : MAT.panel); m.castShadow = m.receiveShadow = true;
+    if (!ghost) { const lo = new THREE.Mesh(g, MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
+    m.visible = false; U[n] = m; scene.add(m);
   }
   U.passive = mesh.shell.geometry;
 }
@@ -134,6 +138,7 @@ function setU() {
   if (!U) return;
   for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
   U[front === "usb" ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;
+  if (U["usb-sockets"]) U["usb-sockets"].visible = front === "usb";
   mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
   const g = roof ? U.active : U.passive; mesh.shell.geometry = g; mesh.low.geometry = g;
   document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
@@ -210,7 +215,7 @@ SHOTS = (("1-iso", "view=iso"), ("2-front", "view=front"), ("3-back", "view=back
 if VARIANT:
     SHOTS = (("1-iso", "view=iso"), ("2-back-pi23", "view=back&m=pi23"), ("3-back-pi4", "view=back&m=pi4"),
              ("4-back-pi5", "view=back&m=pi5"), ("5-right-pi23", "view=right&m=pi23"), ("6-right-pi4", "view=right&m=pi4"),
-             ("7-front-usb", "view=front&front=usb"), ("8-exploded", "view=iso&explode=1&pi=1&m=pi5&roof=active"),
+             ("7-front-usb", "view=front&front=usb"), ("8-exploded", "view=iso&explode=1&pi=1&m=pi5&roof=active&front=usb"),
              ("9-xray-active", "view=iso&xray=1&m=pi5&roof=active"), ("10-top-active", "view=top&roof=active"))
 for name, hashq in SHOTS:
     png = os.path.join(shots, name + ".png")

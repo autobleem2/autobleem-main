@@ -95,23 +95,27 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 | side (USB, Ethernet) | `right-pi23` · `right-pi4` (Ethernet and USB swapped) · `right-pi5` · each also `-front` (one USB block closed, see below) · `right-blank` (to drill yourself) |
 | front (between the buttons and the LED) | `front-blank` · `front-usb` (two USB-A sockets) |
 
-- **Fitting a panel**: before the base goes on, slide the panel up into its opening from below. A tongue on its inner
-  half runs in grooves in the sides and the roof; a foot inside rests on the base plate, so the screwed-on base
-  locks every panel. Swapping a board = swapping two panels.
+- **Assembly - everything on the base**: `uni-base` is the Pi 3 case's base plus a rebate along each opening and
+  the front USB pedestal. Screw the Pi down, fit the switches and the USB sockets, and stand the panels in the
+  rebates (a tab on each panel's inside sits in it). Then slide the shell down over it all: each panel's tongue (its
+  inner half) runs up the grooves in the opening's sides and ends in a groove in the roof. Four screws from below,
+  done. Swapping a board = lifting the shell and swapping two panels.
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
-- **Front USB**: two THT "USB-A female, 180°" sockets push into the panel's sleeves from behind (a drop of glue keeps
-  them). They sit in the panel's upper half (the block behind them prints without supports). Their cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
+- **Front USB**: two THT "USB-A female, 180°" sockets lie in cradles on the base's pedestal (a drop of glue keeps
+  them), their fronts just behind `front-usb`, which has only the two plug windows - each in a 1.4 mm recess, so a
+  plug still goes in its full depth. With `front-blank` the pedestal is hidden, so there is one base for both.
+  The sockets' cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
 - **Printing**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
   colours on the same line: **10.92 mm** with 0.16 mm layers, **10.80 mm** with 0.24 mm (`make_universal.py` prints
-  both). Dark first, then the top colour. Every overhang inside is 45 degrees - no supports; they are 2.4 mm thick
+  both). Dark first, then the top colour. The tab's underside starts at 45 degrees - no supports; they are 2.4 mm thick
   where they stand, so use a brim (the Orca profiles' mouse ears or a 5 mm brim).
-  `ableemstation-panels-all.3mf` has every panel on one plate. Shells, base, buttons and lens as for the Pi 3 case
-  (the base, buttons and lens files are the same).
+  `ableemstation-panels-all.3mf` has every panel on one plate. Shells, `uni-base`, buttons and lens as for the Pi 3 case
+  (the buttons and lens files are the same).
 - **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
   button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.
   RESET, the LED and the RGB pixel are wired the same on every board.

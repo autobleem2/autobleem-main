@@ -3,11 +3,11 @@ The shell, the base, the buttons and the lens are the Pi 3 case's (make_case.py)
   back   (the board's long edge: power, HDMI, audio)   back-pi23 / back-pi4 / back-pi5 / back-blank
   right  (the short edge: USB + Ethernet)              right-pi23 / -pi4 / -pi5, each also "-front" (the USB block
                                                        furthest from the Ethernet closed - it feeds the front USB), blank
-  front  (between the buttons and the LED)             front-usb (two USB-A sockets) / front-blank
-A panel slides up into its opening from below: a tongue on its inner half runs in grooves in the jambs and the roof,
-and a foot on its inside rests on the base plate, so the screwed-on base locks it. Panels print standing, bottom
-edge down, so a filament change gives them the shell's two colours at the same line; every overhang inside is 45
-degrees (no supports). Shells: passive (the Pi 3 case's
+  front  (between the buttons and the LED)             front-usb (two windows) / front-blank
+Everything is assembled on the base (uni-base): the Pi, the switches, the two front USB sockets on their pedestal,
+and the panels, whose tab stands in a rebate along the base's edge. The shell then slides down over it all: each
+panel's tongue (its inner half) runs up the grooves in the opening's sides and ends in a groove in the roof.
+Panels print standing, bottom edge down, so a filament change gives them the shell's two colours at the same line. Shells: passive (the Pi 3 case's
 hidden roof vents) and active (a longer, denser vent field over the Raspberry Pi 5 Active Cooler), each for the plain
 LED and the RGB pixel. Port positions: Raspberry Pi Ltd's mechanical drawings (3B+, 4B, 5).
 Writes ../files/universal/ (STEP, STL, 3MF, viewer/). Run after make_case.py:  python make_universal.py"""
@@ -58,7 +58,10 @@ def wprofile(wall, u0, du, pts):
     return extrude(pl * Polygon(*pts, align=None), amount=du)
 
 
-FOOT = [(WALL - 0.3, BASE_T + 0.1), (WALL + 0.15, BASE_T + 0.1), (WALL + 1.75, BASE_T + 1.7), (WALL - 0.3, BASE_T + 1.7)]
+# the panel's tab: it stands in a rebate along the base's edge (seat at z = SEAT), its underside first rising at 45
+# degrees from the panel, so the panel prints standing without supports
+SEAT = BASE_T - 1.0
+TAB = [(WALL - 0.3, SEAT - 0.8), (WALL + 0.8, SEAT), (WALL + 2.5, SEAT), (WALL + 2.5, BASE_T + 1.7), (WALL - 0.3, BASE_T + 1.7)]
 
 
 def cut_opening(s, name):
@@ -77,7 +80,7 @@ def panel(name, cuts=()):
     wall, a0, a1, (f0, f1), _, _ = OPENINGS[name]
     p = wbox(wall, a0 + C, 0, 0, a1 - a0 - 2 * C, WALL, ZT - C)                              # the outer plate
     p += wbox(wall, a0 - TD, WALL - TG, 0, a1 - a0 + 2 * TD, TG, ZT + TD)                    # the tongue
-    p += wprofile(wall, f0, f1 - f0, FOOT)                     # the foot on the base, its underside at 45 degrees
+    p += wprofile(wall, f0, f1 - f0, TAB)                      # the tab that stands in the base's rebate
     p -= prism(outline(), BAND - 1.2, 1.2) - prism(outline(0.8), BAND - 1.3, 1.4)          # the waist groove runs on
     for c in cuts:
         p -= c
@@ -114,22 +117,42 @@ def right_cuts(model, front_usb=False):
     return c
 
 
-# front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part, 14.5 x 7 mm shell) pushed in from behind into
-# a block behind the panel; the plug passes a 13 x 5.6 window, the socket stops behind a 1 mm lip. The block's
-# underside rises at 45 degrees from the foot, so the panel prints standing - which puts the sockets in its upper half
-USB_X, USB_DEPTH = (74.0, 94.0), 12.0
-USB_Z = BASE_T + 0.1 + (USB_DEPTH - WALL - 0.15) + 5.3          # the block's back edge, 5.3 under the socket's centre
+# front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part, 14.5 x 7 mm shell, pins out of its back) lie in
+# cradles on a pedestal of the base, their fronts 0.3 mm behind the panel; the panel has only the plug windows, in a
+# 1.4 mm recess (1 mm of panel left) so a plug still goes in its full depth
+USB_X, USB_Z, USB_L = (74.0, 94.0), 17.0, 14.5
+USB_W, USB_H = 14.6, 7.2
+USB_FRONT = D - WALL - 0.3
+
+
+def usb_sockets():
+    s = None
+    for x in USB_X:
+        b = box(x - USB_W / 2, USB_FRONT - USB_L, USB_Z - USB_H / 2, USB_W, USB_L, USB_H)
+        s = b if s is None else s + b
+    return s
 
 
 def front_usb_panel():
     p = panel("front")
-    p += wprofile("front", USB_X[0] - 9.0, USB_X[1] - USB_X[0] + 18.0,
-                  [(WALL - 0.3, BASE_T + 0.1), (WALL + 0.15, BASE_T + 0.1), (USB_DEPTH, USB_Z - 5.3),
-                   (USB_DEPTH, USB_Z + 5.3), (WALL - 0.3, USB_Z + 5.3)])
     for x in USB_X:
-        p -= box(x - 7.4, D - USB_DEPTH - 0.5, USB_Z - 3.7, 14.8, USB_DEPTH - 0.5, 7.4)        # the socket's pocket
-        p -= box(x - 6.5, D - 1.5, USB_Z - 2.8, 13.0, 2.5, 5.6)                                # the plug's window
+        p -= box(x - 6.5, D - WALL - 1, USB_Z - 2.8, 13.0, WALL + 2, 5.6)                      # the plug's window
+        p -= box(x - 9.0, D - 1.4, USB_Z - 5.0, 18.0, 2.0, 10.0)                               # the plug's recess
     return p
+
+
+def uni_base():
+    """the Pi 3 case's base + a rebate under each panel's tab + the front USB sockets' pedestal"""
+    b = base()
+    for name, (wall, a0, a1, (f0, f1), _, _) in OPENINGS.items():
+        b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT, f1 - f0 + 0.6, 2.5 + 0.65, 3)                # the seat
+        b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT - 1.2, f1 - f0 + 0.6, 1.5, 3)                 # room for the 45-degree start
+    z0 = USB_Z - USB_H / 2
+    for x in USB_X:
+        b += box(x - USB_W / 2 - 1.6, USB_FRONT - USB_L + 1.0, BASE_T - 0.01, USB_W + 3.2, USB_L - 1.0 - 2.6 - 0.2,
+                 z0 - BASE_T + 0.01 + USB_H / 2)                                                # pedestal + cradle walls
+        b -= box(x - USB_W / 2 - 0.1, USB_FRONT - USB_L - 1, z0 - 0.1, USB_W + 0.2, USB_L + 2, USB_H)   # the cradle
+    return b
 
 
 # ---- the boards, as ghosts for the fit check and the viewer
@@ -209,8 +232,12 @@ def main():
     pchange = {k: first_layer_at(H - first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()}
     print("panels: filament change at %.2f mm with 0.16 mm layers, %.2f mm with 0.24 mm" % (pchange["0.16"], pchange["0.24"]))
 
+    b = uni_base()
+    export_step(b, os.path.join(OUT, "ableemstation-uni-base.step"))
+    export_stl(b, os.path.join(OUT, "ableemstation-uni-base.stl"))
+    write_3mf("uni-base", on_bed(b))
+    usb = usb_sockets()
     # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
-    b = base()
     bad = 0
     for model in ("pi23", "pi4", "pi5"):
         for sname, s in shells.items():
@@ -230,6 +257,9 @@ def main():
         v = (p & shells["uni-shell"]).volume + (p & shells["uni-shell-active-rgb"]).volume + (p & b).volume
         bad += v > 0.01
         print("panel %s x shell/base: %.2f mm3" % (n, v))
+    v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
+    bad += v > 0.01
+    print("front USB sockets x base/panel/shell: %.2f mm3" % v)
     assert not bad, "%d fit check(s) failed" % bad
 
     # the viewer: the passive shell, the base, caps, lens, each board's panel set and ghost, both front panels
@@ -238,7 +268,7 @@ def main():
     lens_in = Pos(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z) * lens()
     vparts = {"shell": shells["uni-shell"], "shell-active": shells["uni-shell-active"], "base": b,
               "caps": Compound(children=caps), "lens": lens_in,
-              "front-usb": panels["front-usb"], "front-blank": panels["front-blank"]}
+              "front-usb": panels["front-usb"], "front-blank": panels["front-blank"], "usb-sockets": usb}
     for model in ("pi23", "pi4", "pi5"):
         vparts["set-" + model] = panels["back-" + model] + panels["right-" + model]
         vparts["set-%s-front" % model] = panels["back-" + model] + panels["right-%s-front" % model]
