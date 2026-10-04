@@ -58,8 +58,8 @@ def wprofile(wall, u0, du, pts):
     return extrude(pl * Polygon(*pts, align=None), amount=du)
 
 
-# the panel's tab: it stands in a rebate along the base's edge (seat at z = SEAT), its underside first rising at 45
-# degrees from the panel, so the panel prints standing without supports
+# the panel's tab: it stands in a rebate along the base's edge (seat at z = SEAT), its underside first rising from the
+# panel, then flat - printed standing it hangs over the bed, so the -ears files carry props under it (tab_props)
 SEAT = BASE_T - 1.0
 TAB = [(WALL - 0.3, SEAT - 0.8), (WALL + 0.8, SEAT), (WALL + 2.5, SEAT), (WALL + 2.5, BASE_T + 1.7), (WALL - 0.3, BASE_T + 1.7)]
 
@@ -218,6 +218,28 @@ def ears(name):
     return e
 
 
+# breakaway props under the tab: standing, the tab's underside hangs 1.4-2 mm over the bed (its 45-degree start is too
+# short to carry it), so a row of fins on a two-layer foot holds it up. They stop SUP_GAP under it - one layer of air,
+# the way a slicer's support leaves it - and SUP_SIDE off the panel's inner face, so nothing welds; the row comes out
+# in one piece
+SUP_T, SUP_PITCH, SUP_GAP, SUP_SIDE, SUP_FOOT = 0.9, 4.0, 0.25, 0.5, 0.4   # fin, fin pitch, gap under the tab, side gap, foot
+
+
+def tab_props(name):
+    """the fins under an opening's panel tab, on their foot (world space, like panel())"""
+    wall, _, _, (f0, f1), _, _ = OPENINGS[name]
+    (v0, z0), (v1, z1), _, (v2, _), _ = TAB
+    vs = WALL + SUP_SIDE                                        # the fins start clear of the panel's inner face
+    zs = z0 + (vs - v0) * (z1 - z0) / (v1 - v0)                 # the tab's underside there, on its 45-degree start
+    fin = [(vs, 0), (v2, 0), (v2, z1 - SUP_GAP), (v1, z1 - SUP_GAP), (vs, zs - SUP_GAP)]
+    p = wprofile(wall, f0, f1 - f0, [(vs, 0), (v2, 0), (v2, SUP_FOOT), (vs, SUP_FOOT)])
+    n = int((f1 - f0 - SUP_T) // SUP_PITCH) + 1
+    first = f0 + (f1 - f0 - SUP_T - (n - 1) * SUP_PITCH) / 2
+    for i in range(n):
+        p += wprofile(wall, first + i * SUP_PITCH, SUP_T, fin)
+    return p
+
+
 def standing(name, p):
     """a panel as it prints: standing on its bottom edge, its length along x"""
     return on_bed(Rot(0, 0, 90) * p if name.startswith("right") else p)
@@ -259,15 +281,17 @@ def main():
         m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
         x, row = x + bb.X + 8, max(row, bb.Y)
     m.write(os.path.join(OUT, "ableemstation-panels-all.3mf"))
-    # the same panels with their breakaway ears; the ears touch a panel only through the bridges
+    # the same panels with their breakaway ears and tab props; the ears touch a panel only through the bridges, the
+    # props not at all
     eared, m, x, y, row = {}, Mesher(), 0.0, 0.0, 0.0
     for n, p in panels.items():
-        e = ears(n.split("-")[0])
+        e, t = ears(n.split("-")[0]), tab_props(n.split("-")[0])
         bridges = (e & p).volume
         assert 0 < bridges < 3.0, "panel %s: the ears touch it with %.2f mm3, not just through the bridges" % (n, bridges)
-        eared[n] = standing(n, p + e)
+        assert (t & p).volume < 1e-6, "panel %s: the tab props touch it" % n
+        eared[n] = standing(n, p + e + t)
         write_3mf("panel-%s-ears" % n, eared[n])
-    print("panels with ears: %s (bridges %.2f mm3 per panel)" % (", ".join(eared), bridges))
+    print("panels with ears + tab props: %s (bridges %.2f mm3 per panel)" % (", ".join(eared), bridges))
     for n, p in eared.items():
         bb = p.bounding_box().size
         if x and x + bb.X > 250:
