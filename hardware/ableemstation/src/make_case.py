@@ -189,7 +189,7 @@ def main():
     # the sizes the viewer needs (so it never carries its own copies)
     json.dump({"W": W, "D": D, "H": H, "BAND": BAND, "LED": [LED_X, D - 1.4, BTN_Z],
                "top": {"c": [43, 85, H - 0.35], "w": 61, "h": 17}, "front": {"c": [36, D - 0.35, BTN_Z - 9.5], "w": 43, "h": 4.6},
-               "filament_change_mm": round(H - BAND, 1)}, open(os.path.join(viewer, "params.json"), "w"), indent=1)
+               "filament_change_mm": round(H - BAND, 1)}, open(os.path.join(viewer, "params.json"), "w", newline="\n"), indent=1)
     print("height %.1f mm, filament change at %.1f mm" % (H, H - BAND))
     print("written to", OUT)
 

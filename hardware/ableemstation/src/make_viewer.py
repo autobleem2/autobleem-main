@@ -153,7 +153,7 @@ addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.up
 </script></body></html>"""
 
 import json  # noqa: E402
-open(PAGE, "w", encoding="utf-8").write(HTML.replace("__DATA__", json.dumps(stl)).replace("__DECO__", json.dumps(deco)).replace("__PARAMS__", json.dumps(prm)).replace("__COLORS__", json.dumps(COLORWAYS)))
+open(PAGE, "w", encoding="utf-8", newline="\n").write(HTML.replace("__DATA__", json.dumps(stl)).replace("__DECO__", json.dumps(deco)).replace("__PARAMS__", json.dumps(prm)).replace("__COLORS__", json.dumps(COLORWAYS)))
 print("viewer:", PAGE)
 
 shots = os.path.join(OUT, "renders")
