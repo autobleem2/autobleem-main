@@ -102,13 +102,16 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
 - **Front USB**: two THT "USB-A female, 180°" sockets push into the panel's sleeves from behind (a drop of glue keeps
-  them). Their cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
+  them). They sit in the panel's upper half (the block behind them prints without supports). Their cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
-- **Printing**: panels lie flat, outer face down (4.9 mm tall; `front-usb` 12 mm), in the dark band colour like a
-  port bezel - `ableemstation-panels-all.3mf` has every panel on one plate. Shells, base, buttons and lens as for
-  the Pi 3 case (the base, buttons and lens files are the same).
+- **Printing**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
+  colours on the same line: **10.92 mm** with 0.16 mm layers, **10.80 mm** with 0.24 mm (`make_universal.py` prints
+  both). Dark first, then the top colour. Every overhang inside is 45 degrees - no supports; they are 2.4 mm thick
+  where they stand, so use a brim (the Orca profiles' mouse ears or a 5 mm brim).
+  `ableemstation-panels-all.3mf` has every panel on one plate. Shells, base, buttons and lens as for the Pi 3 case
+  (the base, buttons and lens files are the same).
 - **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
   button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.
   RESET, the LED and the RGB pixel are wired the same on every board.

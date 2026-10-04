@@ -176,6 +176,17 @@ def button():
     return c
 
 
+LAYERS = {"0.16": (0.2, 0.16), "0.24": (0.24, 0.24)}   # the two Orca profiles: first layer, layer height
+
+
+def first_layer_at(z, first, lh):
+    """the height of the first layer that starts at or above z - where a filament change goes"""
+    h = first
+    while h < z - 1e-6:
+        h += lh
+    return round(h, 2)
+
+
 def on_bed(part):
     """move a part so it lies on z = 0"""
     bb = part.bounding_box()
@@ -240,13 +251,7 @@ def main():
         out = (cyl_z(x, y, 0, 2.0, H - ROOF) - inner).volume + (cyl_z(x, y, 0, 3.2, BASE_T) - plate).volume
         print("screw at (%g, %g): %s" % (x, y, "ok" if out < 0.01 else "TOO CLOSE TO A WALL (%.2f mm3 outside)" % out))
         assert out < 0.01, "boss (%g, %g) too close to a wall" % (x, y)
-    # the filament change: the first layer that starts at or above the waist (shell printed roof-down)
-    change = {}
-    for name, first, lh in (("0.16", 0.2, 0.16), ("0.24", 0.24, 0.24)):
-        z = first
-        while z < H - BAND - 1e-6:
-            z += lh
-        change[name] = round(z, 2)
+    change = {name: first_layer_at(H - BAND, first, lh) for name, (first, lh) in LAYERS.items()}
     # the sizes the viewer needs (so it never carries its own copies)
     json.dump({"W": W, "D": D, "H": H, "BAND": BAND, "LED": [LED_X, D - 0.2, BTN_Z], "LED_R": LENS_R, "layer_change_mm": change,
                "top": {"c": [43, 85, H - 0.35], "w": 61, "h": 17}, "front": {"c": [36, D - 0.35, BTN_Z - 9.5], "w": 43, "h": 4.6},

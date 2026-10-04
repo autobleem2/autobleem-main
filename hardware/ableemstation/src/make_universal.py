@@ -5,17 +5,19 @@ The shell, the base, the buttons and the lens are the Pi 3 case's (make_case.py)
                                                        furthest from the Ethernet closed - it feeds the front USB), blank
   front  (between the buttons and the LED)             front-usb (two USB-A sockets) / front-blank
 A panel slides up into its opening from below: a tongue on its inner half runs in grooves in the jambs and the roof,
-and a foot on its inside rests on the base plate, so the screwed-on base locks it. Shells: passive (the Pi 3 case's
+and a foot on its inside rests on the base plate, so the screwed-on base locks it. Panels print standing, bottom
+edge down, so a filament change gives them the shell's two colours at the same line; every overhang inside is 45
+degrees (no supports). Shells: passive (the Pi 3 case's
 hidden roof vents) and active (a longer, denser vent field over the Raspberry Pi 5 Active Cooler), each for the plain
 LED and the RGB pixel. Port positions: Raspberry Pi Ltd's mechanical drawings (3B+, 4B, 5).
 Writes ../files/universal/ (STEP, STL, 3MF, viewer/). Run after make_case.py:  python make_universal.py"""
 import json
 import os
 
-from build123d import Compound, Mesher, Pos, Rot, export_step, export_stl
+from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, BOSSES, base, box, button, cyl_y, cyl_z, lens, on_bed, outline, prism, shell)
+                       LENS_R, LAYERS, base, box, button, cyl_y, first_layer_at, lens, on_bed, outline, prism, shell)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
 os.makedirs(os.path.join(OUT, "viewer"), exist_ok=True)
@@ -45,6 +47,20 @@ def wbox(wall, u0, v0, z0, du, dv, dz):
     return box(W - v0 - dv, u0, z0, dv, du, dz)      # right
 
 
+def wprofile(wall, u0, du, pts):
+    """a profile drawn in a wall's (v, z) section, run along the wall from u0 for du"""
+    if wall == "back":
+        pl = Plane(origin=(u0, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
+    elif wall == "front":
+        pl = Plane(origin=(u0 + du, D, 0), x_dir=(0, -1, 0), z_dir=(-1, 0, 0))
+    else:
+        pl = Plane(origin=(W, u0, 0), x_dir=(-1, 0, 0), z_dir=(0, 1, 0))
+    return extrude(pl * Polygon(*pts, align=None), amount=du)
+
+
+FOOT = [(WALL - 0.3, BASE_T + 0.1), (WALL + 0.15, BASE_T + 0.1), (WALL + 1.75, BASE_T + 1.7), (WALL - 0.3, BASE_T + 1.7)]
+
+
 def cut_opening(s, name):
     wall, a0, a1, _, rz, ribs = OPENINGS[name]
     v0, v1 = WALL - TG - TGC, WALL + TGC                       # the groove's span across the wall
@@ -61,7 +77,7 @@ def panel(name, cuts=()):
     wall, a0, a1, (f0, f1), _, _ = OPENINGS[name]
     p = wbox(wall, a0 + C, 0, 0, a1 - a0 - 2 * C, WALL, ZT - C)                              # the outer plate
     p += wbox(wall, a0 - TD, WALL - TG, 0, a1 - a0 + 2 * TD, TG, ZT + TD)                    # the tongue
-    p += wbox(wall, f0, WALL - 0.3, BASE_T + 0.1, f1 - f0, 0.3 + WALL + 0.1, 1.5)            # the foot on the base
+    p += wprofile(wall, f0, f1 - f0, FOOT)                     # the foot on the base, its underside at 45 degrees
     p -= prism(outline(), BAND - 1.2, 1.2) - prism(outline(0.8), BAND - 1.3, 1.4)          # the waist groove runs on
     for c in cuts:
         p -= c
@@ -99,15 +115,19 @@ def right_cuts(model, front_usb=False):
 
 
 # front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part, 14.5 x 7 mm shell) pushed in from behind into
-# sleeves; the plug passes a 13 x 5.6 window, the socket stops behind a 1 mm lip
-USB_X, USB_Z = (74.0, 94.0), 12.5
+# a block behind the panel; the plug passes a 13 x 5.6 window, the socket stops behind a 1 mm lip. The block's
+# underside rises at 45 degrees from the foot, so the panel prints standing - which puts the sockets in its upper half
+USB_X, USB_DEPTH = (74.0, 94.0), 12.0
+USB_Z = BASE_T + 0.1 + (USB_DEPTH - WALL - 0.15) + 5.3          # the block's back edge, 5.3 under the socket's centre
 
 
 def front_usb_panel():
     p = panel("front")
+    p += wprofile("front", USB_X[0] - 9.0, USB_X[1] - USB_X[0] + 18.0,
+                  [(WALL - 0.3, BASE_T + 0.1), (WALL + 0.15, BASE_T + 0.1), (USB_DEPTH, USB_Z - 5.3),
+                   (USB_DEPTH, USB_Z + 5.3), (WALL - 0.3, USB_Z + 5.3)])
     for x in USB_X:
-        p += box(x - 9.0, D - 12.0, USB_Z - 5.3, 18.0, 12.0 - WALL + 0.01 + WALL - 1.0, 10.6)   # the sleeve, behind the lip
-        p -= box(x - 7.4, D - 12.5, USB_Z - 3.7, 14.8, 12.5 - 1.0, 7.4)                       # the socket's pocket
+        p -= box(x - 7.4, D - USB_DEPTH - 0.5, USB_Z - 3.7, 14.8, USB_DEPTH - 0.5, 7.4)        # the socket's pocket
         p -= box(x - 6.5, D - 1.5, USB_Z - 2.8, 13.0, 2.5, 5.6)                                # the plug's window
     return p
 
@@ -143,10 +163,9 @@ def write_3mf(name, part):
     m.write(os.path.join(OUT, "ableemstation-%s.3mf" % name))
 
 
-def flat(name, p):
-    """a panel turned outer face down"""
-    wall = OPENINGS[name.split("-")[0]][0]
-    return on_bed((Rot(90, 0, 0) if wall == "back" else Rot(-90, 0, 0) if wall == "front" else Rot(0, 90, 0)) * p)
+def standing(name, p):
+    """a panel as it prints: standing on its bottom edge, its length along x"""
+    return on_bed(Rot(0, 0, 90) * p if name.startswith("right") else p)
 
 
 def main():
@@ -171,17 +190,24 @@ def main():
         export_stl(p, os.path.join(OUT, "ableemstation-%s.stl" % name))
     for name, s in shells.items():
         write_3mf(name, on_bed(Rot(180, 0, 0) * s))
-    flats = {n: flat(n, p) for n, p in panels.items()}
+    flats = {n: standing(n, p) for n, p in panels.items()}
     for n, p in flats.items():
         write_3mf("panel-" + n, p)
         bb = p.bounding_box().size
-        print("panel %s prints %.1f x %.1f x %.1f mm" % (n, bb.X, bb.Y, bb.Z))
-    m = Mesher()                                       # every panel on one plate set
-    x = 0.0
+        print("panel %s prints %.1f x %.1f x %.1f mm (standing)" % (n, bb.X, bb.Y, bb.Z))
+    m = Mesher()                                       # every panel on one plate, in rows
+    x = y = row = 0.0
     for n, p in flats.items():
-        m.add_shape(Pos(x, 0, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
-        x += p.bounding_box().size.X + 6
+        bb = p.bounding_box().size
+        if x and x + bb.X > 250:
+            x, y, row = 0.0, y + row + 8, 0.0
+        m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
+        x, row = x + bb.X + 8, max(row, bb.Y)
     m.write(os.path.join(OUT, "ableemstation-panels-all.3mf"))
+    # the panels' filament change: printed bottom-up, the first layer at or above the shell's colour line
+    # (the shell prints roof-down: its change at H - BAND from the roof is the line H - change from the bottom)
+    pchange = {k: first_layer_at(H - first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()}
+    print("panels: filament change at %.2f mm with 0.16 mm layers, %.2f mm with 0.24 mm" % (pchange["0.16"], pchange["0.24"]))
 
     # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
     b = base()

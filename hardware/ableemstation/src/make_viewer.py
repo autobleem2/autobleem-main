@@ -117,11 +117,14 @@ if (mesh.pi) mesh.pi.visible = false;
 // the universal case: a panel set and a ghost per board, two front panels, the active roof
 const U = P.models ? {} : null;
 if (U) {
-  MAT.panel = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6 });
+  // panels print standing with the shell's filament change: the same two colours, the same line (shared planes)
+  MAT.panel = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: .55, clippingPlanes: MAT.shell.clippingPlanes });
+  MAT.panelDark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: MAT.dark.clippingPlanes });
   for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|shell-active)/.test(n)) {
     const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
     if (n === "shell-active") { U.active = g; continue; }
     const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : MAT.panel); m.castShadow = m.receiveShadow = true;
+    if (!n.startsWith("pi-")) { const lo = new THREE.Mesh(g, MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
     m.visible = false; U[n] = m; (n.startsWith("pi-") ? scene : mesh.shell).add(m);
   }
   U.passive = mesh.shell.geometry;
@@ -173,7 +176,7 @@ function setEx(on) { ex = on; mesh.shell.position.z = on ? 55 : 0; const zc = P.
   MAT.shell.clippingPlanes[0].constant = -zc; MAT.dark.clippingPlanes[0].constant = zc; mesh.caps.position.y = on ? 22 : 0; mesh.caps.position.z = on ? 55 : 0;
   document.getElementById("ex").classList.toggle("on", on); }
 function setPi(on) { piOn = on; mesh.pi.visible = on; document.getElementById("pi").classList.toggle("on", on); }
-function setXr(on) { xr = on; for (const m of [MAT.shell, MAT.dark, MAT.panel].filter(Boolean)) { m.transparent = on; m.opacity = on ? .28 : 1; m.depthWrite = !on; m.needsUpdate = true; }
+function setXr(on) { xr = on; for (const m of [MAT.shell, MAT.dark, MAT.panel, MAT.panelDark].filter(Boolean)) { m.transparent = on; m.opacity = on ? .28 : 1; m.depthWrite = !on; m.needsUpdate = true; }
   document.getElementById("xr").classList.toggle("on", on); if (on) setPi(true); }
 document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => view(b.dataset.v));
 document.getElementById("ex").onclick = () => setEx(!ex);
@@ -182,7 +185,7 @@ document.getElementById("xr").onclick = () => setXr(!xr);
 document.getElementById("sb").onclick = () => setStandby(!document.getElementById("sb").classList.contains("on"));
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0];
-  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) MAT.panel.color.set("#" + c[3]); MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
+  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
   document.querySelectorAll("#cw button").forEach(b => b.classList.toggle("on", b.dataset.k === c[0]));
 }
 document.getElementById("cw").innerHTML = CW.map(c => `<button data-k="${c[0]}" title="${c[1]}" style="display:flex;gap:6px;align-items:center">`
