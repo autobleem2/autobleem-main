@@ -1,6 +1,8 @@
-"""Orca Slicer process profiles "ABleemStation - ASA" (best quality) and "... ASA Prototype" (fast test print) for a Voron Trident 300 (0.4 nozzle, Klipper) set up on Orca's "MyKlipper 0.4 nozzle" printer.
+"""Orca Slicer process profiles "ABleemStation - ASA" (best quality), "... ASA Base" (the final base: nobody sees it,
+so 0.20 mm layers) and "... ASA Prototype" (fast test print) for a Voron Trident 300 (0.4 nozzle, Klipper) set up on
+Orca's "MyKlipper 0.4 nozzle" printer.
 
-Both inherit "0.20mm Standard @MyKlipper" (Orca's Custom vendor). The quality profile, for the best look of this case:
+All inherit "0.20mm Standard @MyKlipper" (Orca's Custom vendor). The quality profile, for the best look of this case:
 - 0.16 mm layers (first 0.2), 5 walls = the case's 2.4 mm walls are solid perimeters, arachne for the chamfers
 - slower outer wall / top + lower accelerations on visible surfaces, seam at the back (the port side)
 - hole + elephant-foot compensation (button holes, inserts, the roof's bed-side edge), precise outer wall
@@ -118,9 +120,39 @@ PROTO = dict(P, **{
     "slow_down_layers": "1",
 })
 
+# the final base: hidden under the case, so 0.20 mm layers and quicker walls - but the fit settings stay (it sits inside
+# the shell, carries the Pi's self-tapping standoffs and the countersunk screws), 4 walls and 20 % gyroid for strength
+BASE = dict(P, **{
+    "name": "ABleemStation - ASA Base",
+    "print_settings_id": "ABleemStation - ASA Base",
+    "layer_height": "0.2",
+    "initial_layer_print_height": "0.2",
+    "wall_loops": "4",
+    "top_shell_layers": "5",
+    "top_shell_thickness": "1",
+    "bottom_shell_layers": "4",
+    "bottom_shell_thickness": "0.8",
+    "sparse_infill_density": "20%",
+    "seam_position": "aligned",
+    "outer_wall_speed": "120",
+    "inner_wall_speed": "180",
+    "top_surface_speed": "120",
+    "internal_solid_infill_speed": "180",
+    "sparse_infill_speed": "200",
+    "gap_infill_speed": "100",
+    "bridge_speed": "35",
+    "default_acceleration": "6000",
+    "outer_wall_acceleration": "4000",
+    "inner_wall_acceleration": "6000",
+    "top_surface_acceleration": "4000",
+    "travel_acceleration": "7000",
+    "travel_speed": "300",
+    "slow_down_layers": "2",
+})
+
 os.makedirs(COPY, exist_ok=True)
 install = "--install" in sys.argv
-for prof in (P, PROTO):
+for prof in (P, BASE, PROTO):
     name = prof["name"]
     text = json.dumps(prof, indent=4, ensure_ascii=False) + "\n"
     info = "sync_info = \nuser_id = \nsetting_id = \nbase_id = GP004\nupdated_time = %d\n" % int(time.time())

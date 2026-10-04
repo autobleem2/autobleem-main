@@ -26,7 +26,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `wiring.svg`, `wiring.png` | the wiring diagram + what to buy, plain LED (`src/make_wiring.py`) |
 | `wiring-rgb.svg`, `wiring-rgb.png` | the same with a WS2812B RGB pixel instead of the LED |
 | `universal/` | the universal case: shells, panels, viewer, renders ([Universal case](#universal-case-pi-2--3--4--5)) |
-| `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality) and "ABleemStation - ASA Prototype" (fast fit test) |
+| `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality), "ABleemStation - ASA Base" (the base, 0.20 mm) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
 the LED is front-left, and POWER / RESET are front-right. The microSD can be reached through a slot in the floor.
@@ -54,7 +54,8 @@ python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also 
 
 - **shell**: upside down (roof on the bed). Two colours: a filament change at the layer that starts the dark band -
   **16.68 mm** with 0.16 mm layers, **16.80 mm** with 0.24 mm layers (`make_case.py` prints both). Everything above it is the lower band.
-- **base**: flat, standoffs up. **button** x 2: standing on the flange.
+- **base**: flat, standoffs up - with "ABleemStation - ASA Base" (0.20 mm: nobody sees it). **button** x 2: standing
+  on the flange.
 - **lens**: clear PETG, standing on the flange, 100 % infill and slow, so it stays as clear as it can.
 - ASA: a closed, warm chamber; let the parts cool on the bed.
 
@@ -63,6 +64,9 @@ use them with a calibrated ASA filament profile (temperatures, flow ratio and sh
 - **ABleemStation - ASA**: 0.16 mm layers, 5 walls (the 2.4 mm walls are solid perimeters), Arachne, outer wall /
   top 60 mm/s at 3000 mm/s², seam at the back, precise outer wall, hole compensation 0.1 mm, elephant foot 0.15 mm,
   mouse-ear brim, gyroid 25 %.
+- **ABleemStation - ASA Base**: the final base (or `uni-base`) - hidden under the case, so 0.20 mm layers, 4 walls,
+  20 % gyroid, walls at 120 / 180 mm/s; the fit settings (hole and elephant-foot compensation) stay, since the base
+  sits inside the shell and carries the standoffs and the countersunk screws.
 - **ABleemStation - ASA Prototype**: the same fit settings with 0.24 mm layers, 3 walls, 12 % grid and walls at
   150 / 220 mm/s - a fast print that still answers "does it fit".
 
