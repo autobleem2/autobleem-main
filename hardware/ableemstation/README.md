@@ -162,4 +162,6 @@ Two versions of the front light, the same buttons:
 - Inkjet / laser on vinyl: print `stickers/ableemstation-stickers-A4.pdf` at 100 % (no "fit to page"); the top plate
   must measure 61 mm. The roof and the front have 0.4 mm recesses the stickers sit in.
 - Cricut (Print Then Cut): upload the PNGs from `stickers/cricut-144dpi/`. If Design Space shows a different size,
-  set it by hand: top 61 x 17 mm, front 43 x 4.6 mm, side 80 x 8 mm, bottom 54 x 30 mm.
+  set it by hand: top 61 x 17 mm, front 43 x 4.6 mm, side 80 x 8 mm, bottom 54 x 34 mm.
+- Bottom plate: one per board - `sticker-bottom` (Pi 3), `sticker-bottom-pi4`, `sticker-bottom-pi5` - with a light box
+  for the serial number: write it in with a permanent marker before sticking it on.

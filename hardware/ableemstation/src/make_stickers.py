@@ -1,5 +1,6 @@
 """ABleemStation stickers in real millimetres: the roof logo plate (61 x 17, fits the 62 x 18 recess), the front label strip
-(43 x 4.6, POWER / RESET under the buttons), a side stripe (80 x 8) and the bottom rating plate (54 x 30).
+(43 x 4.6, POWER / RESET under the buttons), a side stripe (80 x 8) and the bottom rating plate (54 x 34), one per
+board (Pi 3, Pi 4, Pi 5), each with a light box to write the serial number in by hand.
 Writes stickers/*.svg, stickers/*.png (20 px/mm, also the viewer's decals), and the print sheet
 stickers/ableemstation-stickers-A4.pdf (A4, 1:1, a cut line around each; 2 sets), and stickers/cricut-144dpi/
 (one transparent PNG per sticker, 144 dpi, for a Cricut's Print Then Cut), all in ../files/stickers/.
@@ -84,21 +85,33 @@ def side():
                % (WHITE, CYAN))
 
 
-def bottom():
-    w, h = 54, 30
-    rows = [("MODEL", "ABS-3 · Raspberry Pi 3 inside"), ("POWER", "5 V DC  2.5 A  (micro-USB)"),
-            ("VIDEO", "HDMI · 720p / 1080p"), ("SOFTWARE", "AutoBleem")]
+# the rating plate per board: model, power, video (the board's own ports and its official supply)
+BOARDS = {
+    "": ("ABS-3 · Raspberry Pi 3 inside", "5 V DC  2.5 A  (micro-USB)", "HDMI · 720p / 1080p"),
+    "-pi4": ("ABS-4 · Raspberry Pi 4 inside", "5 V DC  3 A  (USB-C)", "micro-HDMI · 720p / 1080p"),
+    "-pi5": ("ABS-5 · Raspberry Pi 5 inside", "5 V DC  5 A  (USB-C, 27 W supply)", "micro-HDMI · 720p / 1080p"),
+}
+BW, BH = 54, 34
+
+
+def bottom(model, power, video):
+    w, h = BW, BH
+    rows = [("MODEL", model), ("POWER", power), ("VIDEO", video), ("SOFTWARE", "AutoBleem")]
     t = "".join('<text x="4" y="%s" font-family="RH" font-size="2" fill="%s" letter-spacing=".3">%s</text>'
-                '<text x="19" y="%s" font-family="OSM" font-size="2.2" fill="%s">%s</text>' % (13 + i * 3.9, STEEL, a, 13 + i * 3.9, WHITE, b)
+                '<text x="19" y="%s" font-family="OSM" font-size="2.2" fill="%s">%s</text>' % (13 + i * 3.6, STEEL, a, 13 + i * 3.6, WHITE, b)
                 for i, (a, b) in enumerate(rows))
+    # the serial number: a light box to write in with a permanent marker
+    sn = ('<text x="4" y="29.2" font-family="RH" font-size="2" fill="%s" letter-spacing=".3">S/N</text>'
+          '<rect x="12" y="26" width="38" height="4.4" rx=".6" fill="%s" stroke="%s" stroke-width=".25"/>') % (STEEL, WHITE, CYAN)
     return svg(w, h, '<path d="%s" fill="url(#gr)"/>' % cut(w, h, 3)
                + '<text x="4" y="7.2" font-family="OSB" font-size="4.4" fill="%s">ABleem<tspan font-family="RH" fill="%s">Station</tspan></text>'
-               % (WHITE, CYAN) + '<rect x="4" y="8.6" width="30" height=".45" fill="url(#bar)"/>' + t
-               + '<text x="4" y="28" font-family="RH" font-size="1.6" fill="%s">Open the case with power off · print: PLA, 0.2 mm</text>' % STEEL)
+               % (WHITE, CYAN) + '<rect x="4" y="8.6" width="30" height=".45" fill="url(#bar)"/>' + t + sn
+               + '<text x="12" y="32.6" font-family="RH" font-size="1.5" fill="%s">Power off before opening the case</text>' % STEEL)
 
 
-ST = {"sticker-top": (top(), 61, 17), "sticker-front": (front(), 43, 4.6), "sticker-side": (side(), 80, 8),
-      "sticker-bottom": (bottom(), 54, 30)}
+ST = {"sticker-top": (top(), 61, 17), "sticker-front": (front(), 43, 4.6), "sticker-side": (side(), 80, 8)}
+for suffix, b in BOARDS.items():
+    ST["sticker-bottom" + suffix] = (bottom(*b), BW, BH)
 
 
 def chrome(args, url):
@@ -133,7 +146,7 @@ for name, (s, w, h) in ST.items():
 items, y = [], 18
 for _set in range(2):
     x = 15
-    for name in ("sticker-top", "sticker-side", "sticker-bottom", "sticker-front"):
+    for name in ("sticker-top", "sticker-side", "sticker-bottom", "sticker-bottom-pi4", "sticker-bottom-pi5", "sticker-front"):
         s, w, h = ST[name]
         if x + w > 195:
             x, y = 15, y + 36
