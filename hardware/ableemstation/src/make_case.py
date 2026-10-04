@@ -6,7 +6,7 @@ Parts (each prints without supports):
           LED holder behind the lens, sticker recesses, 4 bosses for M3 heat-set inserts (Voron's M3 x 5 x 4: a 4.7 mm
           hole, 6 deep)
   base    the floor plate that sits inside the shell: Pi standoffs (M2.5 self-tap), the switch bracket for two
-          6x6 mm tact switches, countersunk M3 holes, feet recesses, a slot to reach the microSD
+          6x6 mm tact switches, countersunk M3 holes, feet recesses, a finger-sized window to reach the microSD
   button  POWER / RESET cap (print 2)
   lens    the LED window, clear PETG: pushed into the front hole from inside, the LED hidden in the holder behind it
 The shell comes in two versions: ableemstation-shell (a plain 5 mm LED in a tube behind the lens) and
@@ -162,7 +162,9 @@ def base():
         b -= Pos(x, y, -0.01) * Cylinder(3.2, 1.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
     for fx, fy in ((22, 14), (W - 18, 14), (22, D - 14), (W - 30, D - 14)):          # feet recesses (Ø12 rubber)
         b -= cyl_z(fx, fy, -0.01, 6.2, 1.0)
-    b -= box(BX - 9, BY + 28 - 8, -1, 12, 16, BASE_T + 2)                            # reach the microSD from below
+    # reach the microSD from below: a finger's room (35 x 20), out from the board's edge - clear of the feet, the
+    # standoffs and the rating plate's field
+    b -= box(BX + 3 - 35, BY + 28 - 10, -1, 35, 20, BASE_T + 2)
     # switch bracket: 6x6 tact switches face the buttons; pockets 6.3 x 6.3 x 3.6 + a slot for the legs
     yb = CAP_REST - 0.5 - 1.5 - 3.7 - 3.0        # cap back at rest - gap - plunger - switch body - bracket back
     b += box(BTN_X[0] - 8, yb, BASE_T, BTN_X[1] - BTN_X[0] + 16, 6.6, BTN_Z + 4.5 - BASE_T)

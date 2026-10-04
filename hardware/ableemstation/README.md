@@ -32,7 +32,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality), "ABleemStation - ASA Base" (the base, 0.20 mm) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
-the LED is front-left, and POWER / RESET are front-right. The microSD can be reached through a slot in the floor.
+the LED is front-left, and POWER / RESET are front-right. The microSD can be reached through a finger-sized window (35 x 20 mm) in the floor.
 
 ## Building the files (`src/`)
 
