@@ -187,6 +187,11 @@ def first_layer_at(z, first, lh):
     return round(h, 2)
 
 
+def layer_number(z, first, lh):
+    """the slicer's layer number (its layer slider counts from 1) of the layer printed at height z"""
+    return int(round((z - first) / lh)) + 1
+
+
 def on_bed(part):
     """move a part so it lies on z = 0"""
     bb = part.bounding_box()
@@ -252,11 +257,13 @@ def main():
         print("screw at (%g, %g): %s" % (x, y, "ok" if out < 0.01 else "TOO CLOSE TO A WALL (%.2f mm3 outside)" % out))
         assert out < 0.01, "boss (%g, %g) too close to a wall" % (x, y)
     change = {name: first_layer_at(H - BAND, first, lh) for name, (first, lh) in LAYERS.items()}
+    change_n = {name: layer_number(change[name], first, lh) for name, (first, lh) in LAYERS.items()}
     # the sizes the viewer needs (so it never carries its own copies)
-    json.dump({"W": W, "D": D, "H": H, "BAND": BAND, "LED": [LED_X, D - 0.2, BTN_Z], "LED_R": LENS_R, "layer_change_mm": change,
+    json.dump({"W": W, "D": D, "H": H, "BAND": BAND, "LED": [LED_X, D - 0.2, BTN_Z], "LED_R": LENS_R, "layer_change_mm": change, "layer_change_n": change_n,
                "top": {"c": [43, 85, H - 0.35], "w": 61, "h": 17}, "front": {"c": [36, D - 0.35, BTN_Z - 9.5], "w": 43, "h": 4.6},
                "filament_change_mm": round(H - BAND, 1)}, open(os.path.join(viewer, "params.json"), "w", newline="\n"), indent=1)
-    print("height %.1f mm; filament change: %.2f mm with 0.16 mm layers, %.2f mm with 0.24 mm" % (H, change["0.16"], change["0.24"]))
+    print("height %.1f mm; filament change: %.2f mm (layer %d) with 0.16 mm layers, %.2f mm (layer %d) with 0.24 mm"
+          % (H, change["0.16"], change_n["0.16"], change["0.24"], change_n["0.24"]))
     print("written to", OUT)
 
 

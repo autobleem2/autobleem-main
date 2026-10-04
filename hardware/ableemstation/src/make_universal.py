@@ -17,7 +17,7 @@ import os
 from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, LAYERS, base, box, button, cyl_y, first_layer_at, lens, on_bed, outline, prism, shell)
+                       LENS_R, LAYERS, base, box, button, cyl_y, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
 os.makedirs(os.path.join(OUT, "viewer"), exist_ok=True)
@@ -188,10 +188,11 @@ def write_3mf(name, part):
 
 # breakaway ears: a panel prints standing on a 2.4 mm edge, about 10 times as tall as it is thick, so each end gets an
 # outrigger - a fin across the panel on a two-layer foot - that holds it upright and comes off by hand afterwards. The
-# fin stands 0.3 mm off the tongue's end and hangs on two small bridges there: the tongue's end lives in the wall's
+# fin stands 0.4 mm off the tongue's end and hangs on two small bridges there: the tongue's end lives in the wall's
 # groove, so what is left of a bridge never shows (trim it flush with a knife so the tongue slides in)
-EAR_T, EAR_GAP, EAR_OUT, EAR_FOOT = 1.2, 0.3, 8.0, (6.5, 0.4)   # fin thickness, gap, reach each side, foot length + height
+EAR_T, EAR_GAP, EAR_OUT, EAR_FOOT = 1.2, 0.4, 8.0, (6.5, 0.4)   # fin thickness, gap, reach each side, foot length + height
 EAR_H = 0.6                                                     # fin height, of the panel's
+EAR_RELIEF = 1.2      # the first layers squash wider (elephant foot): the fin keeps away from the tongue below this
 
 
 def ears(name):
@@ -207,6 +208,9 @@ def ears(name):
         f0 = end + out * EAR_GAP if out > 0 else end - EAR_GAP - EAR_T
         part = wprofile(wall, f0, EAR_T, fin)
         part += wprofile(wall, f0 if out > 0 else f0 - EAR_FOOT[0] + EAR_T, EAR_FOOT[0], foot)
+        # in line with the tongue the fin and its foot start only above EAR_RELIEF, so the squashed first layers
+        # cannot weld them to the tongue's foot - the nearest material down there is the foot, a fin's thickness away
+        part -= wbox(wall, f0 - 0.01, WALL - TG - 0.6, -1, EAR_T + 0.02, TG + 1.2, EAR_RELIEF + 1)
         for z in (3.0, top - 3.0):                             # two bridges, 1 x 0.8 mm, across the gap into the tongue
             u = end - EAR_GAP - 0.05 if out < 0 else end - 0.05
             part += wbox(wall, u, WALL - TG + 0.1, z, EAR_GAP + 0.1, TG - 0.2, 0.8)
@@ -274,7 +278,9 @@ def main():
     # the panels' filament change: printed bottom-up, the first layer at or above the shell's colour line
     # (the shell prints roof-down: its change at H - BAND from the roof is the line H - change from the bottom)
     pchange = {k: first_layer_at(H - first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()}
-    print("panels: filament change at %.2f mm with 0.16 mm layers, %.2f mm with 0.24 mm" % (pchange["0.16"], pchange["0.24"]))
+    pchange_n = {k: layer_number(pchange[k], f, lh) for k, (f, lh) in LAYERS.items()}
+    print("panels: filament change at %.2f mm (layer %d) with 0.16 mm layers, %.2f mm (layer %d) with 0.24 mm"
+          % (pchange["0.16"], pchange_n["0.16"], pchange["0.24"], pchange_n["0.24"]))
 
     b = uni_base()
     export_step(b, os.path.join(OUT, "ableemstation-uni-base.step"))
@@ -329,6 +335,8 @@ def main():
                "bottoms": {"pi23": "sticker-bottom", "pi4": "sticker-bottom-pi4", "pi5": "sticker-bottom-pi5"},
                # the filament changes, for the print notes in the viewer's download
                "layer_change_mm": {k: first_layer_at(H - BAND, f, lh) for k, (f, lh) in LAYERS.items()}, "panel_change_mm": pchange,
+               "layer_change_n": {k: layer_number(first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()},
+               "panel_change_n": pchange_n,
                "hint": "Raspberry Pi 2B / 3B / 3B+ / 4B / 5 - universal"},
               open(os.path.join(view, "params.json"), "w", newline="\n"), indent=1)
     print("written to", OUT)

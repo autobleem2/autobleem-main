@@ -278,7 +278,7 @@ function pick() {
 }
 function zipName() { return `ableemstation-${U ? `${model}-${front === "usb" ? "usb" : "blank"}-${roof ? "active" : "passive"}` : "pi3"}-${rgb ? "rgb" : "led"}-${cwKey}.zip`; }
 function note(names) {
-  const c = CW.find(x => x[0] === cwKey), L = P.layer_change_mm, PC = P.panel_change_mm, M = U ? P.models[model] : "Raspberry Pi 3B / 3B+";
+  const c = CW.find(x => x[0] === cwKey), L = P.layer_change_mm, PC = P.panel_change_mm, LN = P.layer_change_n, PN = P.panel_change_n, M = U ? P.models[model] : "Raspberry Pi 3B / 3B+";
   const has = s => names.filter(n => n.startsWith("3mf/") && n.includes(s)).map(n => "  " + n.slice(4)).join("\n");
   const S = [
     [`ABleemStation${U ? " universal" : ""} - your build`, "",
@@ -286,9 +286,9 @@ function note(names) {
        `Roof:    ${roof ? "active - over the Raspberry Pi 5 Active Cooler" : "passive (hidden vents)"}`] : []),
      `Light:   ${rgb ? "RGB pixel (one WS2812B cut from a 5 V, 10 mm strip)" : "5 mm diffused LED"}`, `Colours: ${c[1]}`],
     ["PRINT (no supports; README.md has the details)",
-     `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm (0.24 mm):`,
+     `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm = layer ${LN["0.16"]} (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm = layer ${LN["0.24"]} (0.24 mm):`,
      "  the top colour first, the band colour after the change.", has("shell"),
-     ...(U ? [`- panels, standing on their bottom edge, "ABleemStation - ASA", with a brim. Filament change at ${PC["0.16"].toFixed(2)} mm / ${PC["0.24"].toFixed(2)} mm:`,
+     ...(U ? [`- panels, standing on their bottom edge, "ABleemStation - ASA", with a brim. Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
        "  the band colour first, the top colour after the change. The -ears files are the same panels with breakaway ears",
        "  that hold them upright: bend them off cold, trim the bridges flush (README).", has("panel-")] : []),
      `- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base"),

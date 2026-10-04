@@ -56,7 +56,8 @@ python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also 
 ## Printing (ASA or PLA, no supports)
 
 - **shell**: upside down (roof on the bed). Two colours: a filament change at the layer that starts the dark band -
-  **16.68 mm** with 0.16 mm layers, **16.80 mm** with 0.24 mm layers (`make_case.py` prints both). Everything above it is the lower band.
+  **16.68 mm = layer 104** with 0.16 mm layers, **16.80 mm = layer 70** with 0.24 mm layers (the layer numbers as
+  Orca's layer slider counts them, from 1; `make_case.py` prints both). Everything above it is the lower band.
 - **base**: flat, standoffs up - with "ABleemStation - ASA Base" (0.20 mm: nobody sees it). **button** x 2: standing
   on the flange.
 - **lens**: clear PETG, standing on the flange, 100 % infill and slow, so it stays as clear as it can.
@@ -118,15 +119,16 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
 - **Printing**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
-  colours on the same line: **10.92 mm** with 0.16 mm layers, **10.80 mm** with 0.24 mm (`make_universal.py` prints
+  colours on the same line: **10.92 mm = layer 68** with 0.16 mm layers, **10.80 mm = layer 45** with 0.24 mm (`make_universal.py` prints
   both). Dark first, then the top colour. The tab's underside starts at 45 degrees - no supports; they are 2.4 mm thick
   where they stand, so use a brim (the Orca profiles' mouse ears or a 5 mm brim).
   `ableemstation-panels-all.3mf` has every panel on one plate.
   **Breakaway ears**: every panel also comes as `panel-…-ears.3mf` (and `panels-all-ears.3mf`) - at each end a fin
-  across the panel on a two-layer foot holds it upright while it prints. The fin stands 0.3 mm off the tongue's end
-  on two small bridges: bend it off by hand when the print is cold and trim what is left of the bridges flush with a
-  knife, so the tongue slides into its groove (the tongue's end hides in the groove, so nothing shows). Shells, `uni-base`, buttons and lens as for the Pi 3 case
-  (the buttons and lens files are the same).
+  across the panel on a two-layer foot holds it upright while it prints. The fin stands 0.4 mm off the tongue's end
+  (further in the first 1.2 mm, where the first layers squash wider) on two small bridges: hold the panel next to
+  the ear, twist the fin off sideways when the print is cold, and trim what is left of the bridges flush with a
+  knife, so the tongue slides into its groove (the tongue's end hides in the groove, so nothing shows).
+  Shells, `uni-base`, buttons and lens as for the Pi 3 case (the buttons and lens files are the same).
 - **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
   button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.
   RESET, the LED and the RGB pixel are wired the same on every board.
