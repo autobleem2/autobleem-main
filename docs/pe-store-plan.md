@@ -1,6 +1,6 @@
 # PE Apps in the Store (APPS-8) - plan
 
-Status: **plan only, not started** (the owner, 2026-10-05: "na razie plan do dokumentacji"). Milestone alpha1.2.
+Status: **in progress** (the owner, 2026-10-05: "robimy APPS-8 w trybie nocnym"). Milestone alpha1.2.
 Follows APPS-7 (PE Apps step 1, done 2026-10-05): a `.mod` in the stick's `Mods/` becomes an App through `proc_pe`,
 and the launcher's `rc/pe_run.sh` runs it with the pad the mod expects.
 
@@ -71,9 +71,16 @@ The 25 projects of https://gitlab.com/groups/modmyclassic/ports were audited:
 Rough cost: 8-10% of a week. Risks: the 2020 patches may not apply to newer upstream (pin the 2020 commit
 instead); heavy builds (lzdoom's sound libraries) need the static-deps pattern of the `app_*` ports.
 
-## Open decisions (for the owner, when the plan starts)
+## Decisions (the owner, 2026-10-05)
 
-1. Approve the plan as a whole.
-2. Wave 1 list.
-3. Quake shareware `pak0.pak` in the tyrquake package, or the user brings it.
-4. PPSSPP only as `app_ppsspp` in the native PSP plan (recommended), or also as a PE package.
+1. The plan is approved; it runs from the night of 2026-10-05.
+2. Wave 1: openlara, Commander-Genius (Keen 1), openjazz (JJ1), tyrquake. blastem moves to wave 2.
+3. The Quake shareware `pak0.pak` ships in the tyrquake package, with id's licence texts unmodified (the owner takes the risk).
+4. PPSSPP only as `app_ppsspp` in the native PSP plan.
+5. Repository `autobleem2/pe_ports` (public, default develop, CI on).
+6. tyrquake built from source has no pad code (the 2020 binary's pad code has no published source): our own SDL pad
+   patch, tested on the PSC.
+7. openjazz is pinned to the 2020 SDL2 fork (gitlab.com/modmyclassic/ports/openjazz-sdl2); a port of modern upstream
+   later if wanted.
+8. The GPL written offer names the GitHub organisation as the contact.
+9. Commander Genius's Boost 1.74 headers are mirrored on our site (not fetched from archives.boost.io).
