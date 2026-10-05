@@ -164,6 +164,7 @@ def led_holder(led):
         h += box(LED_X - LENS_FL_R - 1.6, D - WALL - tube, BTN_Z, 2 * (LENS_FL_R + 1.6), tube + HOLDER_IN,
                  H - ROOF - BTN_Z + 0.5)
         h -= cyl_y(LED_X, D - WALL - tube - 1, BTN_Z, 2.6, tube + 1)                      # the LED (5 mm)
+    h &= prism(outline(WALL - HOLDER_IN), 0, H - ROOF + HOLDER_IN)                       # never through the cut corner
     return h - lens_cuts()
 
 
@@ -395,8 +396,9 @@ def main():
     for led in ("led5", "rgb"):
         joint = (led_holder(led) & body).volume
         clear = (led_holder(led) & lens_cuts()).volume
-        print("LED holder %s: overlaps the shell by %.1f mm3, in the lens window %.2f mm3" % (led, joint, clear))
-        assert joint > 10 and clear < 0.01, "the %s holder is not one with the shell, or it blocks the lens" % led
+        out = (led_holder(led) - prism(outline(), 0, H)).volume
+        print("LED holder %s: overlaps the shell by %.1f mm3, in the lens window %.2f mm3, outside %.2f mm3" % (led, joint, clear, out))
+        assert joint > 10 and clear < 0.01 and out < 0.001, "the %s holder is not one with the shell, blocks the lens or shows outside" % led
     # the button tree: on its pins without touching the shell elsewhere, clear of the base and the switches
     sws = switch_ghost(BTN_X[0]) + switch_ghost(BTN_X[1])
     for name, other in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"]), ("switches", sws)):
