@@ -25,7 +25,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `ableemstation-viewer.html` | the 3D viewer with the "Download ZIP" of the option on screen (three.js from a CDN, so it needs internet) |
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, cut lines: one ab2.0.0 set and one special-edition set (the same sheet in `stickers/special/`); `stickers/*.svg` / `*.png` = each sticker |
-| `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |
+| `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut; `ableemstation-all-stickers.png` = every sticker of both sets on one sheet (170 x 152 mm) |
 | `wiring.svg`, `wiring.png` | the wiring diagram + what to buy, plain LED (`src/make_wiring.py`) |
 | `wiring-rgb.svg`, `wiring-rgb.png` | the same with a WS2812B RGB pixel instead of the LED |
 | `universal/` | the universal case: shells, panels, viewer, renders ([Universal case](#universal-case-pi-2--3--4--5)) |
@@ -191,8 +191,13 @@ Two versions of the front light, the same buttons:
 - Inkjet / laser on vinyl: print `stickers/ableemstation-stickers-A4.pdf` at 100 % (no "fit to page"); the top plate
   must measure 61 mm. The roof and the front have 0.4 mm recesses the stickers sit in.
 - Cricut (Print Then Cut): upload the PNGs from `stickers/cricut-144dpi/`. If Design Space shows a different size,
-  set it by hand: top 61 x 17 mm, front 43 x 4.6 mm, side 80 x 8 mm, bottom 54 x 34 mm.
+  set it by hand: top 61 x 17 mm, front 43 x 4.6 mm, side 80 x 8 mm, bottom 54 x 34 mm, back 62 x 5 mm.
+  `ableemstation-all-stickers.png` is every sticker of both sets on one transparent sheet: upload it once, set its
+  width to 170 mm (it fits Print Then Cut's 6.75 x 9.25 in), and Design Space cuts each sticker on its own.
 - Special edition: `stickers/special/` is the same set in "Grey 94" colours (light grey, dark text, four colour
   accents) for the Grey 94 Special Edition colourway - colours only, no third-party marks.
 - Bottom plate: one per board - `sticker-bottom` (Pi 3), `sticker-bottom-pi4`, `sticker-bottom-pi5` - with a light box
   for the serial number: write it in with a permanent marker before sticking it on.
+- Back panel (universal case): one per board - `sticker-back-pi23` (POWER, HDMI, AUDIO/AV), `sticker-back-pi4`
+  (POWER, HDMI 0, HDMI 1, AUDIO/AV), `sticker-back-pi5` (POWER, HDMI 0, HDMI 1) - on the panel above its port windows,
+  each label over its port (a small mark points at it). AUDIO/AV: the Pi 3 / 4 jack carries audio and composite video.

@@ -228,7 +228,7 @@ function decal(name, w, h, pos, bx, by, parent) {
   const t = tex(name);
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: .4 }));
   const X = new THREE.Vector3(...bx), Y = new THREE.Vector3(...by), Z = new THREE.Vector3().crossVectors(X, Y);
-  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); (parent || mesh.shell).add(m); m.userData.key = name; DEC[name] = m; return m;
+  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); m.position.set(...pos); (parent || mesh.shell).add(m); m.userData.key = m.userData.name = name; DEC[name] = m; return m;
 }
 // read from the front of the console: text runs along -x, "up" on the roof is -y (away from the viewer)
 decal("sticker-top", P.top.w, P.top.h, P.top.c, [-1, 0, 0], [0, -1, 0]);
@@ -238,6 +238,9 @@ if (P.side) decal("sticker-side", P.side.w, P.side.h, P.side.c, [0, -1, 0], [0, 
 const BOT = {};
 if (P.bottom) for (const [k, n] of Object.entries(P.bottoms)) {
   BOT[k] = decal(n, P.bottom.w, P.bottom.h, P.bottom.c, [1, 0, 0], [0, -1, 0], mesh.base); if (BOT[k]) BOT[k].visible = false; }
+// the back panel's port labels: one on each panel set of its board (they stand on the base, shown with their set)
+if (P.back && U) for (const [k, n] of Object.entries(P.backs)) for (const s of [`set-${k}`, `set-${k}-front`]) if (U[s]) {
+  const m = decal(n, P.back.w, P.back.h, P.back.c, [1, 0, 0], [0, 0, 1], U[s]); if (m) { delete DEC[n]; DEC[n + "@" + s] = m; } }
 function showBottom() { for (const [k, m] of Object.entries(BOT)) if (m) m.visible = k === model; }
 const C = new THREE.Vector3(P.W / 2, P.D / 2, P.H / 2.2);
 const VIEWS = { iso: [-150, 260, 190], front: [70, 380, 60], back: [70, -300, 60], right: [380, 52, 70], top: [70, 60, 400],
@@ -274,7 +277,7 @@ function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0]; cwKey = c[0];
   MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + (U ? c[3] : c[4])); MAT.caps.color.set("#" + c[5]);   // universal: the base prints with the panels, band-coloured
   const set = c[6] ? c[6] + "/" : "";                      // a colourway may bring its own sticker set
-  for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
+  for (const m of Object.values(DEC)) { const n = m.userData.name, k = DECO[set + n] ? set + n : n;
     if (m.userData.key !== k) { m.material.map = tex(k); m.material.needsUpdate = true; m.userData.key = k; } }
   document.querySelectorAll("#cw button").forEach(b => b.classList.toggle("on", b.dataset.k === c[0]));
   document.getElementById("cwn").textContent = c[1];
@@ -295,7 +298,7 @@ function pick() {
   const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}${front === "usb" && !cover ? "-open" : ""}` : "base"}.3mf`,
     "3mf/ableemstation-buttons.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
-  for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
+  for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model], P.backs[model]] : []))
     f.push(set + n + ".svg", set + n + ".png", `${set}cricut-144dpi/ableemstation-${n}.png`);
   f.push(set + "ableemstation-stickers-A4.pdf", set + "ableemstation-stickers-A4-preview.png");
   const miss = f.filter(k => !PACK[k]); if (miss.length) console.warn("not in the page:", miss);
@@ -427,8 +430,9 @@ if VARIANT:
     tiles = [(Image.open(os.path.join(shots, n + ".png")).convert("RGB").crop((190, 110, 1090, 710)), t) for n, t in shots_]
     stk = os.path.join(FILES, "stickers")
     names = [("sticker-top", "1 roof - 61 x 17 mm"), ("sticker-front", "2 front - 43 x 4.6 mm"), ("sticker-side", "3 side - 80 x 8 mm"),
-             ("sticker-bottom", "4 bottom, Pi 2 / 3 - 54 x 34"), ("sticker-bottom-pi4", "4 bottom, Pi 4"), ("sticker-bottom-pi5", "4 bottom, Pi 5")]
-    sheet = Image.new("RGB", (2760, 1400), (22, 27, 33))
+             ("sticker-bottom", "4 bottom, Pi 2 / 3 - 54 x 34"), ("sticker-bottom-pi4", "4 bottom, Pi 4"), ("sticker-bottom-pi5", "4 bottom, Pi 5"),
+             ("sticker-back-pi23", "5 back panel, Pi 2 / 3 - 62 x 5"), ("sticker-back-pi4", "5 back, Pi 4"), ("sticker-back-pi5", "5 back, Pi 5")]
+    sheet = Image.new("RGB", (2760, 1560), (22, 27, 33))
     d = ImageDraw.Draw(sheet)
     d.text((40, 30), "ABleemStation universal - the stickers and where they go", font=fb, fill=(238, 243, 246))
     for i, (im, t) in enumerate(tiles):
@@ -441,6 +445,10 @@ if VARIANT:
         im = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
         if n == "sticker-bottom":                      # the three rating plates on a row of their own
             x, y = 40, 1010
+        if n == "sticker-back-pi23":                   # the three back-panel labels on another
+            x, y = 40, 1420
+        if n.startswith("sticker-back"):
+            im = im.resize((800, round(800 * im.height / im.width)), Image.LANCZOS)
         sheet.paste(im, (x, y), im)
         d.text((x, y + im.height + 12), t, font=fs, fill=(147, 163, 179))
         x += im.width + 60

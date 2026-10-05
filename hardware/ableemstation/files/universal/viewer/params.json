@@ -55,6 +55,20 @@
   "pi4": "sticker-bottom-pi4",
   "pi5": "sticker-bottom-pi5"
  },
+ "back": {
+  "c": [
+   81.25,
+   -0.05,
+   20.6
+  ],
+  "w": 62,
+  "h": 5
+ },
+ "backs": {
+  "pi23": "sticker-back-pi23",
+  "pi4": "sticker-back-pi4",
+  "pi5": "sticker-back-pi5"
+ },
  "layer_change_mm": {
   "0.16": 16.68,
   "0.24": 16.8

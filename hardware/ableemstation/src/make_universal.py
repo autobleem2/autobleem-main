@@ -457,6 +457,9 @@ def main():
                # ports), the rating plate on the base's underside between the feet, the screws and the microSD window
                "side": {"c": [-0.05, 60, 5.2], "w": 80, "h": 8}, "bottom": {"c": [89, 57, -0.05], "w": 54, "h": 34},
                "bottoms": {"pi23": "sticker-bottom", "pi4": "sticker-bottom-pi4", "pi5": "sticker-bottom-pi5"},
+               # the port labels on the back panel, above its windows (the panel's face: x 48.7..113.9, z up to the roof)
+               "back": {"c": [81.25, -0.05, 20.6], "w": 62, "h": 5},
+               "backs": {"pi23": "sticker-back-pi23", "pi4": "sticker-back-pi4", "pi5": "sticker-back-pi5"},
                # the filament changes, for the print notes in the viewer's download
                "layer_change_mm": {k: first_layer_at(H - BAND, f, lh) for k, (f, lh) in LAYERS.items()}, "panel_change_mm": pchange,
                "layer_change_n": {k: layer_number(first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()},

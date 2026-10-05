@@ -1,11 +1,12 @@
 """ABleemStation stickers in real millimetres: the roof logo plate (61 x 17, fits the 62 x 18 recess), the front label strip
-(43 x 4.6, RESET / POWER under the buttons), a side stripe (80 x 8) and the bottom rating plate (54 x 34), one per
+(43 x 4.6, RESET / POWER under the buttons), the back panel's port labels (62 x 5, per board), a side stripe (80 x 8) and the bottom rating plate (54 x 34), one per
 board (Pi 3, Pi 4, Pi 5), each with a light box to write the serial number in by hand. Two colour sets: the ab2.0.0
 one (dark, cyan / magenta) and the "Grey 94" special edition (light grey, dark text, four colour accents - colours
 only, no third-party marks) in stickers/special/.
 Writes stickers/*.svg, stickers/*.png (20 px/mm, also the viewer's decals), and the print sheet
 stickers/ableemstation-stickers-A4.pdf (A4, 1:1, a cut line around each; one set of each colour set), and stickers/cricut-144dpi/
-(one transparent PNG per sticker, 144 dpi, for a Cricut's Print Then Cut), all in ../files/stickers/.
+(one transparent PNG per sticker, 144 dpi, for a Cricut's Print Then Cut, and ableemstation-all-stickers.png:
+every sticker of both sets on one sheet), all in ../files/stickers/.
 Run:  python make_stickers.py"""
 import os
 import shutil
@@ -85,6 +86,26 @@ def front():
                + '<circle cx="22.5" cy="2.4" r=".45" fill="%s"/>' % MAG)
 
 
+# the back panel's label strip (62 x 5), above the port windows; each label centred over its port (x from the strip's
+# left edge, read from behind the case) - the universal case's back-pi23 / -pi4 / -pi5 panels (Pi 3/4: one jack = audio
+# + composite video; Pi 5: no jack)
+BACK_W, BACK_H = 62, 5
+BACKS = {
+    "-pi23": (("POWER", 10.95), ("HDMI", 32.35), ("AUDIO/AV", 53.85)),
+    "-pi4": (("POWER", 11.55), ("HDMI 0", 26.35), ("HDMI 1", 39.85), ("AUDIO/AV", 54.35)),
+    "-pi5": (("POWER", 11.55), ("HDMI 0", 26.35), ("HDMI 1", 39.85)),
+}
+
+
+def back(labels):
+    w, h = BACK_W, BACK_H
+    t = "".join('<text x="%s" y="3.35" text-anchor="middle" font-family="RH" font-size="1.9" letter-spacing=".25" fill="%s">%s</text>'
+                % (x, WHITE, s) for s, x in labels)
+    ticks = "".join('<rect x="%s" y="%s" width=".5" height=".5" fill="%s"/>' % (x - .25, h - .9, MAG) for _, x in labels)
+    return svg(w, h, '<rect width="%s" height="%s" rx=".4" fill="%s"/>' % (w, h, G2)
+               + '<rect x="0" y="0" width="%s" height=".35" fill="%s"/>' % (w, CYAN) + t + ticks)
+
+
 def side():
     w, h = 80, 8
     stripes = "".join('<path d="M%s 0 h%s l-6 %s h-%s z" fill="%s"/>' % (52 + i * 5.5, 3.2, h, 3.2, c)
@@ -133,6 +154,8 @@ def build(OUT):
     ST = {"sticker-top": (top(), 61, 17), "sticker-front": (front(), 43, 4.6), "sticker-side": (side(), 80, 8)}
     for suffix, b in BOARDS.items():
         ST["sticker-bottom" + suffix] = (bottom(*b), BW, BH)
+    for suffix, labels in BACKS.items():
+        ST["sticker-back" + suffix] = (back(labels), BACK_W, BACK_H)
     PX = 20                     # px per mm for the PNGs
     for name, (s, w, h) in ST.items():
         open(os.path.join(OUT, name + ".svg"), "w", encoding="utf-8").write(s)
@@ -158,23 +181,50 @@ def build(OUT):
     return ST
 
 
+# one set's layout, row by row (both the A4 sheet and the Cricut sheet)
+ROWS = (("sticker-top", "sticker-side"), ("sticker-bottom", "sticker-bottom-pi4", "sticker-bottom-pi5"),
+        ("sticker-front", "sticker-back-pi23"), ("sticker-back-pi4", "sticker-back-pi5"))
+
+
+def layout(sets, gap, set_gap):
+    """(set index, name, x, y, w, h) in mm from the top-left, every set under the previous one"""
+    out, y = [], 0.0
+    for i, ST in enumerate(sets):
+        for row in ROWS:
+            x = 0.0
+            for name in row:
+                _, w, h = ST[name]
+                out.append((i, name, x, y, w, h))
+                x += w + gap
+            y += max(ST[n][2] for n in row) + gap
+        y += set_gap - gap
+    return out
+
+
 def sheet(sets, outs):
     """the A4 print sheet, 1:1: one set per colour set (the ab2.0.0 one, then the special edition), a hairline cut
-    line 0.5 mm outside each sticker; the same sheet into every folder in outs"""
+    line 0.5 mm outside each sticker; the same sheet into every folder in outs. Also one transparent PNG of every
+    sticker of both sets for Cricut Design Space (fits Print Then Cut's 6.75 x 9.25 in)"""
     os.makedirs(WORK, exist_ok=True)
-    items, y = [], 18
-    for i, ST in enumerate(sets):
-        x = 15
-        for name in ("sticker-top", "sticker-side", "sticker-bottom", "sticker-bottom-pi4", "sticker-bottom-pi5", "sticker-front"):
-            s, w, h = ST[name]
-            for g in ("gr", "bar"):                    # one page: each set's gradients need their own ids
-                s = s.replace('id="%s"' % g, 'id="%s%d"' % (g, i)).replace("url(#%s)" % g, "url(#%s%d)" % (g, i))
-            if x + w > 195:
-                x, y = 15, y + 36
-            items.append('<div style="position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;outline:.1mm dashed #999;'
-                         'outline-offset:.5mm">%s</div>' % (x, y, w, h, s))
-            x += w + 8
-        y += 40
+    items = []
+    for i, name, x, y, w, h in layout(sets, 6, 10):
+        s = sets[i][name][0]
+        for g in ("gr", "bar"):                        # one page: each set's gradients need their own ids
+            s = s.replace('id="%s"' % g, 'id="%s%d"' % (g, i)).replace("url(#%s)" % g, "url(#%s%d)" % (g, i))
+        items.append('<div style="position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;outline:.1mm dashed #999;'
+                     'outline-offset:.5mm">%s</div>' % (15 + x, 18 + y, w, h, s))
+
+    # the Cricut sheet: from each set's 20 px/mm PNGs, 4 mm apart, at 144 dpi with the dpi in the file
+    dpi, cl = 144, layout(sets, 4, 6)
+    mm = lambda v: round(v / 25.4 * dpi)
+    W_, H_ = max(x + w for _, _, x, _, w, _ in cl), max(y + h for _, _, _, y, _, h in cl)
+    big = Image.new("RGBA", (mm(W_), mm(H_)), (0, 0, 0, 0))
+    for i, name, x, y, w, h in cl:
+        im = Image.open(os.path.join(outs[i], name + ".png")).convert("RGBA").resize((mm(w), mm(h)), Image.LANCZOS)
+        big.alpha_composite(im, (mm(x), mm(y)))
+    for out in outs:
+        big.save(os.path.join(out, "cricut-%ddpi" % dpi, "ableemstation-all-stickers.png"), dpi=(dpi, dpi))
+    print("cricut sheet: %dx%d px = %.1f x %.1f mm (all stickers, both sets)" % (big.width, big.height, W_, H_))
     page = os.path.join(WORK, "sheet.html")
     open(page, "w", encoding="utf-8").write(
         '<!doctype html><style>%s@page{size:A4;margin:0}*{margin:0}body{width:210mm;height:297mm;position:relative;font:3mm sans-serif}'
