@@ -24,7 +24,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `ableemstation-all-parts.3mf`, `-all-parts-rgb.3mf` | everything to print in one file, per LED version: shell, base, the button tree, the lens |
 | `ableemstation-viewer.html` | the 3D viewer with the "Download ZIP" of the option on screen (three.js from a CDN, so it needs internet) |
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
-| `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
+| `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, cut lines: one ab2.0.0 set and one special-edition set (the same sheet in `stickers/special/`); `stickers/*.svg` / `*.png` = each sticker |
 | `stickers/cricut-144dpi/` | one transparent PNG per sticker at 144 dpi, for a Cricut's Print Then Cut |
 | `wiring.svg`, `wiring.png` | the wiring diagram + what to buy, plain LED (`src/make_wiring.py`) |
 | `wiring-rgb.svg`, `wiring-rgb.png` | the same with a WS2812B RGB pixel instead of the LED |
@@ -32,7 +32,7 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 | `orca/` | Orca Slicer process profiles: "ABleemStation - ASA" (quality), "ABleemStation - ASA Base" (the base, 0.20 mm) and "ABleemStation - ASA Prototype" (fast fit test) |
 
 Layout: back = power, HDMI, audio (the TV cables). Seen from the front, the USB + Ethernet are on the left side,
-the LED is front-left, and POWER / RESET are front-right. The microSD can be reached through a finger-sized window (35 x 20 mm) in the floor.
+the LED is front-left, and RESET / POWER are front-right (RESET on the left, as the sticker under them says). The microSD can be reached through a finger-sized window (35 x 20 mm) in the floor.
 
 ## Building the files (`src/`)
 

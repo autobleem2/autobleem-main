@@ -1,10 +1,10 @@
 """ABleemStation stickers in real millimetres: the roof logo plate (61 x 17, fits the 62 x 18 recess), the front label strip
-(43 x 4.6, POWER / RESET under the buttons), a side stripe (80 x 8) and the bottom rating plate (54 x 34), one per
+(43 x 4.6, RESET / POWER under the buttons), a side stripe (80 x 8) and the bottom rating plate (54 x 34), one per
 board (Pi 3, Pi 4, Pi 5), each with a light box to write the serial number in by hand. Two colour sets: the ab2.0.0
 one (dark, cyan / magenta) and the "Grey 94" special edition (light grey, dark text, four colour accents - colours
 only, no third-party marks) in stickers/special/.
 Writes stickers/*.svg, stickers/*.png (20 px/mm, also the viewer's decals), and the print sheet
-stickers/ableemstation-stickers-A4.pdf (A4, 1:1, a cut line around each; 2 sets), and stickers/cricut-144dpi/
+stickers/ableemstation-stickers-A4.pdf (A4, 1:1, a cut line around each; one set of each colour set), and stickers/cricut-144dpi/
 (one transparent PNG per sticker, 144 dpi, for a Cricut's Print Then Cut), all in ../files/stickers/.
 Run:  python make_stickers.py"""
 import os
@@ -81,7 +81,7 @@ def front():
     lab = lambda x, t: ('<text x="%s" y="3.15" text-anchor="middle" font-family="RH" font-size="2.1" letter-spacing=".35" fill="%s">%s</text>'
                         % (x, WHITE, t))
     return svg(w, h, '<rect width="%s" height="%s" rx=".4" fill="%s"/>' % (w, h, G2)
-               + '<rect x="0" y="0" width="%s" height=".35" fill="%s"/>' % (w, CYAN) + lab(13.5, "POWER") + lab(33.5, "RESET")
+               + '<rect x="0" y="0" width="%s" height=".35" fill="%s"/>' % (w, CYAN) + lab(13.5, "RESET") + lab(33.5, "POWER")
                + '<circle cx="22.5" cy="2.4" r=".45" fill="%s"/>' % MAG)
 
 
@@ -155,33 +155,46 @@ def build(OUT):
         big.resize(size, Image.LANCZOS).save(os.path.join(cdir, "ableemstation-%s.png" % name), dpi=(CRICUT_DPI, CRICUT_DPI))
         print("cricut: %s %dx%d px = %g x %g mm" % (name, size[0], size[1], w, h))
 
-    # the A4 print sheet, 1:1: two sets, a hairline cut line 0.5 mm outside each sticker
+    return ST
+
+
+def sheet(sets, outs):
+    """the A4 print sheet, 1:1: one set per colour set (the ab2.0.0 one, then the special edition), a hairline cut
+    line 0.5 mm outside each sticker; the same sheet into every folder in outs"""
+    os.makedirs(WORK, exist_ok=True)
     items, y = [], 18
-    for _set in range(2):
+    for i, ST in enumerate(sets):
         x = 15
         for name in ("sticker-top", "sticker-side", "sticker-bottom", "sticker-bottom-pi4", "sticker-bottom-pi5", "sticker-front"):
             s, w, h = ST[name]
+            for g in ("gr", "bar"):                    # one page: each set's gradients need their own ids
+                s = s.replace('id="%s"' % g, 'id="%s%d"' % (g, i)).replace("url(#%s)" % g, "url(#%s%d)" % (g, i))
             if x + w > 195:
                 x, y = 15, y + 36
             items.append('<div style="position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;outline:.1mm dashed #999;'
                          'outline-offset:.5mm">%s</div>' % (x, y, w, h, s))
             x += w + 8
         y += 40
-    sheet = os.path.join(WORK, "sheet.html")
-    open(sheet, "w", encoding="utf-8").write(
+    page = os.path.join(WORK, "sheet.html")
+    open(page, "w", encoding="utf-8").write(
         '<!doctype html><style>%s@page{size:A4;margin:0}*{margin:0}body{width:210mm;height:297mm;position:relative;font:3mm sans-serif}'
         'svg{display:block}</style><div style="position:absolute;left:15mm;top:8mm;color:#555">ABleemStation stickers - print at 100%% '
         '(no "fit to page"), vinyl sticker sheet; cut on the dashed lines. Check: the top plate must measure 61 mm.</div>%s'
         % (CSS, "".join(items)))
-    chrome(["--no-pdf-header-footer", "--print-to-pdf=" + os.path.join(OUT, "ableemstation-stickers-A4.pdf")], "file:///" + sheet.replace("\\", "/"))
-    chrome(["--force-device-scale-factor=1", "--window-size=794,1123", "--screenshot=" + os.path.join(OUT, "ableemstation-stickers-A4-preview.png")],
-           "file:///" + sheet.replace("\\", "/"))
+    for out in outs:
+        chrome(["--no-pdf-header-footer", "--print-to-pdf=" + os.path.join(out, "ableemstation-stickers-A4.pdf")], "file:///" + page.replace("\\", "/"))
+        chrome(["--force-device-scale-factor=1", "--window-size=794,1123", "--screenshot=" + os.path.join(out, "ableemstation-stickers-A4-preview.png")],
+               "file:///" + page.replace("\\", "/"))
     for f in os.listdir(WORK):
         os.remove(os.path.join(WORK, f))
     os.rmdir(WORK)
     print("written to", OUT)
 
 
+sets, outs = [], []
 for key, pal in PALETTES.items():
     globals().update(pal)
-    build(os.path.join(OUT, key) if key else OUT)
+    outs.append(os.path.join(OUT, key) if key else OUT)
+    sets.append(build(outs[-1]))
+sheet(sets, outs)
+print("sheet: one ab2.0.0 set + one special-edition set, in", ", ".join(outs))
