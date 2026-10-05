@@ -180,31 +180,12 @@ def front_usb_panel():
     return p
 
 
-# noses over the tab's inner end: a panel's weight sits outside its tab, so on its own it tips outwards - and then the
-# tab's inner end lifts. Two noses per panel stop that lift, so a panel stands upright while the shell goes on (put it
-# in tilted inwards, the tab under the noses, then upright). Low blocks beside the rebate, under the Pi's board (its
-# underside at BZ); the front ones merge with the USB cradles' plinth.
-LIP_OVER, LIP_GAP, LIP_LEN, LIP_TOP = 0.6, 0.15, 6.0, 5.6   # reach over the tab, air above it, length, block top
-
-
-def panel_lips(name):
-    wall, _, _, (f0, f1), _, _ = OPENINGS[name]
-    seat_in = WALL - 0.5 + 2.5 + 0.65                           # the rebate's inner face (uni_base cuts the seat)
-    tab_end, tab_top = TAB[2][0], TAB[3][1]                     # the tab's inner end and top
-    tip = tab_end - LIP_OVER
-    prof = [(seat_in, BASE_T - 0.01), (seat_in + 1.45, BASE_T - 0.01), (seat_in + 1.45, LIP_TOP), (tip, LIP_TOP),
-            (tip, tab_top + LIP_GAP + 0.15), (tip + 0.15, tab_top + LIP_GAP), (seat_in, tab_top + LIP_GAP)]
-    return wprofile(wall, f0 + 2, LIP_LEN, prof) + wprofile(wall, f1 - 2 - LIP_LEN, LIP_LEN, prof)
-
-
 def uni_base():
     """the Pi 3 case's base + a rebate under each panel's tab + the front USB sockets' pedestal"""
     b = base()
     for name, (wall, a0, a1, (f0, f1), _, _) in OPENINGS.items():
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT, f1 - f0 + 0.6, 2.5 + 0.65, 3)                # the seat
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT - 1.2, f1 - f0 + 0.6, 1.5, 3)                 # room for the 45-degree start
-    for name in OPENINGS:
-        b += panel_lips(name)                                                                   # hold the panels upright
     for x in USB_X:
         b += usb_cradle(x)                                                                      # snap-in cradles
     return b
@@ -389,14 +370,6 @@ def main():
     v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
     bad += v > 0.01
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
-    # the panel noses: over each tab's inner end (else the panel tips out) and under every board
-    for name, (wall, _, _, (f0, f1), _, _) in OPENINGS.items():
-        for u in (f0 + 2 + LIP_LEN / 2, f1 - 2 - LIP_LEN / 2):
-            over = (wbox(wall, u - 0.05, TAB[2][0] - 0.3, TAB[3][1] + LIP_GAP + 0.2, 0.1, 0.1, 0.1) & b).volume > 1e-5
-            bad += not over
-            print("panel nose %s at %g: %s" % (name, u, "over the tab" if over else "MISSING"))
-    print("panel noses top %.1f mm, the board's underside %.1f mm" % (LIP_TOP, BZ))
-    bad += LIP_TOP > BZ - 0.3
     # the snap: each cradle's hooks must reach over the shell's top edges (else the socket lifts out)
     z0 = USB_Z - USB_H / 2
     for x in USB_X:
