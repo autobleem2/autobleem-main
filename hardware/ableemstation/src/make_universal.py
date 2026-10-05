@@ -17,7 +17,7 @@ import os
 from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, LAYERS, base, box, button, cyl_y, cyl_z, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
+                       LENS_R, LAYERS, base, box, button_tree, cyl_y, cyl_z, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
 os.makedirs(os.path.join(OUT, "viewer"), exist_ok=True)
@@ -467,7 +467,7 @@ def main():
 
     # the viewer: the four shells, the base, caps, lens, each board's panel set and ghost, both front panels
     view = os.path.join(OUT, "viewer")
-    caps = [Pos(x, CAP_REST, BTN_Z) * button() for x in BTN_X]
+    caps = [button_tree()]
     lens_in = Pos(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z) * lens()
     vparts = {"shell": shells["uni-shell"], "shell-active": shells["uni-shell-active"], "shell-rgb": shells["uni-shell-rgb"],
               "shell-active-rgb": shells["uni-shell-active-rgb"], "base": b,

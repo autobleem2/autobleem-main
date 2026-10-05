@@ -68,7 +68,7 @@ parts3mf = ["base", "shell", "shell-rgb"] if not VARIANT else (
     + [f[len("ableemstation-"):-4] for f in sorted(os.listdir(OUT)) if f.startswith("ableemstation-uni-bottom-") and f.endswith(".3mf")])
 for n in parts3mf:
     pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(OUT, "ableemstation-%s.3mf" % n))
-for n in ("button", "lens"):                       # the same parts for both cases, in files/
+for n in ("buttons", "lens"):                      # the same parts for both cases, in files/
     pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(FILES, "ableemstation-%s.3mf" % n))
 for f in sorted(os.listdir(os.path.join(FILES, "orca"))):
     pack["orca/" + f] = b64file(os.path.join(FILES, "orca", f))
@@ -272,7 +272,7 @@ document.getElementById("hs").onclick = () => { hideShell = !hideShell; setParts
 document.getElementById("hb").onclick = () => { hideBase = !hideBase; setParts(); };
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0]; cwKey = c[0];
-  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + (U ? c[3] : c[4]));  // universal: the base prints with the panels, band-coloured MAT.caps.color.set("#" + c[5]);
+  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + (U ? c[3] : c[4])); MAT.caps.color.set("#" + c[5]);   // universal: the base prints with the panels, band-coloured
   const set = c[6] ? c[6] + "/" : "";                      // a colourway may bring its own sticker set
   for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
     if (m.userData.key !== k) { m.material.map = tex(k); m.material.needsUpdate = true; m.userData.key = k; } }
@@ -293,7 +293,7 @@ function pick() {
   const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
   // four prints: the shell, the bottom (universal: the base with this option's three panels, one object), buttons, lens
   const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}${front === "usb" && !cover ? "-open" : ""}` : "base"}.3mf`,
-    "3mf/ableemstation-button.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
+    "3mf/ableemstation-buttons.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
   for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
     f.push(set + n + ".svg", set + n + ".png", `${set}cricut-144dpi/ableemstation-${n}.png`);
@@ -317,7 +317,7 @@ function note(names) {
        `  the base at their tabs), "ABleemStation - ASA Base". Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
        "  the band colour first (the base is band-coloured too), the top colour after the change.", has("bottom")]
        : [`- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base")]),
-     `- button x 2, standing on the flange, "ABleemStation - ASA".`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],
+     `- button tree x 1 (both caps in one part), flat, shafts up, "ABleemStation - ASA". Push its two ears on the pins inside the shell, then melt the pin ends flat with a soldering iron.`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],
     ["COLOURS (the nearest ASA you can get)",
      `  top #${c[2]}   band (below the colour line) #${c[3]}   base #${U ? c[3] + " (the band colour: it prints with the panels)" : c[4]}   buttons #${c[5]}   lens: clear PETG`],
     ["ORCA: orca/ - the process profiles (import them, or copy the .json + .info pairs into Orca's user process folder).",

@@ -18,10 +18,10 @@ Two versions: the **Pi 3** case (below) for a Raspberry Pi 3B / 3B+, and the **u
 
 | File | What |
 |---|---|
-| `ableemstation-{shell,shell-rgb,base,button,lens}.step` | the parts for CAD (Fusion, FreeCAD, SolidWorks); `ableemstation-assembly.step` = everything in place |
-| `ableemstation-{shell,shell-rgb,base,button,lens}.stl` | the parts for the slicer (`shell` = plain LED, `shell-rgb` = RGB pixel) |
-| `ableemstation-{shell,shell-rgb,base,button,lens}.3mf` | the same, already turned the way they print (shell roof-down, button and lens flange-down) |
-| `ableemstation-all-parts.3mf`, `-all-parts-rgb.3mf` | everything to print in one file, per LED version: shell, base, 2 buttons, the lens |
+| `ableemstation-{shell,shell-rgb,base,buttons,lens}.step` | the parts for CAD (Fusion, FreeCAD, SolidWorks); `ableemstation-assembly.step` = everything in place |
+| `ableemstation-{shell,shell-rgb,base,buttons,lens}.stl` | the parts for the slicer (`shell` = plain LED, `shell-rgb` = RGB pixel) |
+| `ableemstation-{shell,shell-rgb,base,buttons,lens}.3mf` | the same, already turned the way they print (shell roof-down, the button tree flat with the shafts up, the lens flange-down) |
+| `ableemstation-all-parts.3mf`, `-all-parts-rgb.3mf` | everything to print in one file, per LED version: shell, base, the button tree, the lens |
 | `ableemstation-viewer.html` | the 3D viewer with the "Download ZIP" of the option on screen (three.js from a CDN, so it needs internet) |
 | `renders/` | 3/4, front, back, side, exploded with the Pi, X-ray; `colors/` + `colorways.png` = the colour options |
 | `stickers/ableemstation-stickers-A4.pdf` | the sticker sheet, 1:1, two sets, cut lines; `stickers/*.svg` / `*.png` = each sticker |
@@ -58,8 +58,10 @@ python make_orca_profile.py  # the Orca profiles to files/orca/ (--install also 
 - **shell**: upside down (roof on the bed). Two colours: a filament change at the layer that starts the dark band -
   **16.68 mm = layer 104** with 0.16 mm layers, **16.80 mm = layer 70** with 0.24 mm layers (the layer numbers as
   Orca's layer slider counts them, from 1; `make_case.py` prints both). Everything above it is the lower band.
-- **base**: flat, standoffs up - with "ABleemStation - ASA Base" (0.20 mm: nobody sees it). **button** x 2: standing
-  on the flange.
+- **base**: flat, standoffs up - with "ABleemStation - ASA Base" (0.20 mm: nobody sees it). **buttons**: one part, the
+  button tree - both caps on flexible strips - flat with the shafts up. Push its two ears on the two pins inside the
+  shell (behind the buttons), then melt the pin ends flat with a soldering iron: the caps stay in the shell for good
+  and still move, each on its own strip.
 - **lens**: clear PETG, standing on the flange, 100 % infill and slow, so it stays as clear as it can.
 - ASA: a closed, warm chamber; let the parts cool on the bed.
 
@@ -119,7 +121,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
-- **Printing - four prints**: the shell, the **bottom**, two buttons and the lens. The bottom
+- **Printing - four prints**: the shell, the **bottom**, the button tree and the lens. The bottom
   (`uni-bottom-<board>-<front>.3mf`, e.g. `uni-bottom-pi4-usb`) is the base with that option's three panels standing
   in their rebates - one object of four parts in Orca. Print it as it is: each panel's tab sits on its seat, so the
   panels weld to the base and the bottom comes off the bed in one piece (nothing to assemble, no ears, no props).

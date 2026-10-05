@@ -7,7 +7,7 @@ Parts (each prints without supports):
           hole, 6 deep)
   base    the floor plate that sits inside the shell: Pi standoffs (M2.5 self-tap), the switch bracket for two
           6x6 mm tact switches, countersunk M3 holes, feet recesses, a finger-sized window to reach the microSD
-  button  POWER / RESET cap (print 2)
+  buttons the button tree: both POWER / RESET caps as one part, its ears melted onto two pins in the shell
   lens    the LED window, clear PETG: pushed into the front hole from inside, the LED hidden in the holder behind it
 The shell comes in two versions: ableemstation-shell (a plain 5 mm LED in a tube behind the lens) and
 ableemstation-shell-rgb (one WS2812B pixel cut from an LED strip, in a slot behind the lens - green while the Pi
@@ -17,6 +17,7 @@ Ethernet, the front the buttons and the LED. Pi 3B mechanical data: board 85 x 5
 Run:  python make_case.py   (needs build123d: pip install build123d)
 Writes STEP + STL + 3MF per part, the assembly STEP and the viewer's meshes to ../files/."""
 import json
+import math
 import os
 
 from build123d import (Align, Axis, Box, Compound, Cylinder, Kind, Location, Plane, Polygon, Pos, Rot, chamfer,
@@ -148,6 +149,7 @@ def shell(led="led5", vents=None):
     for x, y in BOSSES:
         s += cyl_z(x, y, BASE_T, 4.2, H - ROOF - BASE_T + 0.5)
         s -= cyl_z(x, y, BASE_T - 1, INSERT_R, INSERT_DEPTH + 1)
+    s += tree_pins()                                                                     # the button tree's pins
     return s
 
 
@@ -202,11 +204,58 @@ def lens():
     return c
 
 
-# ---- button cap (print 2): the shaft through the wall + a flange inside that keeps it in
+# ---- button cap: the shaft through the wall + a flange inside that keeps it in
 def button():
     c = cyl_y(0, 0, 0, 4.2, CAP_L)
     c += cyl_y(0, 0, 0, 5.6, 1.5)
     return c
+
+
+# ---- the button tree (print 1): both caps as one part, like an old gamepad's - each cap hangs on a flexible strip
+# from an ear, the two ears go on two pins in the shell and the pin ends are melted flat with a soldering iron. The
+# strips bend when a cap is pressed (0.8 mm thick, 11-13 mm long: under 1 % strain, ~0.5 N on top of the switch);
+# a thin link between the caps keeps it one part without pressing the other switch. It prints flat on its back face
+TREE_T, TREE_W = 0.8, 3.0                     # strip thickness (it bends through it) and width
+TREE_EARS = ((8.0, 7.0), (57.5, 7.0))         # the pins (x, z): low and outboard, so the strips are long enough
+EAR_R, PIN_R, PIN_HOLE_R, PIN_BOSS_R, PIN_MELT = 3.0, 1.0, 1.15, 2.2, 1.4
+
+
+def tree_strip(p0, p1, w=TREE_W, t=TREE_T):
+    """a flat strip of the tree from p0 to p1 (x, z), t thick from the tree's back face (assembled position)"""
+    (x0, z0), (x1, z1) = p0, p1
+    a = math.atan2(z1 - z0, x1 - x0)
+    nx, nz = -math.sin(a) * w / 2, math.cos(a) * w / 2
+    pts = [(x0 + nx, z0 + nz), (x1 + nx, z1 + nz), (x1 - nx, z1 - nz), (x0 - nx, z0 - nz)]
+    pl = Plane(origin=(0, CAP_REST, 0), x_dir=(1, 0, 0), z_dir=(0, 1, 0))
+    return extrude(pl * Polygon(*[(x, -z) for x, z in pts], align=None), amount=t, dir=(0, 1, 0))
+
+
+def button_tree():
+    """the tree where it sits in the case: the caps' flanges against the wall"""
+    t = None
+    for x in BTN_X:
+        c = Pos(x, CAP_REST, BTN_Z) * button()
+        t = c if t is None else t + c
+    k = 5.6 * 0.7                                                       # where a strip meets its cap's flange
+    (lx, lz), (rx, rz) = TREE_EARS
+    t += tree_strip((lx, lz), (BTN_X[0] - k, BTN_Z - k))
+    t += tree_strip((rx, rz), (BTN_X[1] + k, BTN_Z - k))
+    t += tree_strip((BTN_X[0] + 5.1, BTN_Z), (BTN_X[1] - 5.1, BTN_Z), w=2.0, t=0.6)   # the thin link
+    for x, z in TREE_EARS:
+        t += cyl_y(x, CAP_REST, z, EAR_R, TREE_T)
+        t -= cyl_y(x, CAP_REST - 1, z, PIN_HOLE_R, TREE_T + 2)
+    return t
+
+
+def tree_pins():
+    """the shell's two pins: a boss from the wall to the tree's front face, then the pin through the ear, PIN_MELT
+    left over to melt into a head"""
+    p = None
+    for x, z in TREE_EARS:
+        q = cyl_y(x, CAP_REST + TREE_T, z, PIN_BOSS_R, D - WALL - CAP_REST - TREE_T + 0.01)
+        q += cyl_y(x, CAP_REST - PIN_MELT, z, PIN_R, D - WALL - CAP_REST + PIN_MELT + 0.01)
+        p = q if p is None else p + q
+    return p
 
 
 LAYERS = {"0.16": (0.2, 0.16), "0.24": (0.24, 0.24)}   # the two Orca profiles: first layer, layer height
@@ -232,13 +281,13 @@ def on_bed(part):
 
 
 def write_3mf(parts):
-    """3MF per part, already turned the way it prints (shell: roof down, button: flange down), plus one file with
-    every part to print (shell, base, 2 buttons, the lens - clear PETG), for each LED version - the slicer's auto-arrange spreads them over the plates"""
+    """3MF per part, already turned the way it prints (shell: roof down, button tree: flat, shafts up), plus one file with
+    every part to print (shell, base, the button tree, the lens - clear PETG), for each LED version - the slicer's auto-arrange spreads them over the plates"""
     printable = {
         "shell": on_bed(Rot(180, 0, 0) * parts["shell"]),
         "shell-rgb": on_bed(Rot(180, 0, 0) * parts["shell-rgb"]),
         "base": on_bed(parts["base"]),
-        "button": on_bed(Rot(90, 0, 0) * parts["button"]),
+        "buttons": on_bed(Rot(90, 0, 0) * parts["buttons"]),           # flat on its back face, the shafts up
         "lens": on_bed(Rot(90, 0, 0) * parts["lens"]),
     }
     for name, p in printable.items():
@@ -248,21 +297,21 @@ def write_3mf(parts):
     for shell_name, suffix in (("shell", ""), ("shell-rgb", "-rgb")):
         m = Mesher()
         x = 0.0
-        for p in (printable[shell_name], printable["base"], printable["button"], printable["button"], printable["lens"]):
+        for p in (printable[shell_name], printable["base"], printable["buttons"], printable["lens"]):
             m.add_shape(Pos(x, 0, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
             x += p.bounding_box().size.X + 10
         m.write(os.path.join(OUT, "ableemstation-all-parts%s.3mf" % suffix))
 
 
 def main():
-    parts = {"shell": shell(), "shell-rgb": shell("rgb"), "base": base(), "button": button(), "lens": lens()}
+    parts = {"shell": shell(), "shell-rgb": shell("rgb"), "base": base(), "buttons": button_tree(), "lens": lens()}
     pi = pi_ghost()
     for name, p in parts.items():
         export_step(p, os.path.join(OUT, "ableemstation-%s.step" % name))
         export_stl(p, os.path.join(OUT, "ableemstation-%s.stl" % name))
     write_3mf(parts)
-    # assembly: buttons at rest (flange against the wall, front 2.5 mm proud)
-    caps = [Pos(x, CAP_REST, BTN_Z) * parts["button"] for x in BTN_X]
+    # assembly: the button tree at rest (flanges against the wall, fronts 2.5 mm proud)
+    caps = [parts["buttons"]]
     lens_in = Pos(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z) * parts["lens"]
     asm = Compound(children=[parts["shell"], parts["base"], lens_in] + caps, label="ABleemStation")
     export_step(asm, os.path.join(OUT, "ableemstation-assembly.step"))
@@ -278,8 +327,12 @@ def main():
     for name, p in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"])):
         v = (p & pi).volume
         print("overlap pi x %s: %.2f mm3" % (name, v))
-    for c in caps:
-        print("overlap cap x shell: %.2f mm3" % (c & parts["shell"]).volume)
+    # the button tree: on its pins without touching the shell elsewhere, clear of the base and the switches
+    sws = switch_ghost(BTN_X[0]) + switch_ghost(BTN_X[1])
+    for name, other in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"]), ("switches", sws)):
+        v = (parts["buttons"] & other).volume
+        print("button tree x %s: %.2f mm3" % (name, v))
+        assert v < 0.01, "the button tree hits the %s (%.2f mm3)" % (name, v)
     # the switches: body and legs clear of the bracket, each leg through the back to solder behind it
     for x in BTN_X:
         v = (switch_ghost(x) & parts["base"]).volume
