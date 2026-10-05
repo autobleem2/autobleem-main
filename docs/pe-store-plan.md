@@ -71,6 +71,22 @@ The 25 projects of https://gitlab.com/groups/modmyclassic/ports were audited:
 Rough cost: 8-10% of a week. Risks: the 2020 patches may not apply to newer upstream (pin the 2020 commit
 instead); heavy builds (lzdoom's sound libraries) need the static-deps pattern of the `app_*` ports.
 
+## Status (2026-10-05)
+
+Steps 1 to 5 are done and merged. The core has `ModInstaller` and the item's `source_url` (`AB_SDK_ABI` 9). The
+Store has the PE Apps tab, with the licence and the source link in the details. The launcher has `abdialog` for the
+mods' questions and text screens (the text screen's title is the App's name), and "Apps end whole": the runner stays
+the App's parent and stops everything the App started, on Reset, Start+Select and the App's own end. The `pe`
+processor (1.1.0) moves a converted `.mod` to `Mods/done/` (the owner, 2026-10-05: "Przenieś do Mods/done/");
+`Mods/done/` is never scanned, a package dropped again replaces the old one, and one that fails stays in `Mods/`.
+The Store counts a PE item as installed while its `.mod` is in `Mods/` or `Mods/done/` or its marker
+`Apps/.pe_state/<file>.ini` is there; removing it deletes both and the Apps made from it, and an update retires the
+old version's package in either place. The site has the PE Apps catalog kind, `source/<id>/` (kept at least 3 years)
+and `deps/` (Boost 1.74 for Commander Genius). Step 6, the PSC test: two rounds with the owner - OpenLara and
+tyrquake fully work; Commander Genius and OpenJazz start and end cleanly but their pad mapping is wrong (Triangle as
+the primary button, the menu on R2): fixed in the next round. The `pe_ports` v1 tag (the ports in the online Store)
+waits for that fix.
+
 ## Decisions (the owner, 2026-10-05)
 
 1. The plan is approved; it runs from the night of 2026-10-05.
