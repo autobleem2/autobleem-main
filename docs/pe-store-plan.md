@@ -84,8 +84,9 @@ The Store counts a PE item as installed while its `.mod` is in `Mods/` or `Mods/
 old version's package in either place. The site has the PE Apps catalog kind, `source/<id>/` (kept at least 3 years)
 and `deps/` (Boost 1.74 for Commander Genius). Step 6, the PSC test: two rounds with the owner - OpenLara and
 tyrquake fully work; Commander Genius and OpenJazz start and end cleanly but their pad mapping is wrong (Triangle as
-the primary button, the menu on R2): fixed in the next round. The `pe_ports` v1 tag (the ports in the online Store)
-waits for that fix.
+the primary button, the menu on R2). Round 4 (2026-10-05) passed 10/10 after a planned fix: one pad model for every
+PE App (the kernel pad `psc-kernel`), both ports bound in the console pad's numbers, a deadzone on the x360 outputs,
+the touchpad and motion nodes kept off the desktop seat. `pe_ports` v1.0.0 is in the online Store.
 
 ## Decisions (the owner, 2026-10-05)
 
