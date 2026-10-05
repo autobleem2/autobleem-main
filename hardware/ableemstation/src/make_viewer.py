@@ -3,7 +3,7 @@ The page works by double-click. Hash options: #view=front|back|right|top|iso, &e
 Renders: headless Chrome screenshots of the same page into ../files/renders/. Run after make_case.py and
 make_stickers.py:  python make_viewer.py
 The universal case (make_universal.py):  python make_viewer.py universal  - the same page with the board (&m=pi23|pi4|pi5),
-the front panel (&front=usb|blank) and the roof (&roof=active) to pick, into ../files/universal/.
+the front panel (&front=usb|blank, &cover=open: the rear USB block that feeds it left open) and the roof (&roof=active) to pick, into ../files/universal/.
 Both pages: &led=rgb (the RGB pixel's shell), &cw=<colourway>, &shell=0 / &base=0 (hidden), and "Download ZIP" - the 3MFs, Orca profiles, stickers
 and wiring of the option on screen plus a BUILD.txt with its settings, all inlined, built in the browser (&zipcheck=1 is
 the self-test this script runs)."""
@@ -185,7 +185,7 @@ if (U) {
   }
 }
 let hideShell = q.shell === "0", hideBase = q.base === "0";
-let model = q.m || "pi4", front = q.front || "blank", roof = q.roof === "active", piOn = false, rgb = q.led === "rgb", standby = false, cwKey = CW[0][0];
+let model = q.m || "pi4", front = q.front || "blank", cover = q.cover !== "open", roof = q.roof === "active", piOn = false, rgb = q.led === "rgb", standby = false, cwKey = CW[0][0];
 function setShell() {
   const g = SH["shell" + (U && roof ? "-active" : "") + (rgb ? "-rgb" : "")] || SH.shell;
   mesh.shell.geometry = g; mesh.low.geometry = g;
@@ -194,21 +194,23 @@ function setShell() {
 function setU() {
   if (!U) return;
   for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
-  U[front === "usb" ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;
+  U[front === "usb" && cover ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;   // cover: the rear USB block feeding the front closed
   if (U["usb-sockets"]) U["usb-sockets"].visible = front === "usb";
   if (hideBase) for (const k of Object.keys(U)) if (/^(set-|front-|usb-)/.test(k)) U[k].visible = false;   // the panels stand on the base
   mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
   setShell();
   document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
-  document.getElementById("fu").classList.toggle("on", front === "usb"); document.getElementById("ar").classList.toggle("on", roof);
+  document.getElementById("fu").classList.toggle("on", front === "usb"); document.getElementById("rc").hidden = front !== "usb";
+  document.getElementById("rc").classList.toggle("on", cover); document.getElementById("ar").classList.toggle("on", roof);
 }
 if (U) {
   document.getElementById("um").innerHTML = Object.entries(P.models).map(([k, v]) => `<button data-m="${k}">${v}</button>`).join("");
-  document.getElementById("uo").innerHTML = `<button id="fu">Front USB</button><button id="ar">Active roof</button>`;
+  document.getElementById("uo").innerHTML = `<button id="fu">Front USB</button><button id="rc" title="close the rear USB block that feeds the front sockets">Rear USB cover</button><button id="ar">Active roof</button>`;
   document.getElementById("gm").hidden = false;
   document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { model = b.dataset.m; setU(); showBottom(); });
   document.getElementById("fu").onclick = () => { front = front === "usb" ? "blank" : "usb"; setU(); };
   document.getElementById("ar").onclick = () => { roof = !roof; setU(); };
+  document.getElementById("rc").onclick = () => { cover = !cover; setU(); };
 }
 // the front LED behind its clear lens, lit
 if (DATA.lens) { const g = loader.parse(b64(DATA.lens)); g.computeVertexNormals();
@@ -290,7 +292,7 @@ function pick() {
   const c = CW.find(x => x[0] === cwKey), set = c[6] ? `stickers/${c[6]}/` : "stickers/";
   const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
   // four prints: the shell, the bottom (universal: the base with this option's three panels, one object), buttons, lens
-  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}` : "base"}.3mf`,
+  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}${front === "usb" && !cover ? "-open" : ""}` : "base"}.3mf`,
     "3mf/ableemstation-button.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
   for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
@@ -299,13 +301,13 @@ function pick() {
   const miss = f.filter(k => !PACK[k]); if (miss.length) console.warn("not in the page:", miss);
   return f.filter(k => PACK[k]);
 }
-function zipName() { return `ableemstation-${U ? `${model}-${front === "usb" ? "usb" : "blank"}-${roof ? "active" : "passive"}` : "pi3"}-${rgb ? "rgb" : "led"}-${cwKey}.zip`; }
+function zipName() { return `ableemstation-${U ? `${model}-${front === "usb" ? (cover ? "usb" : "usb-open") : "blank"}-${roof ? "active" : "passive"}` : "pi3"}-${rgb ? "rgb" : "led"}-${cwKey}.zip`; }
 function note(names) {
   const c = CW.find(x => x[0] === cwKey), L = P.layer_change_mm, PC = P.panel_change_mm, LN = P.layer_change_n, PN = P.panel_change_n, M = U ? P.models[model] : "Raspberry Pi 3B / 3B+";
   const has = s => names.filter(n => n.startsWith("3mf/") && n.includes(s)).map(n => "  " + n.slice(4)).join("\n");
   const S = [
     [`ABleemStation${U ? " universal" : ""} - your build`, "",
-     `Board:   ${M}`, ...(U ? [`Front:   ${front === "usb" ? "2 x USB-A (the front-usb panel, the sockets on the base)" : "blank panel"}`,
+     `Board:   ${M}`, ...(U ? [`Front:   ${front === "usb" ? "2 x USB-A (the front-usb panel, the sockets on the base); the rear USB block that feeds them " + (cover ? "closed" : "left open - use the front or the rear, not both at once") : "blank panel"}`,
        `Roof:    ${roof ? "active - over the Raspberry Pi 5 Active Cooler" : "passive (hidden vents)"}`] : []),
      `Light:   ${rgb ? "RGB pixel (one WS2812B cut from a 5 V, 10 mm strip)" : "5 mm diffused LED"}`, `Colours: ${c[1]}`],
     ["PRINT (no supports; README.md has the details)",
@@ -378,7 +380,7 @@ print("viewer:", PAGE)
 # the download check: the page builds the zip of one option, headless Chrome dumps it, and every file in it must be
 # readable and the same bytes as its source
 import io, re, zipfile  # noqa: E401,E402
-for hashq in (("m=pi5&front=usb&roof=active&led=rgb&cw=grey94", "m=pi23&cw=classic") if VARIANT else ("led=rgb&cw=grey94", "cw=classic")):
+for hashq in (("m=pi5&front=usb&roof=active&led=rgb&cw=grey94", "m=pi4&front=usb&cover=open", "m=pi23&cw=classic") if VARIANT else ("led=rgb&cw=grey94", "cw=classic")):
     dom = subprocess.run([CHROME, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--virtual-time-budget=15000",
                           "--dump-dom", "file:///" + PAGE.replace("\\", "/") + "#zipcheck=1&shot=1&" + hashq],
                          check=True, capture_output=True, text=True, encoding="utf-8").stdout

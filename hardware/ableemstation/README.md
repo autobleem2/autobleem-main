@@ -123,7 +123,8 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   (`uni-bottom-<board>-<front>.3mf`, e.g. `uni-bottom-pi4-usb`) is the base with that option's three panels standing
   in their rebates - one object of four parts in Orca. Print it as it is: each panel's tab sits on its seat, so the
   panels weld to the base and the bottom comes off the bed in one piece (nothing to assemble, no ears, no props).
-  The panels' filament change below applies to it: the base starts in the band colour and its few tall bits (the
+  With the front USB there is also `uni-bottom-<board>-usb-open`: the rear USB block that feeds the front stays
+  open (use the front or the rear, not both at once). The panels' filament change below applies to it: the base starts in the band colour and its few tall bits (the
   standoffs, the USB cradles) end in the top colour, inside the case. The viewer's download picks the bottom of the
   option on screen. The separate panels below stay for a board swap or a reprint of one wall.
 - **Printing the panels on their own**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two

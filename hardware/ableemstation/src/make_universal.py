@@ -388,15 +388,15 @@ def main():
     write_3mf("uni-base", on_bed(b))
     # the bottom per option: the base + its three panels, one object to print in one go (they weld at the tabs)
     for model in ("pi23", "pi4", "pi5"):
-        for front in ("usb", "blank"):
+        for front in ("usb", "usb-open", "blank"):        # usb-open: the rear USB block feeding the front left open
             parts = [("base", b), ("panel-back", panels["back-" + model]),
                      ("panel-right", panels["right-%s%s" % (model, "-front" if front == "usb" else "")]),
-                     ("panel-front", panels["front-" + front])]
+                     ("panel-front", panels["front-" + front.split("-")[0]])]
             for pname, p in parts[1:]:
                 gap = p.distance_to(b)
                 assert gap < 0.01, "bottom %s-%s: %s stands %.2f mm off the base - it would not weld" % (model, front, pname, gap)
             write_bottom("uni-bottom-%s-%s" % (model, front), parts)
-    print("bottoms: base + 3 panels as one object, 6 options; every panel touches the base")
+    print("bottoms: base + 3 panels as one object, 9 options; every panel touches the base")
     usb = usb_sockets()
     # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
     bad = 0
