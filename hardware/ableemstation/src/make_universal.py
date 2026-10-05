@@ -17,7 +17,7 @@ import os
 from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, LAYERS, base, box, button, cyl_y, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
+                       LENS_R, LAYERS, base, box, button, cyl_y, cyl_z, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
 os.makedirs(os.path.join(OUT, "viewer"), exist_ok=True)
@@ -118,57 +118,60 @@ def right_cuts(model, front_usb=False):
 
 
 # front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part: a 13.1 x 5.7 x 14.1 mm shell, two mounting
-# legs under it about 10 mm from its front, four pins down at its back) snap into cradles on a pedestal of the base,
+# legs under it about 10 mm from its front) on a small board, screwed to a pedestal of the base,
 # their fronts 0.3 mm behind the panel; the panel has only the plug windows, in a 1.4 mm recess (1 mm of panel left)
 # so a plug still goes in its full depth
 USB_X, USB_Z, USB_L = (74.0, 94.0), 17.0, 14.1
 USB_W, USB_H = 13.1, 5.7
 USB_FRONT = D - WALL - 0.3
-USB_LEG_D, USB_PIN_D = 10.0, 12.3   # from the socket's front: its mounting legs; where the pins' pocket starts
-USB_FIT = 0.15                      # clearance each side in the cradle
-SNAP_T, SNAP_HOOK, SNAP_FREE = 1.2, 0.5, 5.0   # snap finger thickness, hook overhang, finger root below the floor
+
+
+# the sockets come on the common "USB-A female to DIP" breakout board: a 17 x 17 x 1.6 mm FR4 board, the socket on top
+# with its shell sticking out past the board's front edge, two 3 mm mounting holes 12 mm apart whose centres are 11 mm
+# behind that edge, the four DIP pins (VBUS, D-, D+, GND, 2.54 mm) 4 mm behind the holes. The board lies flat on a
+# pedestal and two ~1.85 mm sheet-metal screws (straight into the plastic) hold it; a step in front of the board carries the shell's overhang and
+# sets the board's front-back position
+PCB, PCB_T = 17.0, 1.6
+PCB_OVER = 5.4                      # how far the shell's front sticks out past the board (its legs ~10 mm behind the front,
+                                    # 4.6 mm behind the board's edge) - measure one when they come and set it here
+PCB_HOLE_Y, PCB_HOLE_X, PCB_DIP_Y = 11.0, 6.0, 15.2   # from the board's front edge / from its centre line
+PCB_FIT = 0.3                       # the step's gap to the board's front edge
+SCREW_R, SCREW_D = 0.8, 6.0         # pilot for a ~1.85 mm sheet-metal screw straight into the plastic, its depth
 
 
 def usb_sockets():
-    """the sockets as ghosts for the fit check: shell + legs + pins (typical sizes where none were measured)"""
+    """the sockets on their boards as ghosts for the fit check: shell, board, the solder tails and pins under it"""
     s = None
     for x in USB_X:
-        z0 = USB_Z - USB_H / 2
+        z0 = USB_Z - USB_H / 2                                                              # the shell's underside
+        y0 = USB_FRONT - PCB_OVER                                                           # the board's front edge
         b = box(x - USB_W / 2, USB_FRONT - USB_L, z0, USB_W, USB_L, USB_H)
-        for sx in (-1, 1):                                                                  # mounting legs, 3 mm down
-            b += box(x + sx * (USB_W / 2 - 0.5) - 0.5, USB_FRONT - USB_LEG_D - 0.4, z0 - 3.0, 1.0, 0.8, 3.01)
-        b += box(x - 4.0, USB_FRONT - USB_L + 0.5, z0 - 3.5, 8.0, 1.0, 3.51)                 # the pins, 3.5 mm down
+        b += box(x - PCB / 2, y0 - PCB, z0 - PCB_T, PCB, PCB, PCB_T)                        # the board
+        b += box(x - 4.0, y0 - 8.3, z0 - PCB_T - 1.5, 8.0, 2.0, 1.51)                      # the socket's pins + solder
+        b += box(x - 4.4, y0 - PCB_DIP_Y - 1.0, z0 - PCB_T - 1.5, 8.8, 2.0, 1.51)          # the DIP row's solder
+        for sx in (-1, 1):                                                                  # the legs' solder
+            b += box(x + sx * PCB_HOLE_X - 1.0, y0 - 4.6 - 1.0, z0 - PCB_T - 1.5, 2.0, 2.0, 1.51)
         s = b if s is None else s + b
     return s
 
 
 def usb_cradle(x):
-    """one socket's snap-in cradle: a floor block under its front part, a slot that takes the mounting legs (it sets
-    the socket's length position), a pocket for the pins, and two snap fingers whose hooks close over the shell's top
-    edges. The fingers stand free of the floor block (a 0.8 mm gap) from SNAP_FREE under the floor up, so they flex
-    over 11 mm - a strain under 1 % for ASA when the socket pushes them 0.5 mm apart"""
-    z0 = USB_Z - USB_H / 2                     # the socket's underside = the cradle floor
-    yf = USB_FRONT                             # the socket's front
-    y_back = yf - USB_L - 1.0                  # the pedestal runs 1 mm past the shell's back
-    y_front = yf - 2.8                         # and stops 2.8 mm short of its front (clear of the front panel's foot)
-    wi = USB_W / 2 + USB_FIT                   # the cradle's half width = the fingers' inner face
-    core = wi - 0.8                            # the floor block's half width (the relief gap beside it)
-    zr = z0 - SNAP_FREE                        # the fingers' root
-    c = box(x - wi - SNAP_T, y_back, BASE_T - 0.01, 2 * (wi + SNAP_T), y_front - y_back, zr - BASE_T + 0.01)   # plinth
-    c += box(x - core, y_back, zr - 0.01, 2 * core, y_front - y_back, z0 - zr + 0.01)                        # floor block
-    c -= box(x - core - 1, yf - USB_LEG_D - 1.5, z0 - 4.0, 2 * core + 2, 3.0, 5)          # the legs' slot (+-1.5 mm)
-    c -= box(x - core - 1, y_back - 1, z0 - 5.0, 2 * core + 2, yf - USB_PIN_D - y_back + 1, 6)   # the pins' pocket
-    h0 = z0 + USB_H + 0.15                     # the hook's underside, just over the shell's top
+    """one board's pedestal: flat under the board, two screw holes, pockets for the solder tails (the socket's pins
+    and legs, the DIP row - open to the back for the wires), and a step in front that carries the shell's overhang"""
+    z0 = USB_Z - USB_H / 2                     # the shell's underside = the board's top
+    zb = z0 - PCB_T                            # the board's underside = the pedestal's top
+    y0 = USB_FRONT - PCB_OVER                  # the board's front edge
+    y_back = y0 - PCB - 0.5
+    y_front = USB_FRONT - 2.8                  # the step stops 2.8 mm short of the shell's front (the front panel's foot)
+    hw = PCB / 2 + 0.5
+    c = box(x - hw, y_back, BASE_T - 0.01, 2 * hw, y0 - y_back, zb - BASE_T + 0.01)                   # the pedestal
+    c += box(x - USB_W / 2 + 0.5, y0 + PCB_FIT, BASE_T - 0.01, USB_W - 1.0, y_front - y0 - PCB_FIT,
+             z0 - BASE_T + 0.01)                                                                        # the step
     for sx in (-1, 1):
-        prof = [(wi, zr), (wi + SNAP_T, zr), (wi + SNAP_T, h0 + 0.7), (wi + 0.05, h0 + 0.7),
-                (wi - SNAP_HOOK, h0 + 0.15), (wi - SNAP_HOOK, h0), (wi, h0)]          # finger + hook, 45-degree lead-in
-        pts = [(x + sx * u, z) for u, z in prof]
-        if sx < 0:
-            pts.reverse()
-        f0, f1 = yf - 8.5, y_front                                                     # over the floor block's front part
-        pl = Plane(origin=(0, f0, 0), x_dir=(1, 0, 0), z_dir=(0, -1, 0))
-        # (dir given: a polygon's winding alone decides which way extrude() goes)
-        c += extrude(pl * Polygon(*pts, align=None), amount=f1 - f0, dir=(0, 1, 0))
+        c -= cyl_z(x + sx * PCB_HOLE_X, y0 - PCB_HOLE_Y, zb - SCREW_D, SCREW_R, SCREW_D + 1)           # screw pilots
+        c -= box(x + sx * PCB_HOLE_X - 1.5, y0 - 4.6 - 1.5, zb - 2.5, 3.0, 3.0, 3)                     # the legs' tails
+    c -= box(x - 4.8, y0 - 9.8, zb - 2.5, 9.6, 3.5, 3)                                                  # socket pins' tails
+    c -= box(x - 5.2, y_back - 1, zb - 2.5, 10.4, (y0 - PCB_DIP_Y + 1.6) - (y_back - 1), 3)            # DIP row, open back
     return c
 
 
@@ -207,7 +210,7 @@ def uni_base():
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT, f1 - f0 + 0.6, 2.5 + 0.65, 3)                # the seat
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT - 1.2, f1 - f0 + 0.6, 1.5, 3)                 # room for the 45-degree start
     for x in USB_X:
-        b += usb_cradle(x)                                                                      # snap-in cradles
+        b += usb_cradle(x)                                                                      # the boards' pedestals
     return b
 
 
@@ -448,14 +451,18 @@ def main():
     v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
     bad += v > 0.01
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
-    # the snap: each cradle's hooks must reach over the shell's top edges (else the socket lifts out)
+    # the boards: each lies on its pedestal, a screw pilot under each hole (air in it, plastic round it), and the step
+    # carries the shell's overhang
     z0 = USB_Z - USB_H / 2
+    zb, y0 = z0 - PCB_T, USB_FRONT - PCB_OVER
+    hit = lambda px, py, pz: (box(px - 0.05, py - 0.05, pz - 0.05, 0.1, 0.1, 0.1) & b).volume > 1e-5   # noqa: E731
     for x in USB_X:
+        ok = hit(x, y0 - 12.5, zb - 0.1) and hit(x, USB_FRONT - 3.5, z0 - 0.1)               # under the board, the step
         for sx in (-1, 1):
-            probe = box(x + sx * (USB_W / 2 - 0.2) - 0.05, USB_FRONT - 5.55, z0 + USB_H + 0.25, 0.1, 0.1, 0.1)
-            hooked = (probe & b).volume > 1e-5
-            bad += not hooked
-            print("USB snap at x=%g, %s side: %s" % (x, "left" if sx < 0 else "right", "hooked" if hooked else "NO HOOK"))
+            hx, hy = x + sx * PCB_HOLE_X, y0 - PCB_HOLE_Y
+            ok = ok and not hit(hx, hy, zb - 3) and hit(hx + SCREW_R + 0.4, hy, zb - 3)
+        bad += not ok
+        print("USB board at x=%g: %s" % (x, "seated, 2 screw pilots, shell carried" if ok else "NOT SEATED"))
     assert not bad, "%d fit check(s) failed" % bad
 
     # the viewer: the four shells, the base, caps, lens, each board's panel set and ghost, both front panels

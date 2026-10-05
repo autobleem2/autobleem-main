@@ -332,7 +332,7 @@ function note(names) {
     ["PARTS FOR THIS OPTION (the full list: README.md, Parts)",
      "  4 x M3 heat-set insert (Voron M3 x 5 x 4), 4 x M3 x 8 countersunk, 4 x M2.5 x 5, 2 x 6 x 6 mm tactile switch (5 mm), 4 rubber feet, jumper wires",
      rgb ? "  1 x WS2812B pixel + 330 ohm resistor" : "  1 x 5 mm diffused LED + 330 ohm resistor (100 ohm for blue / white / cyan)",
-     ...(U && front === "usb" ? ["  2 x USB-A female socket, THT 180 degrees, + a 4-wire cable each"] : []),
+     ...(U && front === "usb" ? ["  2 x 'USB-A female to DIP' breakout board (17 x 17 mm), 4 x sheet-metal screw ~1.85 x 6 mm, a 4-wire cable each"] : []),
      ...(U && roof ? [`  Raspberry Pi 5 Active Cooler${model === "pi5" ? "" : " (the active roof is made for it - a " + M + " does not need it)"}`] : [])],
     ["FILES IN THIS ZIP", ...names.map(n => "  " + n)]];
   return S.map(s => s.join("\n")).join("\n\n") + "\n";

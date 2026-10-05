@@ -112,7 +112,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
-- **Front USB**: two THT "USB-A female, 180°" sockets (shell 13.1 x 5.7 x 14.1 mm) snap into cradles on the base's pedestal: press one in from above until both hooks click over its top edges; its legs drop into a slot that sets its depth (no glue; to take one out, spread the two fingers). Their fronts sit
+- **Front USB**: two "USB-A female to DIP" breakout boards (the common 17 x 17 mm board: a USB-A 2.0 socket, two 3 mm holes 12 mm apart, four 2.54 mm pins) lie flat on pedestals of the base, each held by two ~1.85 mm sheet-metal screws straight into the plastic (1.6 mm pilots); a step in front of each board carries the socket's overhang, and pockets under the board take the solder tails (the pin row's pocket is open to the back for the wires). Their fronts sit
   just behind `front-usb`, which has only the two plug windows - each in a 1.4 mm recess, so a
   plug still goes in its full depth. With `front-blank` the pedestal is hidden, so there is one base for both.
   The sockets' cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
@@ -160,7 +160,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 | 1 | the front light, either: a 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), or one WS2812B pixel cut from a 5 V, 10 mm strip + 330 Ω resistor |
 | 6-7 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
 | 4 | rubber feet Ø 12 mm |
-| (2) | universal case, front USB: USB-A female socket, THT 180°, + 4-wire cable (about 15 cm) per socket |
+| (2) | universal case, front USB: "USB-A female to DIP" breakout board (17 x 17 mm) + 2 sheet-metal screws ~1.85 x 6 mm + 4-wire cable (about 15 cm) per socket |
 
 ## Wiring (BCM numbers, physical pins in brackets)
 
