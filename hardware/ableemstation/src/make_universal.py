@@ -222,6 +222,46 @@ def write_3mf(name, part):
     m.write(os.path.join(OUT, "ableemstation-%s.3mf" % name))
 
 
+def write_bottom(name, parts):
+    """the base and its three panels as ONE object of four named parts, standing where they are assembled: a slicer
+    keeps it one object and welds the parts where they touch (each panel's tab on its seat), so the base and the panels
+    print as one piece - no ears, no props, nothing to assemble"""
+    import zipfile
+    shift = Compound(children=[p for _, p in parts]).bounding_box().min
+    objs, comps = [], []
+    for i, (pname, p) in enumerate(parts, 1):
+        vs, ts = p.tessellate(0.02, 0.2)
+        # tessellate() gives each face its own vertices: weld the shared ones, else the mesh is open along every edge
+        key, idx, uniq = {}, [], []
+        for q in vs:
+            k = (round(q.X - shift.X, 4), round(q.Y - shift.Y, 4), round(q.Z - shift.Z, 4))
+            if k not in key:
+                key[k] = len(uniq)
+                uniq.append(k)
+            idx.append(key[k])
+        tris = [(idx[a], idx[b], idx[c]) for a, b, c in ts]
+        tris = [t for t in tris if len(set(t)) == 3]
+        v = "".join('<vertex x="%.4f" y="%.4f" z="%.4f"/>' % k for k in uniq)
+        t = "".join('<triangle v1="%d" v2="%d" v3="%d"/>' % tri for tri in tris)
+        objs.append('<object id="%d" name="%s" type="model"><mesh><vertices>%s</vertices><triangles>%s</triangles></mesh></object>'
+                    % (i, pname, v, t))
+        comps.append('<component objectid="%d"/>' % i)
+    n = len(parts) + 1
+    model = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
+             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><resources>%s'
+             '<object id="%d" name="ableemstation-%s" type="model"><components>%s</components></object></resources>'
+             '<build><item objectid="%d"/></build></model>' % ("".join(objs), n, name, "".join(comps), n))
+    with zipfile.ZipFile(os.path.join(OUT, "ableemstation-%s.3mf" % name), "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.'
+                   'openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/'
+                   'vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/'
+                   'vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>')
+        z.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.'
+                   'openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" '
+                   'Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>')
+        z.writestr("3D/3dmodel.model", model)
+
+
 # breakaway ears: a panel prints standing on a 2.4 mm edge, about 10 times as tall as it is thick, so each end gets an
 # outrigger - a fin across the panel on a two-layer foot - that holds it upright and comes off by hand afterwards. The
 # fin stands 0.4 mm off the tongue's end and hangs on two small bridges there: the tongue's end lives in the wall's
@@ -346,6 +386,17 @@ def main():
     export_step(b, os.path.join(OUT, "ableemstation-uni-base.step"))
     export_stl(b, os.path.join(OUT, "ableemstation-uni-base.stl"))
     write_3mf("uni-base", on_bed(b))
+    # the bottom per option: the base + its three panels, one object to print in one go (they weld at the tabs)
+    for model in ("pi23", "pi4", "pi5"):
+        for front in ("usb", "blank"):
+            parts = [("base", b), ("panel-back", panels["back-" + model]),
+                     ("panel-right", panels["right-%s%s" % (model, "-front" if front == "usb" else "")]),
+                     ("panel-front", panels["front-" + front])]
+            for pname, p in parts[1:]:
+                gap = p.distance_to(b)
+                assert gap < 0.01, "bottom %s-%s: %s stands %.2f mm off the base - it would not weld" % (model, front, pname, gap)
+            write_bottom("uni-bottom-%s-%s" % (model, front), parts)
+    print("bottoms: base + 3 panels as one object, 6 options; every panel touches the base")
     usb = usb_sockets()
     # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
     bad = 0

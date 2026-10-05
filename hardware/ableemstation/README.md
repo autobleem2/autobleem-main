@@ -108,7 +108,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the front USB pedestal. Screw the Pi down, fit the switches and the USB sockets, and stand the panels in the
   rebates (a tab on each panel's inside sits in it). Then slide the shell down over it all: each panel's tongue (its
   inner half) runs up the grooves in the opening's sides and ends in a groove in the roof. Four screws from below,
-  done. Swapping a board = lifting the shell and swapping two panels.
+  done. Swapping a board = lifting the shell and swapping two panels (with the one-piece bottom below: a new bottom).
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
@@ -119,7 +119,14 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
-- **Printing**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
+- **Printing - four prints**: the shell, the **bottom**, two buttons and the lens. The bottom
+  (`uni-bottom-<board>-<front>.3mf`, e.g. `uni-bottom-pi4-usb`) is the base with that option's three panels standing
+  in their rebates - one object of four parts in Orca. Print it as it is: each panel's tab sits on its seat, so the
+  panels weld to the base and the bottom comes off the bed in one piece (nothing to assemble, no ears, no props).
+  The panels' filament change below applies to it: the base starts in the band colour and its few tall bits (the
+  standoffs, the USB cradles) end in the top colour, inside the case. The viewer's download picks the bottom of the
+  option on screen. The separate panels below stay for a board swap or a reprint of one wall.
+- **Printing the panels on their own**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
   colours on the same line: **10.92 mm = layer 68** with 0.16 mm layers, **10.80 mm = layer 45** with 0.24 mm (`make_universal.py` prints
   both). Dark first, then the top colour. The plain files have no supports: the tab's underside hangs over the
   bed, so print the `-ears` files (below); the panels are 2.4 mm thick where they stand, so use a brim (the Orca

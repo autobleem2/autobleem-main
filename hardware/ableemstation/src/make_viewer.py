@@ -64,8 +64,8 @@ def b64file(path):
 
 pack = {"README.md": b64file(os.path.join(FILES, "..", "README.md"))}
 parts3mf = ["base", "shell", "shell-rgb"] if not VARIANT else (
-    ["uni-base", "uni-shell", "uni-shell-rgb", "uni-shell-active", "uni-shell-active-rgb"]
-    + ["panel-" + f[len("ableemstation-panel-"):-4] for f in sorted(os.listdir(OUT)) if f.startswith("ableemstation-panel-") and f.endswith(".3mf")])
+    ["uni-shell", "uni-shell-rgb", "uni-shell-active", "uni-shell-active-rgb"]          # + the bottoms: base + panels, one print
+    + [f[len("ableemstation-"):-4] for f in sorted(os.listdir(OUT)) if f.startswith("ableemstation-uni-bottom-") and f.endswith(".3mf")])
 for n in parts3mf:
     pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(OUT, "ableemstation-%s.3mf" % n))
 for n in ("button", "lens"):                       # the same parts for both cases, in files/
@@ -270,7 +270,7 @@ document.getElementById("hs").onclick = () => { hideShell = !hideShell; setParts
 document.getElementById("hb").onclick = () => { hideBase = !hideBase; setParts(); };
 function colorway(key) {
   const c = CW.find(x => x[0] === key) || CW[0]; cwKey = c[0];
-  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + c[4]); MAT.caps.color.set("#" + c[5]);
+  MAT.shell.color.set("#" + c[2]); MAT.dark.color.set("#" + c[3]); if (MAT.panel) { MAT.panel.color.set("#" + c[2]); MAT.panelDark.color.set("#" + c[3]); } MAT.base.color.set("#" + (U ? c[3] : c[4]));  // universal: the base prints with the panels, band-coloured MAT.caps.color.set("#" + c[5]);
   const set = c[6] ? c[6] + "/" : "";                      // a colourway may bring its own sticker set
   for (const [n, m] of Object.entries(DEC)) { const k = DECO[set + n] ? set + n : n;
     if (m.userData.key !== k) { m.material.map = tex(k); m.material.needsUpdate = true; m.userData.key = k; } }
@@ -289,11 +289,9 @@ view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.
 function pick() {
   const c = CW.find(x => x[0] === cwKey), set = c[6] ? `stickers/${c[6]}/` : "stickers/";
   const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
-  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? "uni-base" : "base"}.3mf`,
+  // four prints: the shell, the bottom (universal: the base with this option's three panels, one object), buttons, lens
+  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}` : "base"}.3mf`,
     "3mf/ableemstation-button.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
-  if (U) for (const ears of ["", "-ears"])                 // each panel plain and with its breakaway ears
-    f.push(`3mf/ableemstation-panel-back-${model}${ears}.3mf`, `3mf/ableemstation-panel-right-${model}${front === "usb" ? "-front" : ""}${ears}.3mf`,
-      `3mf/ableemstation-panel-front-${front}${ears}.3mf`);
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
   for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model]] : []))
     f.push(set + n + ".svg", set + n + ".png", `${set}cricut-144dpi/ableemstation-${n}.png`);
@@ -313,13 +311,13 @@ function note(names) {
     ["PRINT (no supports; README.md has the details)",
      `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm = layer ${LN["0.16"]} (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm = layer ${LN["0.24"]} (0.24 mm):`,
      "  the top colour first, the band colour after the change.", has("shell"),
-     ...(U ? [`- panels, standing on their bottom edge, "ABleemStation - ASA", with a brim. Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
-       "  the band colour first, the top colour after the change. Print the -ears files: breakaway ears hold the panel",
-       "  upright (bend them off cold, trim the bridges flush) and props carry the tab (pull them out) - README.", has("panel-")] : []),
-     `- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base"),
+     ...(U ? [`- bottom: the base with its three panels standing in place - ONE object, print it as it is (the panels weld to`,
+       `  the base at their tabs), "ABleemStation - ASA Base". Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
+       "  the band colour first (the base is band-coloured too), the top colour after the change.", has("bottom")]
+       : [`- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base")]),
      `- button x 2, standing on the flange, "ABleemStation - ASA".`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],
     ["COLOURS (the nearest ASA you can get)",
-     `  top #${c[2]}   band (below the colour line) #${c[3]}   base #${c[4]}   buttons #${c[5]}   lens: clear PETG`],
+     `  top #${c[2]}   band (below the colour line) #${c[3]}   base #${U ? c[3] + " (the band colour: it prints with the panels)" : c[4]}   buttons #${c[5]}   lens: clear PETG`],
     ["ORCA: orca/ - the process profiles (import them, or copy the .json + .info pairs into Orca's user process folder).",
      `  "ABleemStation - ASA Prototype" is a fast print that still answers "does it fit".`],
     [`STICKERS: stickers/${c[6] ? " (the special edition set)" : ""} - print the A4 PDF at 100 % on vinyl, or use the cricut-144dpi PNGs.`,
@@ -393,7 +391,7 @@ for hashq in (("m=pi5&front=usb&roof=active&led=rgb&cw=grey94", "m=pi23&cw=class
         src = [k for k in pack if k == n or k == n.replace("stickers/", "stickers/special/", 1)]
         if n != "BUILD.txt":
             assert any(base64.b64decode(pack[k]) == z.read(n) for k in src), "zip entry differs from its source: " + n
-    assert sum(n.startswith("3mf/") for n in names) >= (10 if VARIANT else 4) and "BUILD.txt" in names, names
+    assert sum(n.startswith("3mf/") for n in names) == 4 and "BUILD.txt" in names, names   # shell, bottom/base, button, lens
     print("zip %s: %d files, %.1f MB" % (m.group(1), len(names), len(base64.b64decode(m.group(2))) / 1e6))
 
 shots = os.path.join(OUT, "renders")
