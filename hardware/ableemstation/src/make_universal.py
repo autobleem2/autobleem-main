@@ -180,6 +180,26 @@ def front_usb_panel():
     return p
 
 
+# the one-piece bottom: the panel must become one with the base, so under each opening the base fills its rebate,
+# the 45-degree pocket and the fit gap to the panel, and reaches JOINT_IN into the panel's plate - the slicer then
+# merges the overlapping parts into one solid along the whole panel, not just on the tab's line
+JOINT_IN = 0.6
+
+
+def joint_fill(name):
+    wall, a0, a1, _, _, _ = OPENINGS[name]
+    v0, v1 = WALL - JOINT_IN, WALL - 0.5 + 2.5 + 0.65 + 0.05          # into the plate .. just past the rebate's inner face
+    return wbox(wall, a0 + C, v0, 0, a1 - a0 - 2 * C, v1 - v0, BASE_T)
+
+
+def bottom_base():
+    """the base of the one-piece bottom: uni_base with the joints filled"""
+    b = uni_base()
+    for name in OPENINGS:
+        b += joint_fill(name)
+    return b
+
+
 def uni_base():
     """the Pi 3 case's base + a rebate under each panel's tab + the front USB sockets' pedestal"""
     b = base()
@@ -386,17 +406,24 @@ def main():
     export_step(b, os.path.join(OUT, "ableemstation-uni-base.step"))
     export_stl(b, os.path.join(OUT, "ableemstation-uni-base.stl"))
     write_3mf("uni-base", on_bed(b))
-    # the bottom per option: the base + its three panels, one object to print in one go (they weld at the tabs)
+    # the bottom per option: the base (joints filled) + its three panels, one object to print in one go: the parts
+    # overlap along each panel, so they print as one solid
+    bb = bottom_base()
+    for sname, s in shells.items():
+        v = (bb & s).volume
+        assert v < 0.01, "the bottom's joint fill hits %s: %.2f mm3" % (sname, v)
     for model in ("pi23", "pi4", "pi5"):
+        assert (bb & pi_ghost(model)).volume < 0.01, "the bottom's joint fill hits the " + model
         for front in ("usb", "usb-open", "blank"):        # usb-open: the rear USB block feeding the front left open
-            parts = [("base", b), ("panel-back", panels["back-" + model]),
+            parts = [("base", bb), ("panel-back", panels["back-" + model]),
                      ("panel-right", panels["right-%s%s" % (model, "-front" if front == "usb" else "")]),
                      ("panel-front", panels["front-" + front.split("-")[0]])]
             for pname, p in parts[1:]:
-                gap = p.distance_to(b)
-                assert gap < 0.01, "bottom %s-%s: %s stands %.2f mm off the base - it would not weld" % (model, front, pname, gap)
+                joint = (p & bb).volume
+                assert joint > 20, "bottom %s-%s: %s overlaps the base by %.1f mm3 only - not one piece" % (model, front, pname, joint)
             write_bottom("uni-bottom-%s-%s" % (model, front), parts)
-    print("bottoms: base + 3 panels as one object, 9 options; every panel touches the base")
+    print("bottoms: base + 3 panels as one object, 9 options; each panel overlaps the base by %s mm3"
+          % ", ".join("%.0f" % (panels[n] & bb).volume for n in ("back-pi4", "right-pi4", "front-usb")))
     usb = usb_sockets()
     # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
     bad = 0
