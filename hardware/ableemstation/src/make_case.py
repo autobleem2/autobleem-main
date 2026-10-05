@@ -125,32 +125,46 @@ def shell(led="led5", vents=None):
     s -= box(14, D - 0.4, BTN_Z - 12.0, 44, 1, 5)
     ring = prism(outline(), BAND - 1.2, 1.2) - prism(outline(0.8), BAND - 1.3, 1.4)
     s -= ring                                                                             # the waist groove all round
-    # front: two button holes; the LED window (the lens's shaft through the wall, its flange in a counterbore) and the
-    # holder tube behind it: the LED's rim stops at the tube's back end, its tip 0.3 mm short of the lens
+    # front: two button holes and the LED window (the lens's shaft through the wall, its flange in a counterbore); the
+    # shell is the same for both lights - the holder behind the window is a part of its own (led_holder)
     for x in BTN_X:
         s -= cyl_y(x, D - WALL - 1, BTN_Z, 4.6, WALL + 2)
-    if led == "rgb":
-        # one WS2812B pixel: a block with a slot the strip segment slides into from below (wires out at the bottom),
-        # the LED facing the lens 0.3 mm behind its flange
-        fl = D - WALL - LENS_FL - 0.2                                                     # the flange's back face
-        s += box(LED_X - 8, D - WALL - 7, BTN_Z - 9, 16, 7.1, 19)
-        s -= box(LED_X - STRIP_W / 2, fl - 0.3 - STRIP_T, BTN_Z - 10, STRIP_W, STRIP_T, 19)
-        s -= cyl_y(LED_X, fl - 0.4, BTN_Z, 3.5, 0.6)                                       # the light's way through
-    else:
-        tube = LED_LEN + 0.3 + LENS_FL + 0.2
-        s += cyl_y(LED_X, D - WALL - tube, BTN_Z, LENS_FL_R + 1.6, tube)
-        # its upper half filled up to the roof, the tube's full width: printed roof-down, the tube grows out of the
-        # roof instead of starting in mid-air
-        s += box(LED_X - LENS_FL_R - 1.6, D - WALL - tube, BTN_Z, 2 * (LENS_FL_R + 1.6), tube, H - ROOF - BTN_Z + 0.5)
-        s -= cyl_y(LED_X, D - WALL - tube - 1, BTN_Z, 2.6, tube + 1)                      # the LED (5 mm)
-    s -= cyl_y(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z, LENS_FL_R + 0.2, LENS_FL + 0.3)     # the lens flange
-    s -= cyl_y(LED_X, D - WALL - 1, BTN_Z, LENS_R + 0.1, WALL + 2)                         # the lens shaft
+    s -= lens_cuts()
     # bosses for M3 heat-set inserts, from the plate up to the roof
     for x, y in BOSSES:
         s += cyl_z(x, y, BASE_T, 4.2, H - ROOF - BASE_T + 0.5)
         s -= cyl_z(x, y, BASE_T - 1, INSERT_R, INSERT_DEPTH + 1)
     s += tree_pins()                                                                     # the button tree's pins
-    return s
+    return s + led_holder(led) if led else s
+
+
+def lens_cuts():
+    """the lens's flange counterbore and its shaft's hole through the front wall"""
+    c = cyl_y(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z, LENS_FL_R + 0.2, LENS_FL + 0.3)
+    return c + cyl_y(LED_X, D - WALL - 1, BTN_Z, LENS_R + 0.1, WALL + 2)
+
+
+# the LED holder: a part of its own, printed with the shell as one object - it reaches HOLDER_IN into the front wall,
+# so the slicer merges the two (as the bottom merges its panels). Either light, the shell is the same
+HOLDER_IN = 0.6
+
+
+def led_holder(led):
+    """led5: a tube for a 5 mm LED (its rim stops at the tube's back end, its tip 0.3 mm short of the lens), its upper
+    half filled up to the roof (printed roof-down, it grows out of the roof); rgb: a block with a slot that one
+    WS2812B strip segment slides into from below (wires out at the bottom), the LED 0.3 mm behind the lens's flange"""
+    if led == "rgb":
+        fl = D - WALL - LENS_FL - 0.2                                                     # the flange's back face
+        h = box(LED_X - 8, D - WALL - 7, BTN_Z - 9, 16, 7 + HOLDER_IN, 19)
+        h -= box(LED_X - STRIP_W / 2, fl - 0.3 - STRIP_T, BTN_Z - 10, STRIP_W, STRIP_T, 19)
+        h -= cyl_y(LED_X, fl - 0.4, BTN_Z, 3.5, 0.6)                                       # the light's way through
+    else:
+        tube = LED_LEN + 0.3 + LENS_FL + 0.2
+        h = cyl_y(LED_X, D - WALL - tube, BTN_Z, LENS_FL_R + 1.6, tube + HOLDER_IN)
+        h += box(LED_X - LENS_FL_R - 1.6, D - WALL - tube, BTN_Z, 2 * (LENS_FL_R + 1.6), tube + HOLDER_IN,
+                 H - ROOF - BTN_Z + 0.5)
+        h -= cyl_y(LED_X, D - WALL - tube - 1, BTN_Z, 2.6, tube + 1)                      # the LED (5 mm)
+    return h - lens_cuts()
 
 
 # ---- base
@@ -280,6 +294,50 @@ def on_bed(part):
     return Pos(-bb.min.X, -bb.min.Y, -bb.min.Z) * part
 
 
+def write_parts_3mf(path, label, parts):
+    """ONE object of several named parts [(name, solid)], where they stand: a slicer keeps it one object and merges
+    the parts where they overlap (a holder in its wall, a panel in its base) into one print"""
+    import zipfile
+    shift = Compound(children=[p for _, p in parts]).bounding_box().min
+    objs, comps = [], []
+    for i, (pname, p) in enumerate(parts, 1):
+        vs, ts = p.tessellate(0.02, 0.2)
+        # tessellate() gives each face its own vertices: weld the shared ones, else the mesh is open along every edge
+        key, idx, uniq = {}, [], []
+        for q in vs:
+            k = (round(q.X - shift.X, 4), round(q.Y - shift.Y, 4), round(q.Z - shift.Z, 4))
+            if k not in key:
+                key[k] = len(uniq)
+                uniq.append(k)
+            idx.append(key[k])
+        tris = [(idx[a], idx[b], idx[c]) for a, b, c in ts]
+        tris = [t for t in tris if len(set(t)) == 3]
+        v = "".join('<vertex x="%.4f" y="%.4f" z="%.4f"/>' % k for k in uniq)
+        t = "".join('<triangle v1="%d" v2="%d" v3="%d"/>' % tri for tri in tris)
+        objs.append('<object id="%d" name="%s" type="model"><mesh><vertices>%s</vertices><triangles>%s</triangles></mesh></object>'
+                    % (i, pname, v, t))
+        comps.append('<component objectid="%d"/>' % i)
+    n = len(parts) + 1
+    model = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
+             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><resources>%s'
+             '<object id="%d" name="%s" type="model"><components>%s</components></object></resources>'
+             '<build><item objectid="%d"/></build></model>' % ("".join(objs), n, label, "".join(comps), n))
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.'
+                   'openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/'
+                   'vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/'
+                   'vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>')
+        z.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.'
+                   'openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" '
+                   'Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>')
+        z.writestr("3D/3dmodel.model", model)
+
+
+def shell_print(body, led):
+    """a shell as it prints: roof down, the same shell + the LED holder as two parts of one object"""
+    return [("shell", Rot(180, 0, 0) * body), ("led-holder", Rot(180, 0, 0) * led_holder(led))]
+
+
 def write_3mf(parts):
     """3MF per part, already turned the way it prints (shell: roof down, button tree: flat, shafts up), plus one file with
     every part to print (shell, base, the button tree, the lens - clear PETG), for each LED version - the slicer's auto-arrange spreads them over the plates"""
@@ -290,7 +348,12 @@ def write_3mf(parts):
         "buttons": on_bed(Rot(90, 0, 0) * parts["buttons"]),           # flat on its back face, the shafts up
         "lens": on_bed(Rot(90, 0, 0) * parts["lens"]),
     }
+    body = shell(None)                                                     # one shell for both lights
     for name, p in printable.items():
+        if name.startswith("shell"):                                       # + its LED holder, merged by the slicer
+            write_parts_3mf(os.path.join(OUT, "ableemstation-%s.3mf" % name), "ableemstation-" + name,
+                            shell_print(body, "rgb" if name.endswith("rgb") else "led5"))
+            continue
         m = Mesher()
         m.add_shape(p, linear_deflection=0.02, angular_deflection=0.2)
         m.write(os.path.join(OUT, "ableemstation-%s.3mf" % name))
@@ -327,6 +390,13 @@ def main():
     for name, p in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"])):
         v = (p & pi).volume
         print("overlap pi x %s: %.2f mm3" % (name, v))
+    # the LED holders: each reaches into the shell (one print, merged), the lens window stays clear
+    body = shell(None)
+    for led in ("led5", "rgb"):
+        joint = (led_holder(led) & body).volume
+        clear = (led_holder(led) & lens_cuts()).volume
+        print("LED holder %s: overlaps the shell by %.1f mm3, in the lens window %.2f mm3" % (led, joint, clear))
+        assert joint > 10 and clear < 0.01, "the %s holder is not one with the shell, or it blocks the lens" % led
     # the button tree: on its pins without touching the shell elsewhere, clear of the base and the switches
     sws = switch_ghost(BTN_X[0]) + switch_ghost(BTN_X[1])
     for name, other in (("shell", parts["shell"]), ("shell-rgb", parts["shell-rgb"]), ("base", parts["base"]), ("switches", sws)):

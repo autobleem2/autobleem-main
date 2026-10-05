@@ -88,7 +88,9 @@ multi-material unit, or Add pause for a manual swap; `M600` only if the printer 
 - **Side** (opposite the USB): slots through the wall with a baffle 1.8 mm behind them, closed at both ends and
   open below, so the air turns down under it and the inside stays out of sight.
 - **LED**: the clear lens is pushed into the front hole from inside (its flange sits in a counterbore), and the
-  LED stays hidden behind it:
+  LED stays hidden behind it. The shell body is the same for both lights; the LED holder is a part of its own that
+  reaches 0.6 mm into the front wall and the roof, so in the 3MF (one object, two parts) the slicer welds it into
+  the shell:
   - `shell`: a plain 5 mm LED in the holder tube, its tip 0.3 mm behind the lens;
   - `shell-rgb`: one **WS2812B** pixel cut from an LED strip (10 mm wide), slid into the slot behind the lens from
     below, the LED facing the lens, the three wires out at the bottom. It keeps its last colour while it has 5 V -

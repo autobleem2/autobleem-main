@@ -17,7 +17,8 @@ import os
 from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, LAYERS, base, box, button_tree, cyl_y, cyl_z, first_layer_at, layer_number, lens, on_bed, outline, prism, shell)
+                       LENS_R, LAYERS, base, box, button_tree, cyl_y, cyl_z, first_layer_at, layer_number, led_holder, lens, on_bed, outline, prism, shell,
+                       shell_print, write_parts_3mf)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
 os.makedirs(os.path.join(OUT, "viewer"), exist_ok=True)
@@ -249,40 +250,7 @@ def write_bottom(name, parts):
     """the base and its three panels as ONE object of four named parts, standing where they are assembled: a slicer
     keeps it one object and welds the parts where they touch (each panel's tab on its seat), so the base and the panels
     print as one piece - no ears, no props, nothing to assemble"""
-    import zipfile
-    shift = Compound(children=[p for _, p in parts]).bounding_box().min
-    objs, comps = [], []
-    for i, (pname, p) in enumerate(parts, 1):
-        vs, ts = p.tessellate(0.02, 0.2)
-        # tessellate() gives each face its own vertices: weld the shared ones, else the mesh is open along every edge
-        key, idx, uniq = {}, [], []
-        for q in vs:
-            k = (round(q.X - shift.X, 4), round(q.Y - shift.Y, 4), round(q.Z - shift.Z, 4))
-            if k not in key:
-                key[k] = len(uniq)
-                uniq.append(k)
-            idx.append(key[k])
-        tris = [(idx[a], idx[b], idx[c]) for a, b, c in ts]
-        tris = [t for t in tris if len(set(t)) == 3]
-        v = "".join('<vertex x="%.4f" y="%.4f" z="%.4f"/>' % k for k in uniq)
-        t = "".join('<triangle v1="%d" v2="%d" v3="%d"/>' % tri for tri in tris)
-        objs.append('<object id="%d" name="%s" type="model"><mesh><vertices>%s</vertices><triangles>%s</triangles></mesh></object>'
-                    % (i, pname, v, t))
-        comps.append('<component objectid="%d"/>' % i)
-    n = len(parts) + 1
-    model = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
-             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><resources>%s'
-             '<object id="%d" name="ableemstation-%s" type="model"><components>%s</components></object></resources>'
-             '<build><item objectid="%d"/></build></model>' % ("".join(objs), n, name, "".join(comps), n))
-    with zipfile.ZipFile(os.path.join(OUT, "ableemstation-%s.3mf" % name), "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.'
-                   'openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/'
-                   'vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/'
-                   'vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>')
-        z.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.'
-                   'openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" '
-                   'Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>')
-        z.writestr("3D/3dmodel.model", model)
+    write_parts_3mf(os.path.join(OUT, "ableemstation-%s.3mf" % name), "ableemstation-" + name, parts)
 
 
 # breakaway ears: a panel prints standing on a 2.4 mm edge, about 10 times as tall as it is thick, so each end gets an
@@ -345,13 +313,14 @@ def standing(name, p):
 
 
 def main():
-    shells = {}
+    shells, bodies = {}, {}
     for kind, vents in (("", None), ("-active", ACTIVE_VENTS)):
+        s = shell(None, vents)                         # one shell for both lights; the LED holder is a part of its own
+        for name in OPENINGS:
+            s = cut_opening(s, name)
+        bodies[kind] = s
         for led, suffix in (("led5", ""), ("rgb", "-rgb")):
-            s = shell(led, vents)
-            for name in OPENINGS:
-                s = cut_opening(s, name)
-            shells["uni-shell%s%s" % (kind, suffix)] = s
+            shells["uni-shell%s%s" % (kind, suffix)] = s + led_holder(led)
     panels = {}
     for m in ("pi23", "pi4", "pi5", "blank"):
         panels["back-" + m] = panel("back", back_cuts(m))
@@ -364,8 +333,10 @@ def main():
     for name, p in list(shells.items()) + [("panel-" + n, p) for n, p in panels.items()]:
         export_step(p, os.path.join(OUT, "ableemstation-%s.step" % name))
         export_stl(p, os.path.join(OUT, "ableemstation-%s.stl" % name))
-    for name, s in shells.items():
-        write_3mf(name, on_bed(Rot(180, 0, 0) * s))
+    for kind, body in bodies.items():                  # printed: the shell + its LED holder, one object of two parts
+        for led, suffix in (("led5", ""), ("rgb", "-rgb")):
+            name = "uni-shell%s%s" % (kind, suffix)
+            write_parts_3mf(os.path.join(OUT, "ableemstation-%s.3mf" % name), "ableemstation-" + name, shell_print(body, led))
     flats = {n: standing(n, p) for n, p in panels.items()}
     for n, p in flats.items():
         write_3mf("panel-" + n, p)
