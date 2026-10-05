@@ -165,13 +165,34 @@ def base():
     # reach the microSD from below: a finger's room (35 x 20), out from the board's edge - clear of the feet, the
     # standoffs and the rating plate's field
     b -= box(BX + 3 - 35, BY + 28 - 10, -1, 35, 20, BASE_T + 2)
-    # switch bracket: 6x6 tact switches face the buttons; pockets 6.3 x 6.3 x 3.6 + a slot for the legs
-    yb = CAP_REST - 0.5 - 1.5 - 3.7 - 3.0        # cap back at rest - gap - plunger - switch body - bracket back
-    b += box(BTN_X[0] - 8, yb, BASE_T, BTN_X[1] - BTN_X[0] + 16, 6.6, BTN_Z + 4.5 - BASE_T)
+    # switch bracket: 6x6 tact switches lie on their backs facing the buttons, in pockets 6.3 x 6.3 x 3.7; each leg
+    # goes through its own hole in the bracket's back (SW_BACK thick), so the legs stick out behind it to be soldered
+    yb = switch_floor() - SW_BACK                # the bracket's back face
+    b += box(BTN_X[0] - 8, yb, BASE_T, BTN_X[1] - BTN_X[0] + 16, 6.6 - (3.0 - SW_BACK), BTN_Z + 4.5 - BASE_T)
     for x in BTN_X:
-        b -= box(x - 3.15, yb + 3.0, BTN_Z - 3.15, 6.3, 3.7, 6.3)
-        b -= box(x - 3.15, yb - 1, BTN_Z - 1.5, 6.3, 5, 3.0)
+        b -= box(x - 3.15, yb + SW_BACK, BTN_Z - 3.15, 6.3, 3.7, 6.3)
+        for lx, lz in SW_LEGS:
+            b -= cyl_y(x + lx, yb - 1, BTN_Z + lz, SW_LEG_R, SW_BACK + 1.5)
     return b
+
+
+# the 6x6 x 5 mm THT tact switch: four legs 6.5 mm apart across the plunger's sides and 4.5 mm along them, 3.5 mm long
+SW_LEGS = [(sx * 3.25, sz * 2.25) for sx in (-1, 1) for sz in (-1, 1)]
+SW_LEG_R, SW_BACK = 0.65, 1.8            # a leg's hole (legs 0.7 x 0.3; a small printed hole comes out tighter), the back
+
+
+def switch_floor():
+    """where a switch's back face sits: the cap's back at rest - gap - plunger - body"""
+    return CAP_REST - 0.5 - 1.5 - 3.7
+
+
+def switch_ghost(x):
+    """one switch as it sits in the bracket: body, plunger, the four legs out of its back (for the fit check)"""
+    y0 = switch_floor()
+    s = box(x - 3, y0, BTN_Z - 3, 6, 3.5, 6) + cyl_y(x, y0 + 3.5, BTN_Z, 1.75, 1.5)
+    for lx, lz in SW_LEGS:
+        s += box(x + lx - 0.35, y0 - 3.5, BTN_Z + lz - 0.15, 0.7, 3.5, 0.3)
+    return s
 
 
 # ---- LED lens (clear PETG): a flange that sits in the counterbore + a shaft flush with the front face
@@ -259,6 +280,12 @@ def main():
         print("overlap pi x %s: %.2f mm3" % (name, v))
     for c in caps:
         print("overlap cap x shell: %.2f mm3" % (c & parts["shell"]).volume)
+    # the switches: body and legs clear of the bracket, each leg through the back to solder behind it
+    for x in BTN_X:
+        v = (switch_ghost(x) & parts["base"]).volume
+        print("switch at x=%g x base: %.2f mm3" % (x, v))
+        assert v < 0.01, "the switch at x=%g hits its bracket (%.2f mm3)" % (x, v)
+    print("switch legs stick out %.1f mm behind the bracket" % (3.5 - SW_BACK))
     for name in ("shell", "shell-rgb"):
         print("overlap lens x %s: %.2f mm3" % (name, (lens_in & parts[name]).volume))
     # every screw must sit inside: the insert hole clear of the walls (0.8 mm of boss left), the countersink inside the

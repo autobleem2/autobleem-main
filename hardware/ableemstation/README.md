@@ -156,7 +156,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 | 4 | M3 heat-set insert, Voron's standard M3 x 5 x 4 (the bosses have a 4.7 mm hole, 6 mm deep), pressed into the shell's bosses |
 | 4 | M3 x 8 countersunk screw (base -> inserts) |
 | 4 | M2.5 x 5 screw (Pi -> standoffs, self-tapping) |
-| 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, into the bracket's pockets, legs bent back |
+| 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, on its back in the bracket's pocket, each leg through its own hole - solder the wires to the legs behind the bracket |
 | 1 | the front light, either: a 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), or one WS2812B pixel cut from a 5 V, 10 mm strip + 330 Ω resistor |
 | 6-7 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |
 | 4 | rubber feet Ø 12 mm |
