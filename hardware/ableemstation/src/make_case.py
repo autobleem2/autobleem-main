@@ -20,7 +20,7 @@ import json
 import math
 import os
 
-from build123d import (Align, Axis, Box, Compound, Cylinder, Kind, Location, Plane, Polygon, Pos, Rot, chamfer,
+from build123d import (Align, Axis, Box, Compound, Cone, Cylinder, Kind, Location, Plane, Polygon, Pos, Rot, chamfer,
                        Mesher, export_step, export_stl, extrude, offset)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -174,6 +174,8 @@ def base():
     for hx, hy in ((3.5, 3.5), (61.5, 3.5), (3.5, 52.5), (61.5, 52.5)):
         b += cyl_z(BX + hx, BY + hy, BASE_T, 3.0, STAND)
         b -= cyl_z(BX + hx, BY + hy, 1.0, 1.15, STAND + 3)                           # M2.5 self-tap
+        b -= Pos(BX + hx, BY + hy, BASE_T + STAND - 0.6) * Cone(1.15, 1.75, 0.61,
+                                                                align=(Align.CENTER, Align.CENTER, Align.MIN))  # lead-in
     for x, y in BOSSES:                                                              # M3 clearance + countersink
         b -= cyl_z(x, y, -1, 1.7, BASE_T + 2)
         b -= Pos(x, y, -0.01) * Cylinder(3.2, 1.7, align=(Align.CENTER, Align.CENTER, Align.MIN))

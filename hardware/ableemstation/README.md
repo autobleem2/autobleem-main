@@ -116,7 +116,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
-- **Front USB**: two "USB-A female to DIP" breakout boards (the common 17 x 17 mm board: a USB-A 2.0 socket, two 3 mm holes 12 mm apart, four 2.54 mm pins) lie flat on pedestals of the base, each held by two ~1.85 mm sheet-metal screws straight into the plastic (1.6 mm pilots); a step in front of each board carries the socket's overhang, and pockets under the board take the solder tails (the pin row's pocket is open to the back for the wires). Their fronts sit
+- **Front USB**: two "USB-A female to DIP" breakout boards (the common 17 x 17 mm board: a USB-A 2.0 socket, two 3 mm holes 12 mm apart, four 2.54 mm pins) lie flat on pedestals of the base, each held by two ~1.85 mm sheet-metal screws straight into the plastic (1.9 mm holes through the pedestal and the plate; the socket sits 1.3 mm above the board); a step in front of each board carries the socket's overhang, and pockets under the board take the solder tails (the pin row's pocket is open to the back for the wires). Their fronts sit
   just behind `front-usb`, which has only the two plug windows - each in a 1.4 mm recess, so a
   plug still goes in its full depth. With `front-blank` the pedestal is hidden, so there is one base for both.
   The sockets' cables are soldered to the four pins of one rear USB block, under the board - the block furthest from
@@ -159,7 +159,7 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 |---|---|
 | 4 | M3 heat-set insert, Voron's standard M3 x 5 x 4 (the bosses have a 4.7 mm hole, 6 mm deep), pressed into the shell's bosses |
 | 4 | M3 x 8 countersunk screw (base -> inserts) |
-| 4 | M2.5 x 5 screw (Pi -> standoffs, self-tapping) |
+| 4 | M2.5 x 5 screw (Pi -> standoffs, cuts its own thread in the 2.3 mm hole; a 0.6 mm lead-in chamfer on top) |
 | 2 | 6 x 6 mm tactile switch, 5 mm tall, 4 pins through-hole, on its back in the bracket's pocket, each leg through its own hole - solder the wires to the legs behind the bracket |
 | 1 | the front light, either: a 5 mm diffused LED + 330 Ω 1/4 W resistor (100 Ω for blue / white / cyan), or one WS2812B pixel cut from a 5 V, 10 mm strip + 330 Ω resistor |
 | 6-7 | jumper wire female-female (Dupont), 20 cm, + heat-shrink tube |

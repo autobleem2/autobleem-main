@@ -137,21 +137,30 @@ PCB_OVER = 5.4                      # how far the shell's front sticks out past 
                                     # 4.6 mm behind the board's edge) - measure one when they come and set it here
 PCB_HOLE_Y, PCB_HOLE_X, PCB_DIP_Y = 11.0, 6.0, 15.2   # from the board's front edge / from its centre line
 PCB_FIT = 0.3                       # the step's gap to the board's front edge
-SCREW_R, SCREW_D = 0.8, 6.0         # pilot for a ~1.85 mm sheet-metal screw straight into the plastic, its depth
+SOCKET_LIFT = 1.3                   # the socket's shell sits this much above the board's top (the owner's test print,
+                                    # 2026-10-06: the pedestals 1.3 mm too high, the socket above the panel's window)
+SCREW_R = 0.95                      # a ~1.85 mm sheet-metal screw's hole, through the pedestal and the plate (the test
+                                    # print: 1.6 mm blind pilots too tight and too short)
+
+
+def board_z():
+    """the shell's underside and the board's underside (= the pedestal's top)"""
+    z0 = USB_Z - USB_H / 2
+    return z0, z0 - SOCKET_LIFT - PCB_T
 
 
 def usb_sockets():
     """the sockets on their boards as ghosts for the fit check: shell, board, the solder tails and pins under it"""
     s = None
     for x in USB_X:
-        z0 = USB_Z - USB_H / 2                                                              # the shell's underside
+        z0, zb = board_z()                                                                  # shell / board underside
         y0 = USB_FRONT - PCB_OVER                                                           # the board's front edge
         b = box(x - USB_W / 2, USB_FRONT - USB_L, z0, USB_W, USB_L, USB_H)
-        b += box(x - PCB / 2, y0 - PCB, z0 - PCB_T, PCB, PCB, PCB_T)                        # the board
-        b += box(x - 4.0, y0 - 8.3, z0 - PCB_T - 1.5, 8.0, 2.0, 1.51)                      # the socket's pins + solder
-        b += box(x - 4.4, y0 - PCB_DIP_Y - 1.0, z0 - PCB_T - 1.5, 8.8, 2.0, 1.51)          # the DIP row's solder
+        b += box(x - PCB / 2, y0 - PCB, zb, PCB, PCB, PCB_T)                                # the board
+        b += box(x - 4.0, y0 - 8.3, zb - 1.5, 8.0, 2.0, 1.51)                              # the socket's pins + solder
+        b += box(x - 4.4, y0 - PCB_DIP_Y - 1.0, zb - 1.5, 8.8, 2.0, 1.51)                  # the DIP row's solder
         for sx in (-1, 1):                                                                  # the legs' solder
-            b += box(x + sx * PCB_HOLE_X - 1.0, y0 - 4.6 - 1.0, z0 - PCB_T - 1.5, 2.0, 2.0, 1.51)
+            b += box(x + sx * PCB_HOLE_X - 1.0, y0 - 4.6 - 1.0, zb - 1.5, 2.0, 2.0, 1.51)
         s = b if s is None else s + b
     return s
 
@@ -159,8 +168,7 @@ def usb_sockets():
 def usb_cradle(x):
     """one board's pedestal: flat under the board, two screw holes, pockets for the solder tails (the socket's pins
     and legs, the DIP row - open to the back for the wires), and a step in front that carries the shell's overhang"""
-    z0 = USB_Z - USB_H / 2                     # the shell's underside = the board's top
-    zb = z0 - PCB_T                            # the board's underside = the pedestal's top
+    z0, zb = board_z()                         # the shell's underside, the board's underside = the pedestal's top
     y0 = USB_FRONT - PCB_OVER                  # the board's front edge
     y_back = y0 - PCB - 0.5
     y_front = USB_FRONT - 2.8                  # the step stops 2.8 mm short of the shell's front (the front panel's foot)
@@ -169,7 +177,7 @@ def usb_cradle(x):
     c += box(x - USB_W / 2 + 0.5, y0 + PCB_FIT, BASE_T - 0.01, USB_W - 1.0, y_front - y0 - PCB_FIT,
              z0 - BASE_T + 0.01)                                                                        # the step
     for sx in (-1, 1):
-        c -= cyl_z(x + sx * PCB_HOLE_X, y0 - PCB_HOLE_Y, zb - SCREW_D, SCREW_R, SCREW_D + 1)           # screw pilots
+        c -= cyl_z(x + sx * PCB_HOLE_X, y0 - PCB_HOLE_Y, -1, SCREW_R, zb + 2)                          # screw holes, through
         c -= box(x + sx * PCB_HOLE_X - 1.5, y0 - 4.6 - 1.5, zb - 2.5, 3.0, 3.0, 3)                     # the legs' tails
     c -= box(x - 4.8, y0 - 9.8, zb - 2.5, 9.6, 3.5, 3)                                                  # socket pins' tails
     c -= box(x - 5.2, y_back - 1, zb - 2.5, 10.4, (y0 - PCB_DIP_Y + 1.6) - (y_back - 1), 3)            # DIP row, open back
@@ -424,8 +432,8 @@ def main():
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
     # the boards: each lies on its pedestal, a screw pilot under each hole (air in it, plastic round it), and the step
     # carries the shell's overhang
-    z0 = USB_Z - USB_H / 2
-    zb, y0 = z0 - PCB_T, USB_FRONT - PCB_OVER
+    z0, zb = board_z()
+    y0 = USB_FRONT - PCB_OVER
     hit = lambda px, py, pz: (box(px - 0.05, py - 0.05, pz - 0.05, 0.1, 0.1, 0.1) & b).volume > 1e-5   # noqa: E731
     for x in USB_X:
         ok = hit(x, y0 - 12.5, zb - 0.1) and hit(x, USB_FRONT - 3.5, z0 - 0.1)               # under the board, the step
