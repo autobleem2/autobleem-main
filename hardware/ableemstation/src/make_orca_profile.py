@@ -43,6 +43,11 @@ P = {
     "only_one_wall_top": "1",
     "sparse_infill_density": "25%",
     "sparse_infill_pattern": "gyroid",
+    # the AFC tool change (the band's colour): AFC's poop purges, so the prime tower only primes - a small one (the
+    # printer profile has purge_in_prime_tower off, as AFC's slicer docs ask)
+    "enable_prime_tower": "1",
+    "prime_tower_width": "20",
+    "prime_volume": "15",
     # surface quality
     "seam_position": "back",
     "seam_gap": "10%",
