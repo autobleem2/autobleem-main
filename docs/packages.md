@@ -700,10 +700,11 @@ is no MS-DOS row in the games list and no "runtime-only" concept.
   `AB_PKG_SET_*` and `AB_PKG_MAPPER` -> **with two or more starts the DOSBox start script shows its program choice
   (Game / Setup)** and runs the chosen one; with one start it runs it. DOSBox with no `dos-game` package shows the
   launcher's "No game data found" message with how to add games.
-- `AB_PKG_DIR` is read-only (5.2): DOS games write saves next to themselves, so DOSBox mounts the package folder
-  read-only and puts an **overlay in its own App folder** (`<App>/overlay/<package id>/`, DOSBox-staging's
-  `mount -t overlay` or an equivalent) where the game's writes land. Saves survive, the player's folder is untouched.
-  The engine's work (APPS-10); listed here as the contract it must meet.
+- **The one exception to "`AB_PKG_DIR` is read-only" (5.2): a `dos-game` package is mounted read-write.** DOS games
+  write their saves and settings (SETUP's config) next to themselves, and our engine is DOSBox 0.74 (the 2020 SDL2
+  line - it has no overlay mount; DOSBox-staging needs a newer compiler than the image's gcc-6). So DOSBox mounts the
+  package folder as `C:` read-write; the game's writes land in its own folder, which is what the player expects from a
+  DOS game. Nothing else writes there (the launcher still never does). An overlay is a later idea, if the engine moves.
 - **This spec does not depend on APPS-3** (the pad's keyboard mode, moved to alpha2): the picker and the program choice
   are launcher/engine screens on the normal pad, and a game's keys come from its optional mapper file. Until APPS-3,
   games that need keys are limited by what the mapper file can bind.
@@ -846,4 +847,4 @@ Answered, and written into this spec:
 7. For the device round the owner has only the full Quake (`id1/pak0.pak` + `pak1.pak`); every other identifying-file row
    is marked "verify against a real copy" (3.3, 4.3) and Quake's is verified at the round.
 
-Still for the lead: whether to keep the small old-`.mod` data route in proc_pe (2.3 recommends yes).
+Decided by the lead: proc_pe keeps the small old-`.mod` data route (2.3) for old and third-party data mods.
