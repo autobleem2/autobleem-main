@@ -42,6 +42,7 @@ sticker PNGs (`CHROME=<path>` if it is not found).
 
 ```
 cd src
+python make_all.py           # everything below except the wiring and Orca, in this order - use it after any change
 python make_case.py          # parts: STEP, STL, 3MF; the fit check (the Pi must overlap the case by 0 mm3)
 python make_universal.py     # the universal case: shells + panels to files/universal/, fit checks per board
 python make_stickers.py      # stickers: SVG, PNG, the A4 PDF, the Cricut PNGs
