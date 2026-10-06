@@ -430,6 +430,10 @@ def main():
     v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
     bad += v > 0.01
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
+    tree = button_tree()                       # its ears clear of the front panel's groove lips (the test print)
+    v = max((tree & shells[n]).volume for n in shells) + (tree & panels["front-usb"]).volume
+    bad += v > 0.01
+    print("button tree x shells/front panel: %.2f mm3" % v)
     # the boards: each lies on its pedestal, a screw pilot under each hole (air in it, plastic round it), and the step
     # carries the shell's overhang
     z0, zb = board_z()

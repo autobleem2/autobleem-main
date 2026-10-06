@@ -233,7 +233,9 @@ def button():
 # strips bend when a cap is pressed (0.8 mm thick, 11-13 mm long: under 1 % strain, ~0.5 N on top of the switch);
 # a thin link between the caps keeps it one part without pressing the other switch. It prints flat on its back face
 TREE_T, TREE_W = 0.8, 3.0                     # strip thickness (it bends through it) and width
-TREE_EARS = ((8.0, 7.0), (57.5, 7.0))         # the pins (x, z): low and outboard, so the strips are long enough
+TREE_EARS = ((8.0, 7.0), (56.5, 7.0))         # the pins (x, z): low and outboard, so the strips are long enough
+EAR_FLAT_X = 58.85                             # the right ear cut flat here: the universal case's front-panel groove
+                                               # has its inner lip from x = 59.15 (the owner's test print, 2026-10-06)
 EAR_R, PIN_R, PIN_HOLE_R, PIN_BOSS_R, PIN_MELT = 3.0, 1.0, 1.15, 2.2, 1.4
 
 
@@ -259,7 +261,10 @@ def button_tree():
     t += tree_strip((rx, rz), (BTN_X[1] + k, BTN_Z - k))
     t += tree_strip((BTN_X[0] + 5.1, BTN_Z), (BTN_X[1] - 5.1, BTN_Z), w=2.0, t=0.6)   # the thin link
     for x, z in TREE_EARS:
-        t += cyl_y(x, CAP_REST, z, EAR_R, TREE_T)
+        e = cyl_y(x, CAP_REST, z, EAR_R, TREE_T)
+        if x + EAR_R > EAR_FLAT_X:
+            e &= box(x - EAR_R - 1, CAP_REST - 1, z - EAR_R - 1, EAR_FLAT_X - (x - EAR_R - 1), TREE_T + 2, 2 * EAR_R + 2)
+        t += e
         t -= cyl_y(x, CAP_REST - 1, z, PIN_HOLE_R, TREE_T + 2)
     return t
 
