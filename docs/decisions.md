@@ -334,3 +334,5 @@ republished as zip `package` items - one data format for every package, the old 
 only through DOSBox**, an App with `Uses=dos-game` whose picker lists the `dos-game` packages (no MS-DOS row in the games
 list); the old Crispy Doom Apps are parked in `Apps/.replaced/` after their saves are copied; the Packages row shows only
 when a package exists; the player's own read-only `Packages/packages.ini` is allowed. Nothing in it depends on APPS-3.
+
+- **2026-10-07 - PE ports in the Store and the data Apps** (the owner, after the ABI-10 round 2 on the PSC): Store categories - game ports `games`, DOSBox `emulators`, game-data mods (freedoomdata, openarenadata, any `[datapackage]` port) the game-data package category; proc_pe DELETES an old data App (`pe-freedoomdata`, `pe-openarenadata`) when its data becomes a package (no `Apps/.replaced/` for data Apps - the mod stays in `Mods/done/`, no doubled space); BlastEm's second upstream bug (.smd files closed twice) is fixed in 1.0.0-4.
