@@ -139,7 +139,7 @@ PCB_HOLE_Y, PCB_HOLE_X, PCB_DIP_Y = 11.0, 6.0, 15.2   # from the board's front e
 PCB_FIT = 0.3                       # the step's gap to the board's front edge
 SOCKET_LIFT = 1.3                   # the socket's shell sits this much above the board's top (the owner's test print,
                                     # 2026-10-06: the pedestals 1.3 mm too high, the socket above the panel's window)
-SCREW_R = 0.95                      # a ~1.85 mm sheet-metal screw's hole, through the pedestal and the plate (the test
+SCREW_R = 0.85                      # a ~1.85 mm sheet-metal screw's hole, through the pedestal and the plate (the test
                                     # print: 1.6 mm blind pilots too tight and too short)
 
 
