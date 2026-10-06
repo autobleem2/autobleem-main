@@ -27,6 +27,8 @@ C = 0.15                     # panel clearance in its opening, each side
 TG, TGC = 1.2, 0.15          # tongue thickness (the panel's inner half) and its clearance in the groove
 TD = 1.2                     # how far a tongue reaches into its groove
 RIB = 1.45                   # the inner lip that closes a groove inside a straight wall
+EASE = 0.15                  # the shell's opening and grooves this much wider on every side than C/TGC alone, so the
+                             # top slides over the standing panels more easily (the owner's test print, 2026-10-06)
 ZT = H - ROOF                # the openings reach the roof's underside
 ACTIVE_VENTS = (BX + 35, BY + 31, 64.0, 8)   # over the Active Cooler (63.5 x 42.5 x 13.7 mm)
 
@@ -67,12 +69,13 @@ TAB = [(WALL - 0.3, SEAT - 0.8), (WALL + 0.8, SEAT), (WALL + 2.5, SEAT), (WALL +
 
 def cut_opening(s, name):
     wall, a0, a1, _, rz, ribs = OPENINGS[name]
-    v0, v1 = WALL - TG - TGC, WALL + TGC                       # the groove's span across the wall
-    for end, on in zip((a0 - TD - 0.2 - RIB, a1), ribs):       # the inner lips first, so the grooves cut through them
+    v0, v1 = WALL - TG - TGC - EASE, WALL + TGC + EASE         # the groove's span across the wall
+    g = TD + 0.2 + EASE                                        # how far a groove runs past the opening's end
+    for end, on in zip((a0 - g - RIB, a1), ribs):              # the inner lips first, so the grooves cut through them
         if on:
-            s += wbox(wall, end, v1 - 0.01, rz, TD + 0.2 + RIB, RIB, ZT - rz + 0.01)
-    s -= wbox(wall, a0, -1, -1, a1 - a0, WALL + 1.01, ZT + 1)                                # the opening
-    s -= wbox(wall, a0 - TD - 0.2, v0, -1, a1 - a0 + 2 * (TD + 0.2), v1 - v0, ZT + 1 + TD + 0.2)  # the grooves
+            s += wbox(wall, end, v1 - 0.01, rz, g + RIB, RIB, ZT - rz + 0.01)
+    s -= wbox(wall, a0 - EASE, -1, -1, a1 - a0 + 2 * EASE, WALL + 1.01, ZT + 1)              # the opening
+    s -= wbox(wall, a0 - g, v0, -1, a1 - a0 + 2 * g, v1 - v0, ZT + 1 + g)                    # the grooves
     return s
 
 
