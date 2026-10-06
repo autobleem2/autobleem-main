@@ -32,6 +32,7 @@ MIN = (Align.MIN, Align.MIN, Align.MIN)
 W, D = 140.0, 105.0                 # outer: x = width, y = depth (back = 0 -> front)
 WALL, ROOF, CUT = 2.4, 3.2, 16.0    # wall, roof (3.2: the vent slots' 45-degree run hides the inside), the cut corners (ab2.0.0)
 BASE_T, FIT = 3.0, 0.3              # floor plate thickness, its gap to the walls
+BRIDGE_STEP = 0.48                  # one bridge step over a screw-head recess: 3 layers at 0.16, 2 at 0.24
 STAND = 3.0                         # Pi standoff height above the plate (clears the microSD socket under the board)
 BX, BY = W - WALL - 2.0 - 85.0, WALL + 1.0      # the Pi board's corner: USB 2 mm past the board edge, HDMI 1 mm
 BZ = BASE_T + STAND                 # board underside
@@ -176,9 +177,14 @@ def base():
         b -= cyl_z(BX + hx, BY + hy, 1.0, 1.15, STAND + 3)                           # M2.5 self-tap
         b -= Pos(BX + hx, BY + hy, BASE_T + STAND - 0.6) * Cone(1.15, 1.75, 0.61,
                                                                 align=(Align.CENTER, Align.CENTER, Align.MIN))  # lead-in
-    for x, y in BOSSES:                                                              # M3 clearance + countersink
+    for x, y in BOSSES:                                                              # M3 clearance + head recess
         b -= cyl_z(x, y, -1, 1.7, BASE_T + 2)
         b -= Pos(x, y, -0.01) * Cylinder(3.2, 1.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        # the recess prints on the bed, so its ceiling would be a ring hanging in the air round the hole: two
+        # sacrificial bridge steps instead - a slot as wide as the hole across the recess (its sides bridge from rim
+        # to rim), then a square (its two new sides bridge across the slot) - and only then the round hole
+        b -= box(x - 3.2, y - 1.7, 1.7 - 0.01, 6.4, 3.4, BRIDGE_STEP + 0.01)
+        b -= box(x - 1.7, y - 1.7, 1.7 - 0.01, 3.4, 3.4, 2 * BRIDGE_STEP + 0.01)
     for fx, fy in ((22, 14), (W - 18, 14), (22, D - 14), (W - 30, D - 14)):          # feet recesses (Ø12 rubber)
         b -= cyl_z(fx, fy, -0.01, 6.2, 1.0)
     # reach the microSD from below: a finger's room (35 x 20), out from the board's edge - clear of the feet, the
