@@ -31,7 +31,7 @@ stick is the launcher's `docs/developer-guide.md`, "The quiet stick". This file 
 
 ```
 Packages/                         the stick (user-writable, ours and his)
-  pe-freedoomdata/                made from a .mod       package.ini   freedoom1.wad  freedoom2.wad  licences/
+  freedoom/                       from the Store (zip)   package.ini   freedoom1.wad  freedoom2.wad  licences/
   quake-shareware/                from the Store (zip)   package.ini   id1/pak0.pak
   Doom/DOOM.WAD  DOOM2.WAD        the player's own copy  (no descriptor; recognised from rc/packages.ini)
   DOS/Prince/PRINCE.EXE ...       the player's own copy  (recognised, or his own package.ini)
@@ -72,12 +72,15 @@ ignored, and **keys are flat** (IniFile has no sections) - games are numbered `G
 | `Readme` | no | A text file in the package (relative path), shown by the info view. |
 | `Source` | no | `store`, `mod` or `user`; the installer **stamps it** (`PackageInstaller` writes `store`, proc_pe writes `mod`); a hand-made descriptor says `user` or nothing. Shown as "Store" / "Mod" / "Your files". |
 | `StoreId` | no | The catalog id (`pkg/freedoom`), stamped by `PackageInstaller`; how the Store knows it installed the folder. |
-| `PeSource` | no | The `.mod` file name, stamped by proc_pe (the same key and meaning as in an App's `app.ini`). |
+| `PeSource` | no | The `.mod` file name, stamped by proc_pe when it makes a package from an old/third-party `.mod` (2.3). |
+| `Replaces` | no | App folders this package supersedes (`pe-freedoomdata`), `;` separated: `PackageInstaller` parks each one that exists in `Apps/.replaced/` after the package is in place (section 11). |
 | `Game<N>.Title` | yes (N from 1) | The game's display name (`Freedoom: Phase 1`). |
 | `Game<N>.File` | yes | The game's **main file**, relative to the package root, `/` separators, no `..`, not absolute: what `AB_PKG_FILE` becomes (a `.wad`, `id1/pak0.pak`, `PRINCE.EXE`). The name is resolved case-insensitively against the real folder; the real spelling is what the engine gets. |
 | `Game<N>.Id` | no | The game's id, same grammar as `Id`; default `game<N>`. It is also the `{package_game}` value; **keep it stable across versions** (saves are filed under it). |
 | `Game<N>.Kind` | no | This game's content kind; default the package's `Kind` (the first one when it lists several). |
 | `Game<N>.Variant` | no | Free text shown after the title in the picker's second line (`Phase 1`, `v1.9`). |
+| `Game<N>.Dosbox.<name>` | no | `dos-game` only: a per-game DOSBox setting - `Cycles`, `Memsize`, `Sound` (the DOSBox engine defines the names it reads; anything else is ignored). Passed as `AB_PKG_SET_<NAME>` (section 5.2). |
+| `Game<N>.Mapper` | no | `dos-game` only: a DOSBox mapper file in the package (relative path) for this game's keys; passed as `AB_PKG_MAPPER`. Absent = the engine's default. |
 | `Game<N>.Start<M>.File`, `Game<N>.Start<M>.Title` | no | Programs that start the game (M from 1): for a `dos-game`, the game itself and its SETUP (section 10). The first one is the default. Relative like `File`. |
 
 Rules the reader enforces (a violation drops the game or the package and logs one line - never a crash, never a write):
@@ -87,7 +90,7 @@ Rules the reader enforces (a violation drops the game or the package and logs on
   with no game left is not a package (the folder is then "unknown data");
 - keys that are not listed are ignored (room for later versions); a file larger than 64 KB is refused.
 
-Example, Freedoom as the proc_pe route makes it (`Packages/pe-freedoomdata/package.ini`):
+Example, Freedoom as pe_ports builds it (`Packages/freedoom/package.ini`, after the Store stamped it):
 
 ```
 [package]
@@ -98,8 +101,9 @@ Licence=BSD-3-Clause
 Author=The Freedoom project
 Description=Free game data for Doom engines: Phase 1 (the Ultimate Doom replacement) and Phase 2 (the Doom II replacement).
 Image=freedoomdata.png
-Source=mod
-PeSource=freedoomdata_0.13.0-1.mod
+Source=store
+StoreId=pkg/freedoom
+Replaces=pe-freedoomdata
 Game1.Id=freedoom1
 Game1.Title=Freedoom: Phase 1
 Game1.File=freedoom1.wad
@@ -138,47 +142,52 @@ Game2.File=Quake/id1/pak0.pak
 (For Quake, `AB_PKG_DIR` is the package root; a game whose files live in a sub-folder is better as its own package so
 that the root is the folder the engine expects - the table does this by itself, section 4.)
 
-### 2.3 How proc_pe makes one from a `kind=data` `.mod`
+### 2.3 How pe_ports builds one (and the old `.mod` route)
 
-Today a data port (`kind=data` in pe_ports' `port.ini`) becomes an App with an empty script (`pe-freedoomdata`,
-`pe-openarenadata`). From APPS-12 it becomes a package:
+Today a data port (`kind=data` in pe_ports' `port.ini`) becomes a `.mod` that proc_pe turns into an App with an empty
+script (`pe-freedoomdata`, `pe-openarenadata`). From APPS-12 **a data port builds a package zip and a Store item of
+kind `package`** - one data format for every package, no `.mod` for data:
 
-1. **pe_ports, `port.ini`**: a data port gets a `[package]` section (the keys of 2.2, same names, no `Game<N>`
-   numbering needed in the source - the generator writes it):
+1. **`port.ini`**: a data port (`kind=data`) gets a `[package]` section (the keys of 2.2, no `Game<N>` numbering in the
+   source - the generator writes it):
    ```
    [package]
    content_kind=doom-iwad
    games=freedoom1|Freedoom: Phase 1|freedoom1.wad;freedoom2|Freedoom: Phase 2|freedoom2.wad
+   replaces=pe-freedoomdata
    ```
-   (each game is `id|title|file`; the licence, author, version, description, image come from `[port]`). `tools/mkmod.py` validates it (the kind
-   grammar, every `file` present in the staged data) and writes `package.ini` into the launcher folder, and adds
-   `launcher_package="1"` to `launcher.cfg`. No `launch.sh` is generated for a data port, no `[launcher] binary` is
-   required; `ci/build.sh`'s "no binary" check for `kind=data` stays.
-2. **proc_pe**: a launcher folder with `launcher_package="1"` and a `package.ini` is a package, not an App. It is
-   unpacked and checked by the same code as today (the size limits, the path checks, the "links become copies" step),
-   then **laid into `Packages/pe-<launcher_filename>/`** (the same `pe-` prefix and the same atomic rename as an App,
-   so a half-made package never shows). proc_pe stamps `Source=mod` and `PeSource=<the .mod's file name>` into
-   `package.ini`, adds `Version=` from the control file when the descriptor has none, and `Image=<filename>.png` when
-   the launcher folder has that icon. A launcher folder without `launcher_package` is processed exactly as today.
-3. **Replace / refuse / skip** work like an App's: the same folder from the same `PeSource` and an older version is
-   replaced, a newer installed version refuses the older one with a `#WARN`, the same version from the same file does
-   nothing, a folder that exists without our `PeSource` is left alone and warned about.
-4. **Removal**: `ModInstaller::remove` also removes every `Packages/*` whose `package.ini` says `PeSource=<this file>`
-   (after the `.mod`, before the processor's marker, as for the Apps). `ModInstaller::present` also counts it.
-5. **The state marker** stays where it is today (`Apps/.pe_state/`): it is ours, not the player's folder.
-6. **Engine ports** keep making Apps; `port.ini` `[port]` gets `uses=` (a `;` list) and optionally `package_dir=`
+   (each game is `id|title|file`; the licence, author, version, description, image come from `[port]`). A `dos-game`
+   port may add `start=`, `mapper=` and `dosbox.<name>=` lines (2.2).
+2. **`tools/mkmod.py`** (a `--package` output for a data port, the `.mod` output stays for engine ports): validates the
+   section (the kind grammar, every `file` present in the staged data), writes `package.ini` (no stamps) and packs the
+   data, `package.ini`, the icon as `Image`, `licences/` and `SOURCE.txt` into **`<id>-<version>.zip`** (one folder or
+   the root, 2.4). The licence/source-offer files of today's `.mod` stay in the zip. `ci/build.sh`'s "no binary" check
+   for `kind=data` stays; a data port without `[package]` fails the build.
+3. **The Store item** the build writes (`tools/store_item.py` of the repo, or mkmod's catalog line): `kind: "package"`,
+   `category: "packages"`, `provides`, the zip as its one file with size and sha256, `requires` empty (section 8). The
+   engines' items point at it with `requires` (`lzdoom` -> `pkg/freedoom`, `ioquake3` -> `pkg/openarena`).
+4. **Engine ports** keep making `.mod` Apps; `port.ini` `[port]` gets `uses=` (a `;` list) and optionally `package_dir=`
    (a relative folder), which `mkmod.py` writes as `launcher_uses="doom-iwad;heretic-iwad"` and
    `launcher_package_dir="WAD"` in `launcher.cfg`; proc_pe copies them to `app.ini` as `Uses=` and `PackageDir=`. A
    value that does not fit the grammar is dropped with a `#WARN`. The engine's `launch.sh` reads the choice from
    `AB_PKG_*` (section 5) - the environment reaches it through `rc/pe_run.sh` unchanged.
+5. **The old data Apps migrate** when the package is installed (section 11): `Replaces=pe-freedoomdata` parks the old App.
+
+**Is proc_pe's `.mod` -> package route still needed? Not for our data - recommended: build it anyway, small, for
+old and third-party `.mod`s.** Nothing of ours uses it after step 2. A third-party or older `.mod` that holds only data
+(`launcher_package="1"` in `launcher.cfg` plus a `package.ini` in the launcher folder) is made into `Packages/pe-<launcher_filename>/`
+with the same checks as an App (size limits, path checks, links become copies, atomic rename), `Source=mod` and
+`PeSource=<the .mod>` stamped, replace/refuse/skip rules as for Apps, removal and `present` through `ModInstaller`
+(also covering `Packages/`). It is a few dozen lines on code that exists; dropping it would leave a `.mod` of data in
+`Mods/` making an App with nothing to run. If the lead prefers less code, the alternative is proc_pe refusing such a mod
+with a `#WARN` ("data mods are packages: use the Store's zip") - the spec works either way, nothing else depends on it.
 
 ### 2.4 How the Store installs one
 
-Two routes, one result (a folder in `Packages/` with a `package.ini`):
+One route for our data, one result (a folder in `Packages/` with a `package.ini`). Data built by pe_ports (Freedoom,
+OpenArena ...) is a `package` item like any other (2.3); only old/third-party `.mod`s still reach `Packages/` through
+proc_pe.
 
-- **PE-built data** (Freedoom, OpenArena ...) stays catalog `kind: "pe"`: the `.mod` goes to `Mods/` and proc_pe makes
-  the package (2.3). No change in how ext_store installs it; it only gains `category: "packages"`, `provides`, and its
-  engines' `requires` (section 8).
 - **A `package` item** (catalog `kind: "package"`, section 8) has one file: a `.zip`, `.tar.gz` or `.7z` that holds
   `package.ini` at its root or inside its one folder. `PackageInstaller::install(archive, packagesDir, stagingDir)`
   works like `AppInstaller`: unpack to staging on the same filesystem, find the descriptor, **validate it with the
@@ -189,7 +198,7 @@ Two routes, one result (a folder in `Packages/` with a `package.ini`):
   failure leaves the old one); an equal or older version is a no-op. Any failure leaves `Packages/` untouched.
   `PackageInstaller::remove(folder)` removes **only** a folder whose descriptor says `Source=store` or `Source=mod`
   - never a player's folder, never one without a descriptor.
-- After either route the Store asks the launcher for a scan of `Packages/` only (`requestRescan(ScanPackages)`, section 9).
+- After the install the Store asks the launcher for a scan of `Packages/` only (`requestRescan(ScanPackages)`, section 9).
 
 ## 3. Content kinds
 
@@ -227,14 +236,15 @@ To add a kind: (1) a row (or rows) in `rc/packages.ini` for the player's files, 
 | `sw-grp` | Shadow Warrior's group file | `SW.GRP` | the `.grp` | JFSW | "Shadow Warrior data" |
 
 `AB_PKG_DIR` is the package root in every row - the folder an engine would be pointed at (`-basedir`,
-`fs_basepath`, `-j`). The file names are matched case-insensitively. The identifying files above were taken from the
-engines and from the shipped data; **the implementer checks each one against a real copy** when the table is written
-(and records the sizes of the variants the owner can measure).
+`fs_basepath`, `-j`). The file names are matched case-insensitively. **Verification status:** the identifying files above were taken from the engines and published lists. **Only Quake's
+(`id1/pak0.pak` + `id1/pak1.pak`, the full game) is to be verified at the device round** - the owner has that copy. **Every
+other row is marked `# verify against a real copy` in the shipped table** and the implementer must not treat it as
+confirmed; the Freedoom rows are verifiable from our own build.
 
 ### 3.4 Not kinds (for alpha1.2)
 
 - **PWADs / Doom mods** are not a kind: they are add-ons to an IWAD (the engine needs an IWAD *and* the mod), and the
-  picker chooses one thing. They stay in the engine's own `MODS/` folder (LZDoom). Open question 1.
+  picker chooses one thing. They stay in the engine's own `MODS/` folder (LZDoom). (the owner, 2026-10-06).
 - Wolf3D, Commander Keen, OpenJazz and the other shareware ports keep their data inside their App. Moving one to a
   package later is the one-line procedure of 3.2.
 
@@ -277,11 +287,15 @@ file starts with `# autobleem-packages 1`.
 | `variant` | no | Free text for the picker's second line (`v1.9`). |
 | `licence` | no | Shown in the info view (`Shareware`, `Free`). |
 | `start` | no | For `dos-game`: `FILE|Title;FILE|Title` - the programs that start it (like `Start<M>` of a descriptor). |
+| `set.<name>` | no | For `dos-game`: a DOSBox setting (`set.cycles=3000`), like `Dosbox.<name>` of a descriptor. |
+| `mapper` | no | For `dos-game`: a mapper file, relative to the root. |
 
 Initial shipped table (the implementer completes it; ordering matters - a specific row before a generic one):
 
 ```
 # autobleem-packages 1
+# rows marked 'verify' were not checked against a real copy; only [quake] is checked at the device round
+# verify against a real copy
 [doom1-shareware]
 kind=doom-iwad
 title=Doom (Shareware)
@@ -289,12 +303,14 @@ match=DOOM1.WAD
 magic=IWAD
 licence=Shareware
 
+# verify against a real copy
 [doom]
 kind=doom-iwad
 title=Doom
 match=DOOM.WAD
 magic=IWAD
 
+# verify against a real copy
 [doom2]
 kind=doom-iwad
 title=Doom II: Hell on Earth
@@ -302,6 +318,7 @@ match=DOOM2.WAD
 magic=IWAD
 
 # Final Doom: [tnt] is TNT.WAD, [plutonia] is PLUTONIA.WAD - the same shape as [doom2]
+# verify against a real copy
 [tnt]
 kind=doom-iwad
 title=Final Doom: TNT - Evilution
@@ -309,6 +326,7 @@ match=TNT.WAD
 magic=IWAD
 
 # [freedoom2], [freedm] (FREEDM.WAD), [chex] (CHEX.WAD) and [hacx] (HACX.WAD) have the same shape
+# verify against a real copy
 [freedoom1]
 kind=doom-iwad
 title=Freedoom: Phase 1
@@ -317,6 +335,7 @@ magic=IWAD
 licence=BSD-3-Clause
 
 # [hexen] (HEXEN.WAD) and [strife] (STRIFE1.WAD) likewise, each with its own kind
+# verify against a real copy
 [heretic]
 kind=heretic-iwad
 title=Heretic
@@ -328,6 +347,7 @@ kind=quake-id1
 title=Quake
 match=id1/pak0.pak;id1/pak1.pak
 
+# verify against a real copy
 [quake-shareware]
 kind=quake-id1
 title=Quake (Shareware)
@@ -335,27 +355,32 @@ match=id1/pak0.pak
 size=18689235
 licence=Shareware
 
+# verify against a real copy
 [quake-id1]
 kind=quake-id1
 title=Quake (id1 data)
 match=id1/pak0.pak
 
+# verify against a real copy
 [openarena]
 kind=q3-openarena
 title=OpenArena
 match=baseoa/pak0.pk3
 licence=GPL-2.0
 
+# verify against a real copy
 [quake3]
 kind=q3-baseq3
 title=Quake III Arena
 match=baseq3/pak0.pk3
 
+# verify against a real copy
 [theme-hospital]
 kind=theme-hospital
 title=Theme Hospital
 match=DATA/VBLK-0.DAT;QDATA/FONT00V.DAT
 
+# verify against a real copy
 [duke3d-shareware]
 kind=duke3d-grp
 title=Duke Nukem 3D (Shareware)
@@ -363,11 +388,13 @@ match=DUKE3D.GRP
 size=11035779
 licence=Shareware
 
+# verify against a real copy
 [duke3d]
 kind=duke3d-grp
 title=Duke Nukem 3D
 match=DUKE3D.GRP
 
+# verify against a real copy
 [sw]
 kind=sw-grp
 title=Shadow Warrior
@@ -375,7 +402,7 @@ match=SW.GRP
 ```
 
 (The sizes above are the commonly published sizes of the Quake 1.06 shareware `pak0.pak` and the Duke Nukem 3D 1.3d
-shareware group file; the implementer re-measures them against the real files before shipping the table. Variant rows
+shareware group file; they are unverified. Variant rows
 for other versions - registered/atomic Duke, Shadow Warrior's shareware - are added the same way when someone has the
 file to measure. An unknown version still matches the generic row, so it is never refused for being unlisted.)
 
@@ -456,6 +483,8 @@ After the pick (section 6) the launcher sets, in `LaunchService::appEnvironment`
 | `AB_PKG_ID` | `<package id>/<game id>` - the key of the choice and of the engine's per-game saves. |
 | `AB_PKG_GAME` | The game's id alone (`freedoom2`, `doom2`). |
 | `AB_PKG_STARTS` | Only when the game has `Start` programs: `FILE|Title;FILE|Title` - the first is the default. |
+| `AB_PKG_SET_<NAME>` | One per `Game<N>.Dosbox.<name>` (or table `set.<name>=`) of the chosen game, name upper-cased: `AB_PKG_SET_CYCLES`, `AB_PKG_SET_MEMSIZE`, `AB_PKG_SET_SOUND`. |
+| `AB_PKG_MAPPER` | Absolute path of the game's mapper file (`Game<N>.Mapper` / table `mapper=`), when it has one. |
 
 Paths use the stick's real mount point (`/media/Autobleem/Packages/...` on the console), so a script started from
 `/var/volatile/launchtmp` reads them as they are. An App started with no choice (no `Uses=`) gets none of these
@@ -597,10 +626,10 @@ and changed catalog fields, JSON (`store/<platform>/catalog.json`) and TSV (colu
 
 | Field | Meaning |
 |---|---|
-| `category` | Already added by the Store item types work (branch `feature/store-types`): the item's type, lower case. A package item (and a PE data item) says **`packages`**; the launcher's `AppCategory` names stay `games`, `emulators`, `tools`, `media`, `other`, `pe`, `packages`. An installed App takes the catalog's category only when its `app.ini` names none - an App is never put in `packages`. |
+| `category` | Already added by the Store item types work (branch `feature/store-types`): the item's type, lower case. A package item says **`packages`**; the launcher's `AppCategory` names stay `games`, `emulators`, `tools`, `media`, `other`, `pe`, `packages`. An installed App takes the catalog's category only when its `app.ini` names none - an App is never put in `packages`. |
 | `provides` | **New.** The content kinds a package item holds (`["doom-iwad"]`). Lower-cased, trimmed, unknown kept. For display ("Content") and for the engine's "needs game data" hint. |
 | `uses` | **New.** The content kinds an engine item runs - the same list as its `app.ini` `Uses=`. For display and the hint. |
-| `requires` | Already read into `dependsOn` and ignored; now honoured (8.2). The ids of other items (`pkg/freedoom`, `pe/freedoomdata`). |
+| `requires` | Already read into `dependsOn` and ignored; now honoured (8.2). The ids of other items (`pkg/freedoom`, `pkg/openarena`). |
 
 ```json
 {"id": "pkg/quake-shareware", "kind": "package", "title": "Quake (Shareware)", "version": "1.06",
@@ -659,30 +688,35 @@ picked entry leave the tree snapshot unchanged (the only allowed write is `ab_se
 
 ## 10. DOSBox (APPS-10) as a consumer
 
-- A DOS game is a package of kind `dos-game`: a `package.ini` (ours) or a table row / the player's own descriptor with
-  `Game1.File` = the game's main program and `Game1.Start<M>.*` / `start=` for the programs the engine may offer
-  (the game, `SETUP.EXE`, an installer).
-- The DOSBox App has `Uses=dos-game`. The launcher's picker is the game list (the same screen, so no separate
-  "choose a game" dialog); after the pick the engine gets `AB_PKG_DIR` (to mount as `C:`), `AB_PKG_FILE` (the default
-  program) and `AB_PKG_STARTS`. **When there are two or more starts the DOSBox engine's start script offers them**
-  (its own dialog, APPS-10's) and runs the chosen one; with one start it runs it.
+The owner's decision (2026-10-06): **DOS games are reached only through DOSBox.** DOSBox is an App with `Uses=dos-game`; there
+is no MS-DOS row in the games list and no "runtime-only" concept.
+
+- A DOS game is a package of kind `dos-game`: a `package.ini` (ours, from the Store) or the player's own descriptor / a
+  row of his `Packages/packages.ini`. The descriptor carries, per game: `Game<N>.File` (the main program), the **start
+  programs** (`Game<N>.Start<M>.*` / `start=`: the game, `SETUP.EXE`), the **per-game DOSBox settings**
+  (`Game<N>.Dosbox.Cycles`, `.Memsize`, `.Sound`) and an **optional per-game mapper file** (`Game<N>.Mapper`) - 2.2.
+- The flow: the player starts DOSBox -> the launcher's picker lists the `dos-game` packages (the same screen as every
+  engine) -> after the pick the engine gets `AB_PKG_DIR` (to mount as `C:`), `AB_PKG_FILE`, `AB_PKG_STARTS`,
+  `AB_PKG_SET_*` and `AB_PKG_MAPPER` -> **with two or more starts the DOSBox start script shows its program choice
+  (Game / Setup)** and runs the chosen one; with one start it runs it. DOSBox with no `dos-game` package shows the
+  launcher's "No game data found" message with how to add games.
 - `AB_PKG_DIR` is read-only (5.2): DOS games write saves next to themselves, so DOSBox mounts the package folder
-  read-only and puts an **overlay in its own App folder** (`<App>/overlay/<package id>/`, for DOSBox-staging's
-  `mount -t overlay` or an equivalent) where the game's writes land. Saves therefore survive and the player's folder is
-  untouched. This is part of the engine's work (APPS-10), listed here because it is the contract it must meet.
-- APPS-10 said DOSBox is "a runtime ... not a launchable App" and "a DOS game is its own App package": under APPS-12 a
-  DOS game is a package and DOSBox is the App that runs the kind (open question 3). Its icon can still sit in a Select
-  group through its `Category=`.
-- The Store's "MS-DOS games" section = catalog items `kind: "package"`, `provides: ["dos-game"]`, `requires` nothing;
-  the DOSBox item's `uses: ["dos-game"]` gives the "Needs game data" hint.
+  read-only and puts an **overlay in its own App folder** (`<App>/overlay/<package id>/`, DOSBox-staging's
+  `mount -t overlay` or an equivalent) where the game's writes land. Saves survive, the player's folder is untouched.
+  The engine's work (APPS-10); listed here as the contract it must meet.
+- **This spec does not depend on APPS-3** (the pad's keyboard mode, moved to alpha2): the picker and the program choice
+  are launcher/engine screens on the normal pad, and a game's keys come from its optional mapper file. Until APPS-3,
+  games that need keys are limited by what the mapper file can bind.
+- The Store's "MS-DOS games" = catalog items `kind: "package"`, `provides: ["dos-game"]`; the DOSBox item's
+  `uses: ["dos-game"]` gives the "Needs game data" hint. A new DOSBox icon is designed separately.
 
 ## 11. Migration of the old data Apps (nothing lost, nothing deleted)
 
 | Today | After |
 |---|---|
-| `Apps/pe-freedoomdata`, `Apps/pe-openarenadata` (PE data Apps; no saves, only data files) | The new `.mod` of the same port id makes `Packages/pe-freedoomdata` (2.3). proc_pe sees the old `Apps/pe-<id>` carrying our `PeSource` for the same port and **removes that App folder** in the same operation as it lays the package (the App holds only the downloaded data, which the package now holds; a failure to lay the package leaves the App). An `Apps/pe-<id>` without our `PeSource` is left alone and warned about (as today). |
-| lzdoom's `LZ_FREEDOOM=../pe-freedoomdata` and ioquake3's `OA_DATA` | Replaced by `AB_PKG_*` in the same pe_ports release as the packages (`requires=` keeps pointing at the data port, so the Store installs both). The engine's own data (`WAD/`, saved games, `lzdoom.ini`) is not moved. |
-| Crispy Doom's three Apps `Apps/doom`, `Apps/freedoom1`, `Apps/freedoom2` (each with its own `savegames/`, `default.cfg`, `crispy-doom.cfg`) | One App `Apps/crispydoom`, `Uses=doom-iwad`; the data is two Store packages (`pkg/doom-shareware`, shared Freedoom `pe/freedoomdata` or its zip twin) that the App `requires`. **Saves are filed per game**: `-savedir savegames/{package_game}`, where the game id is the row id / `Game<N>.Id` (`doom1-shareware`, `freedoom1`, `freedoom2`). |
+| `Apps/pe-freedoomdata`, `Apps/pe-openarenadata` (PE data Apps; no saves, only data files) | The Store's new `pkg/freedoom` / `pkg/openarena` zip package installs `Packages/freedoom` (2.3, 2.4); its `Replaces=pe-freedoomdata` makes `PackageInstaller` **park the old App** in `Apps/.replaced/` once the package is in place (a failed install leaves the App; an App that is not ours - no `PeSource=` - is left alone). The old `.mod` in `Mods/done/` is inert (never reprocessed). The old catalog ids `pe/freedoomdata`, `pe/openarenadata` leave the catalog; the Store lists them as "installed, not in the catalog" until removed (Remove deletes the parked/old data as today). |
+| lzdoom's `LZ_FREEDOOM=../pe-freedoomdata` and ioquake3's `OA_DATA` | Replaced by `AB_PKG_*` in the same pe_ports release as the packages (`requires=` points at the data package, so the Store installs both). The engine's own data (`WAD/`, saved games, `lzdoom.ini`) is not moved. |
+| Crispy Doom's three Apps `Apps/doom`, `Apps/freedoom1`, `Apps/freedoom2` (each with its own `savegames/`, `default.cfg`, `crispy-doom.cfg`) | One App `Apps/crispydoom`, `Uses=doom-iwad`; the data is two Store packages (`pkg/doom-shareware`, shared Freedoom `pkg/freedoom`) that the App `requires`. **Saves are filed per game**: `-savedir savegames/{package_game}`, where the game id is the row id / `Game<N>.Id` (`doom1-shareware`, `freedoom1`, `freedoom2`). |
 
 **The Crispy Doom saves migration** is declared by the new App's `app.ini` and done once by `AppInstaller` when the new
 App is installed (Store or by hand): 
@@ -695,7 +729,7 @@ Migrate=doom:savegames>savegames/doom1-shareware; freedoom1:savegames>savegames/
 - `Migrate` entries are `<old App folder>:<path in it>><path in the new App>`; a path is a file or a folder. **Copy, never
   move**; a destination that already exists is not overwritten; an entry whose source is missing is skipped. The
   operation is idempotent (a second install copies nothing new).
-- `Replaces=` names the old Apps. After the copies **succeed**, each old App folder is **moved** (renamed, the same
+- `Replaces=` names the old Apps (the same key serves a package's `package.ini`, 2.2). After the copies **succeed**, each old App folder is **moved** (renamed, the same
   filesystem) to `Apps/.replaced/<name>/` - hidden from the Apps scan (dot-folders are skipped), restorable by the
   player by moving it back, never deleted. If any copy failed, nothing is moved and the old Apps stay beside the new one.
 - The old Store ids (`app/doom`, `app/freedoom1`, `app/freedoom2`) leave the catalog in the same release; the Store's
@@ -724,12 +758,12 @@ a real stick. The scan tests use a faithful in-memory listing where the real fil
   a table row inside it; loose files at `Packages/`; hidden/`$`/`System Volume Information` skipped; a grouping folder is
   not unknown, an empty or non-matching one is; the same game twice = two entries; ids stable across scans; a missing
   `Packages/` = an empty index and **no directory created**.
-- `test_package_ini`: every key of 2.2, `Game<N>` gaps stop the list, a missing file drops the game, an escaping path
+- `test_package_ini`: every key of 2.2 (`Replaces`, `Dosbox.*`, `Mapper` included), `Game<N>` gaps stop the list, a missing file drops the game, an escaping path
   (`..`, absolute, a drive letter) drops it, a bad kind/id is rejected, a 64 KB+ file is refused, `Start` lists, `Kind`
   list vs per-game kind.
 - `test_package_match`: an App's `Uses=` against kinds (case, blanks, several kinds, empty = no picker), the entries'
   order, an engine `PackageDir` source, an unknown kind kept.
-- `test_launch` additions: `AB_PKG_*` present only with a choice; every placeholder; an unknown `{x}` untouched; a path
+- `test_launch` additions: `AB_PKG_SET_*` and `AB_PKG_MAPPER` from a dos-game choice; `AB_PKG_*` present only with a choice; every placeholder; an unknown `{x}` untouched; a path
   with a blank is **one** argument on the direct route and quoted on the script route; `Env=` placeholders; a `package`
   game refuses to launch.
 - `test_app_manifest`: `Uses` and `PackageDir` parse, with blanks and case.
@@ -740,7 +774,7 @@ a real stick. The scan tests use a faithful in-memory listing where the real fil
 - `test_store_catalog`: `provides`, `uses`, `requires`, `category` in JSON and TSV; `kind: package` kept; an item without them unchanged.
 - `test_content_installer`: `PackageInstaller` install / replace-newer / no-op-same / refuse-broken (nothing left in
   `Packages/`) / FAT-safe and duplicate folder names / stamps `Source` and `StoreId` / `remove` only stamped folders, never
-  a player's; `ModInstaller::remove` and `present` with a package made from a mod; `Replaces`/`Migrate` copy, no
+  a player's; `Replaces=` in a package parks the old App only after the install succeeded; `ModInstaller::remove` and `present` with a package made from a mod; `Replaces`/`Migrate` copy, no
   overwrite, idempotent, nothing moved after a failed copy, old App parked in `Apps/.replaced`.
 - `test_scan_scope`/`test_scan_service`: `ScanPackages` is in `ScanAll`; the watcher asks for it when the top-level
   listing signature changes and for nothing when it does not.
@@ -755,15 +789,16 @@ a package opens the info view and never calls the launch path; the info view's "
 over every new key in all 16 languages; the shots walk (two entries, eight, a long title, "No game data", the Packages row
 and an info view; 16:9 and 4:3; five themes) on a VM sandbox through `ab_drive.py`.
 
-**proc_pe**: a `.mod` with `launcher_package="1"` makes `Packages/pe-<name>/` with `package.ini` stamped (`Source=mod`,
+**proc_pe** (only if the old-`.mod` route is kept, 2.3): a `.mod` with `launcher_package="1"` makes `Packages/pe-<name>/` with `package.ini` stamped (`Source=mod`,
 `PeSource`, `Version`, `Image`) and **no App and no `launch.sh`**; a missing or invalid `package.ini` = `#WARN`, nothing
 added; a game file that does not exist = refused; path traversal and over-size limits as for Apps; replace / older
 refused / same skipped / foreign folder left alone; the old `Apps/pe-<id>` with our `PeSource` is removed only after the
 package is in place; an engine launcher folder's `launcher_uses`/`launcher_package_dir` become `Uses=`/`PackageDir=`
 and an invalid value is dropped with a warning; every existing test unchanged.
 
-**pe_ports**: `mkmod.py` tests: a `[package]` section validates (kind grammar, every game file in the staged data), writes
-`package.ini` and `launcher_package`; an engine's `uses=`/`package_dir=` land in `launcher.cfg`; a data port without a
+**pe_ports**: `mkmod.py` tests: a `[package]` section validates (kind grammar, every game file in the staged data) and builds
+`<id>-<version>.zip` with `package.ini` (accepted by core's reader and `PackageInstaller`) plus a `package` Store item with
+`provides`, size and sha256; `replaces`, `start`, `mapper` and `dosbox.*` reach `package.ini`; an engine's `uses=`/`package_dir=` land in `launcher.cfg`; a data port without a
 `[package]` section fails the build; the engines' start scripts (`psc-pad.sh` of lzdoom, ioquake3, CorsixTH, tyrquake) run
 under `sh -n` and, with `AB_PKG_FILE`/`AB_PKG_DIR`/`AB_PKG_KIND` set in a temporary folder, produce the expected `-iwad`,
 `fs_basepath`, `com_basegame`, `theme_hospital_install`.
@@ -797,25 +832,18 @@ route), `docs/developer-guide.md` (a short "Packages" section and the quiet-stic
 `docs/pe-store-plan.md` (data ports), the pe_ports `README.md` ("port.ini": `[package]`, `uses`, `package_dir`), proc_pe's
 `CLAUDE.md`, each `app_*` `CLAUDE.md`.
 
-## 14. Open questions for the owner
+## 14. Decisions (the owner, 2026-10-06) and what is left
 
-1. **Doom mods (PWADs): a package kind, or stay in the engine's `MODS/` folder?** Recommended: **stay in `MODS/`** for
-   alpha1.2 - a mod needs an IWAD *and* the mod, the picker chooses one thing, and LZDoom already loads `MODS/` as it is.
-   A `doom-pwad` kind with "pick a game, then pick add-ons" can be a later row.
-2. **Store data built by pe_ports: keep as `.mod` (kind `pe`) or republish as zip `package` items?** Recommended: **keep
-   `.mod`** (no extra install code on the console for them, the route works today) and use the zip `package` kind for data
-   that has no `.mod` (Doom shareware, Quake shareware, DOS games).
-3. **DOSBox: the App that runs `dos-game` packages (this spec), or a runtime that is not launchable (APPS-10 as written)?**
-   Recommended: **the App with `Uses=dos-game`** - the picker is then the game list and nothing else is needed; its Select
-   group icon stays possible.
-4. **The three Crispy Doom Apps: after the copy of the saves, park the old Apps in `Apps/.replaced/` (this spec), or leave
-   them beside the new one?** Recommended: **park them** (reversible, no duplicate icons); the alternative is the safest for
-   saves but leaves three Apps that no longer get updates.
-5. **The Packages row: only when there is at least one package (like the PE row), or always?** Recommended: **only when
-   there is one** - the same as PE; with none, the "No game data" message already explains where to put files.
-6. **A player's own `Packages/packages.ini` (one row adds an unlisted game).** Recommended: **yes** (read-only, costs a few
-   lines). Without it an unlisted DOS game needs a `package.ini` per game.
-7. **Originals for the test round:** the sizes and file names in 3.3 and 4.3 come from published lists; each is re-checked
-   on a real copy by the implementer, so for step 8 the owner needs to lend Doom II (or Doom), Quake (registered), Theme
-   Hospital, a DOS game and, if he has them, Duke Nukem 3D / Shadow Warrior - or the table ships with the generic rows
-   only for those he cannot test.
+Answered, and written into this spec:
+
+1. Doom mods (PWADs) **stay in the engine's `MODS/` folder** for alpha1.2 (3.4). A `doom-pwad` kind is a later row.
+2. pe_ports data (Freedoom, OpenArena) is **republished as zip `package` items**; one data format for every package
+   (2.3). The old data Apps migrate (11). proc_pe's `.mod` data route is kept only for old/third-party mods (2.3).
+3. DOSBox is an App with `Uses=dos-game`; **DOS games are reached only through DOSBox** (10).
+4. The three old Crispy Doom Apps are **parked in `Apps/.replaced/`** after the saves are copied (11).
+5. The Packages row shows **only when at least one package exists** (7).
+6. The player's own read-only `Packages/packages.ini`: **yes** (4.2).
+7. For the device round the owner has only the full Quake (`id1/pak0.pak` + `pak1.pak`); every other identifying-file row
+   is marked "verify against a real copy" (3.3, 4.3) and Quake's is verified at the round.
+
+Still for the lead: whether to keep the small old-`.mod` data route in proc_pe (2.3 recommends yes).
