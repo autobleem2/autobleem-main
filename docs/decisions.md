@@ -316,3 +316,21 @@ is as wide as its one-row footer needs (at least today's 800 px), up to the full
 40 px margins). Only when even the full width cannot hold it does the footer step down to the Small font, and only
 then are labels shortened. Never two rows. The launcher's own hint bar (EvolutionUI) has its own rules and is not
 covered by this.
+
+## Packages: one game-data format for every engine (the owner, 2026-10-06)
+
+Game data (Freedoom, Quake's `id1`, OpenArena, Theme Hospital, DOS games, the Duke / Shadow Warrior group files) lives
+in **packages** in their own `Packages/` folder, not in an App per data set. A package names its **content kind**
+(`doom-iwad`, `quake-id1`, ...); an engine's `app.ini` names the kinds it runs (`Uses=`); the launcher shows its own
+picker (one match starts at once, none says how to add data) and hands the choice over in `AB_PKG_*` and `{package}`.
+The player's own original files dropped into `Packages/` are recognised from a table (`rc/packages.ini`), read only -
+nothing is written into his folders and nothing about them on the stick (the index is in RAM). We only ever ship free
+data. A package is never launched. The Store gets a `package` kind and honours `requires` (install together), in the
+ABI 10 bump with the item types. The specification, with the formats, the kinds, the picker, the migration of the old
+data Apps and the tests of every repository: `docs/packages.md` (todo APPS-12).
+
+Answers (2026-10-06): Doom PWAD mods stay in the engine's `MODS/`; data built by pe_ports (Freedoom, OpenArena) is
+republished as zip `package` items - one data format for every package, the old data Apps migrate; **DOS games are reached
+only through DOSBox**, an App with `Uses=dos-game` whose picker lists the `dos-game` packages (no MS-DOS row in the games
+list); the old Crispy Doom Apps are parked in `Apps/.replaced/` after their saves are copied; the Packages row shows only
+when a package exists; the player's own read-only `Packages/packages.ini` is allowed. Nothing in it depends on APPS-3.
