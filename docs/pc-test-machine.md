@@ -77,7 +77,7 @@ forward reconnects every 5 s).
 
 ## Installing a nightly
 
-Two ways, depending on what is being tested:
+Three ways, depending on what is being tested:
 
 **A - in place, through the launcher's own updater** (what a real user does; use this when the launcher on
 the stick already runs and the test is about the update path itself, or about whatever changed since the
@@ -100,6 +100,58 @@ regression test needs - and the only option before any launcher has ever run on 
    every time (the auto-mode safety classifier also refuses an agent-run `dd` on its own; the owner runs it,
    or explicitly allows that class of command first).
 4. Boot (VM passthrough or real hardware) into the fresh first-boot setup wizard.
+
+**C - the VM stick's nightly, by the package update path** (PLATFORM-14, 2026-10-07; what keeps the stick on the
+newest nightly without a `dd`; the same steps `autobleem-update` runs after the launcher's own download):
+1. `nightly/latest.json` on the site names the newest `pcusb` package (`autobleem-pcusb-i386-<v>.tar.gz`, sha256).
+   In the guest (`abvm.py guest`, the VM lease): `curl` it into `/media/autobleem/System/Updates/`, check the sha256,
+   write `System/Updates/pending.json` = `{"autobleem_version": "<v>", "autobleem_file": "<file>"}`.
+2. `sudo systemctl stop autobleem; sudo autobleem-update` - unpacks the package in `/var/tmp`, runs its
+   `install.sh --update` (games, saves, settings, Home/ and System/Processors/ are kept; 35 s), logs to
+   `System/Logs/update.log`, removes `System/Updates/`.
+3. `abvm.py restart`; `cat /media/autobleem/VERSION` and the launcher's corner tag (NIGHTLY + the short version)
+   say it worked. Never `abvm.py install <dist> launcher` for this (it leaves the old `VERSION` and overwrites
+   `config.ini`).
+
+## The test data set on the VM stick (PLATFORM-14)
+
+`tools/vm/vm_testdata.py` (launcher repository) lays one prepared, repeatable data set on the stick - generated or
+free content only, no copyrighted games - and can lay it again after any reinstall or update:
+
+```bash
+python tools/vm/abvm.py --who <name> lock take <task> 30        # the VM lease first
+python tools/vm/vm_testdata.py lay   --who <name>               # generate, ship to the guest, unpack, restart, Re-scan games
+python tools/vm/vm_testdata.py check --who <name>               # read-only: names what of the set is missing
+python tools/vm/vm_testdata.py build <dir>                      # the same tree into a local folder (a stick root), no VM
+```
+
+It is idempotent: the guest unpacks with `tar --skip-old-files`, so a file already on the stick - whatever the scan,
+the launcher or a tester wrote there (`Game.ini`, `pcsx.cfg`, covers, a card a tester played) - is never replaced and
+nothing is duplicated (verified: a second `lay` leaves the md5 of all 1214 files of the set unchanged). It writes only
+inside `Games/`, `RetroArch/roms/<system>/` and `Apps/<app>/`; never `config.ini`, `System/`, `Themes/`, `Extensions/`,
+the launcher, or Tetrade (the installer's own sample game, its saves and srm/mcd). To get a piece back to its
+generated state, delete that folder/file on the stick and run `lay` again. The free downloads are sha256-pinned in
+the script and cached in `<temp>/ab-testdata-cache`.
+
+| Piece | What | Where it shows |
+|---|---|---|
+| 8 generated PS1 games | `make_usb.py`'s fake games (generated bin/cue, a `SLUS_nnn.nn` file in the ISO, serials SLUS-01234..41), over `Games/`, `Action`, `Action/Platformers`, `RPG`, `Puzzle`. The cover DB knows these serials, so the scan shows real titles and covers for most (Rayman 2, Madden NFL 2001, Lunar 2 ...) - the game *content* is still generated | carousel, set picker (10 games with Tetrade) |
+| 1 multi-disc game | `Games/RPG/Fake Chronicles/`: `(Disc 1)` and `(Disc 2)`, serials SLUS-99901/02 (in no DB, so the title and the 404 cover stay) | carousel: 2 discs; the scan writes the `.m3u` |
+| 1 refused game | `Games/Broken Disc/`: a bin and a hand-edited `Game.ini` (`Automation=0`, `Discs=Ghost Disc`) | Game Manager: "Broken Disc - Not added: Cue file not found / Bin file failed to verify". (A cue naming a missing bin is not refused - the scan repairs cues - and a lone cue is not a game file) |
+| 3 memory card sets | `Games/!MemCards/`: "Fighting games" (2 generated saves), "RPG saves" (3 saves, 1-3 blocks, + a save on card 2), "Kids" (blank); titles, product codes and a 16x16 icon are generated | Memory Cards (System menu) |
+| 1 game card with a save | `!SaveStates/Crash Dummies/memcards/card1.mcd` ("CRASH DUMMIES - LEVEL 4") | game menu -> Memory Card -> Memory Card Manager (the game is Rayman 2 on the shelf) |
+| resume slots | `!SaveStates/` of Crash Dummies (3 slots, the newest chip), Spyro the Fake (1) and Fake Chronicles (1): the launcher's own slot files and a generated picture. The state files are placeholders: the Resume cards show, **loading one fails** (the games are not real discs) | game menu -> Resume |
+| 4 RetroArch ROMs | the installer's four free homebrew ROMs (below) | RetroArch tab: NES 1, SNES 2, Mega Drive 1 |
+| 2 Apps | Terminal 1.0.0 and SDLPoP 1.24-RC-1, the pcusb packages of the autobleem2 releases (real programs) | Apps tab |
+
+Free content and licences: Nova the Squirrel (NES; NovaSquirrel; GPL-3.0; github.com/NovaSquirrel/NovaTheSquirrel),
+Asteroids and Castle Platformer (SNES; undisbeliever; MIT; github.com/undisbeliever), Alex vs Bus - The Race (Mega Drive;
+M374LX; GPL-3.0 code, CC BY-SA 4.0 assets; github.com/M374LX/alexvsbus-md), Terminal (AutoBleem; GPL-3.0-or-later; DejaVu
+Sans Mono font), SDLPoP (its authors; GPL-3.0). The stick also keeps Tetrade (a free PS1 homebrew the installer lays);
+`System/samples.txt` / `SAMPLES.md` on the stick list the installer's samples.
+
+The language on the stick is whatever its `config.ini` says (Polish today); the driver's `menu <English key>` / `select`
+words work in any language.
 
 ## Testing in the VM from a dev PC: `abvm` (2026-09-28)
 
