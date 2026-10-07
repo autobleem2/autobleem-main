@@ -101,17 +101,21 @@ regression test needs - and the only option before any launcher has ever run on 
    or explicitly allows that class of command first).
 4. Boot (VM passthrough or real hardware) into the fresh first-boot setup wizard.
 
-**C - the VM stick's nightly, by the package update path** (PLATFORM-14, 2026-10-07; what keeps the stick on the
-newest nightly without a `dd`; the same steps `autobleem-update` runs after the launcher's own download):
-1. `nightly/latest.json` on the site names the newest `pcusb` package (`autobleem-pcusb-i386-<v>.tar.gz`, sha256).
-   In the guest (`abvm.py guest`, the VM lease): `curl` it into `/media/autobleem/System/Updates/`, check the sha256,
-   write `System/Updates/pending.json` = `{"autobleem_version": "<v>", "autobleem_file": "<file>"}`.
-2. `sudo systemctl stop autobleem; sudo autobleem-update` - unpacks the package in `/var/tmp`, runs its
-   `install.sh --update` (games, saves, settings, Home/ and System/Processors/ are kept; 35 s), logs to
-   `System/Logs/update.log`, removes `System/Updates/`.
-3. `abvm.py restart`; `cat /media/autobleem/VERSION` and the launcher's corner tag (NIGHTLY + the short version)
-   say it worked. Never `abvm.py install <dist> launcher` for this (it leaves the old `VERSION` and overwrites
-   `config.ini`).
+**C - the VM stick's nightly, by the package update path** (PLATFORM-14, 2026-10-07; keeps the stick on the newest
+nightly without a `dd`; the same path the launcher's own Software Update takes):
+```bash
+python tools/vm/abvm.py --who <name> lock take <task> 30      # the VM lease - `update` refuses without it
+python tools/vm/abvm.py --who <name> update                   # the newest pcusb nightly of the site
+python tools/vm/abvm.py --who <name> update --version <v>     # a given nightly - always installed, even when current
+```
+`update` prints the stick's `VERSION` before and after and says `already on <v>` (nothing touched) when the newest
+nightly is already there. Otherwise it downloads `nightly/<v>/autobleem-pcusb-i386-<v>.tar.gz` in the guest into
+`System/Updates/`, checks its sha256 against the site's published sum (`<file>.sha256`, and `latest.json` for the
+newest), writes `pending.json`, stops the launcher, runs `sudo autobleem-update` (`install.sh --update`: games,
+saves, settings, `Home/` and `System/Processors/` are kept; ~35 s), restarts the launcher and fails unless `VERSION`
+now equals the target (a failed apply leaves the download in `System/Updates/`; `System/Logs/update.log` says why).
+`ABVM_SITE` changes the site. Never `abvm.py install <dist> launcher` for this (it leaves the old `VERSION` and
+overwrites `config.ini`). After an update `vm_testdata.py check` (below) shows the data set is still whole.
 
 ## The test data set on the VM stick (PLATFORM-14)
 
