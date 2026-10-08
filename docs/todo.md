@@ -231,7 +231,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 
 | ID | What | Where | Size | Who | Ms | State |
 |---|---|---|---|---|---|---|
-| PLATFORM-1 | Pi 400: the pad is dead 1-3 s after every game and at boot - the multi-mode pad re-enumerates under SDL's hidapi probe. `SDL_HINT_JOYSTICK_HIDAPI=0` swapped Triangle/Square (reverted); fix with a pad-database line for the evdev GUID, or by not closing the pad around a game. | launcher | M | dev | alpha2 | new |
+| PLATFORM-1 | Pi 400: the pad is dead 1-3 s after every game and at boot - the multi-mode pad re-enumerates under SDL's hidapi probe. `SDL_HINT_JOYSTICK_HIDAPI=0` swapped Triangle/Square (reverted); fix with a pad-database line for the evdev GUID, or by not closing the pad around a game. | launcher | M | dev | alpha2 | closed |
 | PLATFORM-2 | The PC stick beyond the BIOS VM: 32- and 64-bit UEFI, real hardware, a pad; AutoBleemFlasher writing a stick the owner boots. | checklist | M | tester | alpha2 | new |
 | PLATFORM-3 | Windows: the self-update never ran end to end against the site; a real PS1 game never went through the whole chain (a fake disc only). | checklist §6 | S | tester | alpha2 | new |
 | PLATFORM-4 | Pi image: the interactive WiFi prompt on a flash without presets; an armhf image boot. | appliance | S | tester | alpha2 | new |
