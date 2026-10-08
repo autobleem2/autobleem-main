@@ -159,7 +159,7 @@ order, on `feature/uirev`; each is checked on the Pi (screenshots). Nothing merg
 | EMU-1 | **pcsx-abnxt phase 7, the compatibility pass** - the 20 built-in games and the `title.h` titles on the console, a subset on the Pi: boot, first minutes, a save, FMV, CDDA, a real disc swap (Parasite Eve, RE2, FF7). It decides which of Sony's 131 per-title hacks are needed. abnxt has been the default since 2026-09-21. | pcsx-abnxt | L | tester+dev | beta1 | new |
 | EMU-2 | pcsx-abnxt phase 8: the only emulator in `emu/`, pcsx-ab archived - the owner decides when, after EMU-1 (pcsx-ab is no longer developed since 2026-09-27, `docs/decisions.md`). | pcsx-abnxt, appliance | M | owner | beta1 | new |
 | EMU-3 | pcsx-abnxt: a "which disc" picker in the launcher's resume menu, and the `.m3u` hand-over. | pcsx-abnxt, launcher | M | dev | later | new |
-| EMU-4 | Windows direct mode: Chinese in pcsx-abnxt needs a `fonts/` folder next to the emulator. | launcher/win | S | dev | alpha2 | new |
+| EMU-4 | Windows direct mode: Chinese in pcsx-abnxt needs a `fonts/` folder next to the emulator. | launcher/win | S | dev | alpha2 | in progress |
 | EMU-5 | pcsx-abnxt's 32-bit Pi build has never run. | pcsx-abnxt | S | tester | alpha2 | new |
 | EMU-6 | A save state loaded in the first seconds of an HLE boot spins in the HLE BIOS (a PC without a BIOS cannot test resume). | pcsx-abnxt | M | dev | later | new |
 | EMU-7 | Upstream PR candidates (`path_is_absolute`, `PCSX_MEMCARD_COUNT`, soft filter, the 4:3 layer rule, player-2 analogs, `pl_scanlines_by_plat`, the `MENU_SHOW_VOUTMODE` NULL fix). | pcsx-abnxt | M | dev | later | new |
