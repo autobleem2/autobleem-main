@@ -121,7 +121,8 @@ class FakeGitHub(release.GitHub):
         self.compare_status = compare_status or {}  # {repo: "ahead"|"behind"|"identical"|"diverged"}
         # OWN_VERSION_REPOS's latest release tag, defaulted so a promote() in an unrelated test still passes
         # check_own_version_repos(); {repo: None} in a test means "no release yet"
-        self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1", "autobleem-themes": "v1.0.0"}
+        self.latest_releases = {"proc_unzip": "v1.1.0", "ext_store": "v1.0.1", "autobleem-themes": "v1.0.0",
+                                "open_bios": "v1.0.0"}
         self.latest_releases.update(latest_releases or {})
 
     def compare(self, repo, base, head):

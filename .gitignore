@@ -15,6 +15,7 @@
 /retroarch-psc/
 /psc-kernel/
 /psc-kernel-payload/
+/open_bios/
 /ext_*/
 /proc_*/
 /app_*/

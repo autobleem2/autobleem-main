@@ -20,6 +20,7 @@ libpicofe              pcsx-abnxt's front-end library (our fork)
 retroarch-psc          RetroArch built for the console
 psc-kernel             the console's Linux 4.4 kernel fork (work on master - see docs/todo.md K6)
 psc-kernel-payload     the AutoBleem kernel payload ABFlashKit flashes (Buildroot)
+open_bios              OpenBIOS with the AutoBleem boot screen, pcsx-ab's BIOS when there is no Sony one (not the console)
 
 # extensions and scanner processors
 ext_store              the AutoBleem Store, the first extension, bundled with every package

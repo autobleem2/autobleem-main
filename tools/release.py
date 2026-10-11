@@ -64,8 +64,10 @@ BUILD_IMAGE_WATCHED_PATHS = ("docker/**", ".github/workflows/image.yml")
 # by hand in its own repository, not by this script - so the appliance's release build has something other
 # than a nightly to bundle (autobleem-appliance's release_assets.sh errors otherwise). proc_unzip and
 # ext_store were tagged for the first time on 2026-09-26 (v1.1.0, v1.0.1); autobleem-themes joined here D5,
-# 2026-09-27 (its package build, staged by the appliance's stage_themes) - it has no v* tag yet.
-OWN_VERSION_REPOS = ["proc_unzip", "ext_store", "autobleem-themes"]
+# 2026-09-27 (its package build, staged by the appliance's stage_themes) - it has no v* tag yet. open_bios (the
+# OpenBIOS every package but the console's bundles in place of pcsx-ab's HLE BIOS, stage_openbios) joined
+# 2026-10-11; its versions count its own releases, upstream (pcsx-redux/nugget) has none.
+OWN_VERSION_REPOS = ["proc_unzip", "ext_store", "autobleem-themes", "open_bios"]
 # the workflow that builds a component - its develop into the rolling `nightly` release, a tag into that
 # tag's release. A tag push may start other workflows too (the launcher's test gate); this is the one
 # awaited. autobleem-core has none (no release of its own).
@@ -79,19 +81,20 @@ WORKFLOWS = {
     "ext_store": "build.yml",
     "proc_unzip": "build.yml",
     "autobleem-themes": "build.yml",
+    "open_bios": "autobleem.yml",
     "autobleem-appliance": "assemble.yml",
     "autobleem-build": "image.yml",
 }
 # the components whose develop feeds the nightly (the kernel payload reaches it through its releases) - the
 # same list as the appliance's fingerprint (assemble.yml's plan; autobleem-themes joined it D5, 2026-09-27)
 NIGHTLY_REPOS = ["pcsx-abnxt", "autobleem", "autobleem-console-tools", "autobleem-pc-tools",
-                 "ext_store", "proc_unzip", "autobleem-themes"]
+                 "ext_store", "proc_unzip", "autobleem-themes", "open_bios"]
 # what a component's develop build does not run for (its workflow's paths-ignore): a commit touching only these
 # publishes no nightly, so develop's head stays past the `nightly` tag - and is no reason to rebuild
 IGNORED_PATHS = {"autobleem": ("docs/**", "**.md", "manuals/**")}
 # the components whose workflow can build a feature branch as the rolling `preview` release (its `channel`
-# input, PLATFORM-20); proc_unzip has no such input yet, so a preview always takes its nightly
-PREVIEW_REPOS = [r for r in NIGHTLY_REPOS if r != "proc_unzip"]
+# input, PLATFORM-20); proc_unzip and open_bios have no such input yet, so a preview always takes their nightly
+PREVIEW_REPOS = [r for r in NIGHTLY_REPOS if r not in ("proc_unzip", "open_bios")]
 # a branch name a preview takes: what git allows that is also safe in a site folder name
 PREVIEW_BRANCH = re.compile(r"^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._/-]{0,99}\Z")
 ALL_PLATFORMS = "rpi-armhf rpi-arm64 pcusb psc win"

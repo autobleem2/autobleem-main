@@ -83,6 +83,7 @@ assembles the products from those; autobleem-main drives nightlies and promotion
 | `autobleem-core` | `build.yml` | push, `v*`, PR, dispatch | the SDK's suites |
 | `autobleem-console-tools`, `autobleem-pc-tools` | `build.yml` | push, `v*`, PR, dispatch | the tools, tests, packages |
 | `ext_store`, `proc_unzip`, `proc_template`, `app_*` | `build.yml` | push, `v*`, PR, dispatch | per-target packages, the nightly; ext_store also publishes the site's Store page (self-hosted) |
+| `open_bios` | `autobleem.yml` | push develop, `v*`, PR, dispatch | `openbios-<v>.bin` built in PCSX-Redux's image (GitHub's runner) -> release or nightly; upstream's own workflows (Build, Documentation, Hardware farm, RFC) come with the fork and are to be disabled |
 | `autobleem-manuals` | `build.yml` | push, `v*`, PR, dispatch (`publish`) | the PDFs; publish self-hosted |
 | `autobleem-build` | `image.yml` | push/PR under `docker/**`; dispatch | builds the image on the self-hosted runner (layer cache), `:develop` from develop, `:latest` from master, plus `:<sha>`; a real develop push also dispatches `autobleem-main`'s `nightly.yml` with `rebuild_all` (R17, below) |
 | | `retroarch.yml` | monthly (3rd, 04:17), daily 04:41, dispatch | RetroArch + cores for the Pis, the PC stick and Windows -> `rpi/`, `pc/`, `win/` on the site |
