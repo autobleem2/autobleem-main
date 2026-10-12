@@ -9,7 +9,7 @@ and which parts of the logic could move. The line counts are from autobleem-core
 The Pi and a PC run anything; the console sets the limits (`docs/console.md`):
 
 - 32-bit ARM (armhf), a PowerVR GE8300 whose driver reports OpenGL ES 3.2 / GLSL ES 3.20 (read from the
-  driver's strings; a runtime check on the console is still to do) and pins the kernel at 4.4;
+  driver's strings, confirmed at run time by step 0 below) and pins the kernel at 4.4;
 - Sony's Weston 1.11 with `wl_shell` only and libwayland 1.12, no X; our own SDL 2.0.18 (`autobleem_sdl`) is the
   ceiling there;
 - 1 GB of RAM shared with the running emulator; glibc 2.24;
@@ -61,6 +61,18 @@ The C++ launcher keeps working the whole time; Rust parts go into it one by one 
 `glow` on the console's Weston through `autobleem_sdl` - one textured tile, Chinese text, pad
 input - cross-built for armhf against glibc 2.24, the same program on the Pi and a PC; the start time, the RAM
 and 60 fps measured. If it fails, the idea stops here and AutoBleem stays C++.
+
+**Step 0 passed (2026-10-12)**: a probe in Rust (glow, GLES 3.0, cosmic-text; SDL2 loaded at run time; the armhf
+build cross-compiled with `cargo zigbuild` for glibc 2.24), 30 s each:
+
+| Device | GL at run time | SDL | Resolution | fps (avg) | first frame |
+|---|---|---|---|---|---|
+| PlayStation Classic | OpenGL ES 3.2, PowerVR GE8300 | `autobleem_sdl` 2.0.18, Wayland | 1280x720 | 59.0 | 366 ms |
+| Raspberry Pi 400 | OpenGL ES 3.1, V3D 4.2 (Mesa) | system 2.32.4, KMSDRM | 1920x1080 | 59.6 | 497 ms |
+| PC | OpenGL ES 3.2 | 2.0.18 | 1280x720 | 61 | ~1.05 s |
+
+The Pi 400 has GLES 3.1, so the renderer keeps to GLES 3.0 features. Text from cosmic-text looked clearly better
+than today's. Step 1 needs its own plan and approval.
 
 **Step 1 - logic without UI, inside today's launcher through FFI** (the waves below). Each module ships in the
 old launcher at once, with its unit tests.
