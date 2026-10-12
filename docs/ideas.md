@@ -17,6 +17,7 @@ Size as in todo.md.
 | Real artwork for the big-box frame (`evoimg/bigbox.png`, generated today) | S | low | Any time; `tools/make_bigbox_frame.py` draws the placeholder |
 | The themes pack: the 51 community themes of `screemerpl/autobleem-themes-pack` (archived) converted - without Sony's fonts and firmware images, franchise art or commercial music | L | med | A plan of its own (the owner, 2026-09-25); a Store `theme` kind would be its home |
 | "Add your WAD" in the launcher or the Store, so Doom plays a full `DOOM.WAD` without editing `app.ini` | S | low | app_crispydoom |
+| The launcher in Rust, moved piece by piece (a proof on the console first, then the core's services through FFI from `disc_reader` on, then a new UI shell on the same DebugDriver protocol) | XL | med | The owner's question, 2026-10-11; the stack, the steps and the waves in `rust-plan.md` - not costed |
 
 ## PS1 emulation
 
