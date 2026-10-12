@@ -23,6 +23,7 @@ memory cards, the game's config and the resume points belong to the serial. A di
 | Audio CDs (the owner's addition: the real PS1 played them too) | An audio CD shows a jewel case with a note and "Audio CD" in place of the cover, with no game config, memory card or resume points; Cross opens a CD player designed in the spirit of the PS1 BIOS's, with a music visualisation - piece 8 |
 | The mockups (DISC-1, 2026-10-12 03:1x, files in the Graphic Designer's `!autobleem/out/disc-drive/`) | An empty drive shows a dim disc icon; the drive chip ("Reading the disc...", "Disc: <title>", "This is not a PlayStation disc") is always centred at the top of the screen, never beside the notifications; after Circle, **R1 = "Disc"** brings the disc view back, shown in the carousel footer only while a disc is ready (R1 keeps its meaning elsewhere: in the player it is "next track"); the player's visualisation is **spectrum bars only** (no waveform); **no disc badge on the cover** ("it is on the screen, so it is a CD" - the meta row's "DISC" source tag and the lit chip mark it); the player's buttons as mockup 04: Cross play track, Square stop, L1/R1 previous/next, L2/R2 seek, Triangle repeat, Select shuffle, Start pause, Circle back. **Approved 03:21** ("super - zatwierdzam") |
 | Playing a disc that matches a library game | Counts as that game's play ("recently played", the play record), like its image |
+| LibCrypt from a drive (2026-10-12 04:56-05:04, after the Pi tests) | With a network the launcher downloads the game's `.sbi` and the emulator reads no Q from the drive; offline the emulator's own reading of the drive's marks stays as the failover. The `.sbi` files come from **our site, a pack of redump's LibCrypt `.sbi` by serial**; when a serial has several versions (Spyro: Year of the Dragon PAL: "Original" and "Rev 1 Platinum", different marks) the launcher fetches all and the emulator reads the 32 LibCrypt places once and takes the version that matches, else the drive's marks - piece 10 |
 
 ## What exists already
 
@@ -125,6 +126,23 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
   measured there.
 - **Strings** ("Audio CD", "Track", the player's help lines) in all languages.
 
+### 10. LibCrypt: the `.sbi` from our site (the owner, 2026-10-12)
+
+What the Pi showed (Spyro: Year of the Dragon PAL, LG GP20N): the drive gives LibCrypt's marks byte for byte as
+redump's `.sbi`, but also ~4% of the sectors' Qs with a bad CRC, the same on every read (scratches - the
+subchannel has no error correction), two of them on LibCrypt's places. pcsx-abnxt (develop `c4536582` and on) now
+reads the drive's marks once per disc - a pair n, n+5 with both Qs bad - and no subchannel during play; that is
+the offline failover. (The game still loops a cutscene with redump's own `.sbi` too, so that loop is not LibCrypt -
+a separate emulation issue, on the owner's list.)
+
+- **The site**: `sbi/index.json` (`{"SCES-02835": ["SCES-02835.1.sbi", "SCES-02835.2.sbi"], ...}`) and the files in
+  `sbi/`, built once from redump's LibCrypt list by a script in autobleem-repo and refreshed by hand.
+- **The launcher**: for a PS1 disc whose serial is in the index, before `launchDisc`, every version is fetched (when
+  missing) into the game's save folder as `<ID>.sbi` (one version) or `<ID>.1.sbi`, `<ID>.2.sbi`... (`<ID>` = the
+  serial without the dash, as the emulator's CdromId); no network = nothing fetched.
+- **The emulator**: `<ID>.sbi` = used as is, no Q read; `<ID>.N.sbi` = the 32 places read once and the matching
+  version taken; none matches or no file = the drive's marks.
+
 ### 9. Testing
 
 - Core unit tests with `FakeDrive`: the identity from a recorded set of sectors, every watcher state.
@@ -156,4 +174,3 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 ## Not in this plan (new things, for the owner's list)
 
 - Copying a disc to the stick as an image (with its `.sbi`): `DiscReader` already does the reading.
-- A built-in `.sbi` pack by serial, so LibCrypt discs play on drives that cannot give raw P-W.
