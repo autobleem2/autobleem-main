@@ -1,4 +1,4 @@
-# A PS1 disc in a USB drive - the plan (2026-10-12)
+# A PS1 disc or an audio CD in a USB drive - the plan (2026-10-12)
 
 Status: **plan, waiting for the owner's approval**. The emulator part is done and on develop; this plan is the
 launcher, the core and the platforms around it.
@@ -20,6 +20,7 @@ memory cards, the game's config and the resume points belong to the serial. A di
 | The way back from the disc to the carousel | Taking the disc out, or a button (Circle); after the button the disc stays in the drive and the icon waits on it |
 | Multi-disc games | One memory card and one set of saves for the whole set, by the first disc's serial (from the database); changing a disc in a game = opening the tray |
 | Platforms | The Raspberry Pi first, then the PlayStation Classic, the PC USB stick last; **Windows does not get this** |
+| Audio CDs (the owner's addition: the real PS1 played them too) | An audio CD shows a jewel case with a note and "Audio CD" in place of the cover, with no game config, memory card or resume points; Cross opens a CD player designed in the spirit of the PS1 BIOS's, with a music visualisation - piece 8 |
 
 ## What exists already
 
@@ -97,7 +98,27 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 3. **PC USB stick**: last; the guest's permissions on `/dev/sg*`.
 4. **Windows**: not planned (the owner).
 
-### 8. Testing
+### 8. Audio CDs: the CD player
+
+- **Telling it apart**: a disc whose TOC has only audio tracks is an audio CD; a PS1 game with audio tracks
+  (mixed mode) stays a game. The identity gets a fourth result: audio CD (the track list and lengths, the
+  CD-Text titles when the drive gives them - READ TOC format 5).
+- **The disc view**: a jewel case with a note and "Audio CD" (art from the Graphic Designer, a theme asset with
+  a default), the number of tracks and the total time in place of the game's metadata; no config, memory card
+  or resume-point entries.
+- **The player** (a new screen, Cross on the audio CD): the track grid, play/pause, stop, previous/next, seek
+  inside a track, repeat (track/disc) and shuffle, the elapsed and total time; the look in the spirit of the
+  PS1 BIOS's CD player, our own design (no Sony art), from a mockup first. The theme's music stops while it
+  plays; Circle leaves it; taking the disc out stops it and goes back to the carousel.
+- **The sound**: digital, not the drive's headphone socket (a USB drive has no line to the console): a reader
+  thread pulls the tracks raw with READ CD (2352 bytes = 1/75 s of 44.1 kHz 16-bit stereo) into a ring
+  buffer, SDL audio plays it - through lib_ableem's `Audio`, a new streaming source. Reading ahead a few seconds
+  covers the drive's spin-ups.
+- **The visualisation**: from the same PCM - a spectrum of bars (a small FFT, 30 times a second) and/or a
+  waveform, drawn with the renderer; cheap enough for the console's CPU, to be measured there.
+- **Strings** ("Audio CD", "Track", the player's help lines) in all languages.
+
+### 9. Testing
 
 - Core unit tests with `FakeDrive`: the identity from a recorded set of sectors, every watcher state.
 - The UI flow on the pcusb-test VM through the DebugDriver needs a drive in the guest: a VirtualBox virtual
@@ -111,14 +132,16 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 |---|---|---|
 | 1 | Core: `LinuxCdDrive`, `DiscIdentity`, `DriveWatcher`, `DiscGame`, their tests | ~3% |
 | 2 | Launcher: the icon, the fades, the disc view, the launch, theme assets, strings; the emulator's two additions | ~4% |
-| 3 | The Pi with the owner | ~1% |
-| 4 | The console: the kernel modules, the rc, the device check | ~3% |
-| 5 | The PC USB stick | ~1-2% |
+| 3 | Audio CDs: the identity's fourth result, the jewel case, the player screen (from a mockup), the streaming source, the visualisation, strings | ~5% |
+| 4 | The Pi with the owner (a game disc and an audio CD) | ~1% |
+| 5 | The console: the kernel modules, the rc, the device check, the visualisation's cost measured | ~3% |
+| 6 | The PC USB stick | ~1-2% |
 
 ## Open
 
 - Where the drive icon sits on the carousel screen, and whether an empty drive shows it at all: a mockup from
-  the Graphic Designer first.
+  the Graphic Designer first, together with the jewel case and the CD player's screen.
+- CD-Text titles come from few discs; looking the tracks up online (MusicBrainz) would be a new thing.
 - Where the multi-disc set comes from for a disc that is not in the library (the covers db or the rdb).
 - On the Pi, the launcher's user and its access to `/dev/sg*` and the hub's `power/control`.
 
@@ -126,4 +149,3 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 
 - Copying a disc to the stick as an image (with its `.sbi`): `DiscReader` already does the reading.
 - A built-in `.sbi` pack by serial, so LibCrypt discs play on drives that cannot give raw P-W.
-- Playing audio CDs.
