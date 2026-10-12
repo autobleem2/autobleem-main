@@ -21,6 +21,8 @@ memory cards, the game's config and the resume points belong to the serial. A di
 | Multi-disc games | One memory card and one set of saves for the whole set, by the first disc's serial (from the database); changing a disc in a game = opening the tray |
 | Platforms | The Raspberry Pi first, then the PlayStation Classic, the PC USB stick last; **Windows does not get this** |
 | Audio CDs (the owner's addition: the real PS1 played them too) | An audio CD shows a jewel case with a note and "Audio CD" in place of the cover, with no game config, memory card or resume points; Cross opens a CD player designed in the spirit of the PS1 BIOS's, with a music visualisation - piece 8 |
+| The mockups (DISC-1, 2026-10-12 03:1x, files in the Graphic Designer's `!autobleem/out/disc-drive/`) | An empty drive shows a dim disc icon; the drive chip ("Reading the disc...", "Disc: <title>", "This is not a PlayStation disc") is always centred at the top of the screen, never beside the notifications; after Circle, **R1 = "Disc"** brings the disc view back, shown in the carousel footer only while a disc is ready (R1 keeps its meaning elsewhere: in the player it is "next track"); the player's visualisation is **spectrum bars only** (no waveform); **no disc badge on the cover** ("it is on the screen, so it is a CD" - the meta row's "DISC" source tag and the lit chip mark it); the player's buttons as mockup 04: Cross play track, Square stop, L1/R1 previous/next, L2/R2 seek, Triangle repeat, Select shuffle, Start pause, Circle back. **Approved 03:21** ("super - zatwierdzam") |
+| Playing a disc that matches a library game | Counts as that game's play ("recently played", the play record), like its image |
 
 ## What exists already
 
@@ -72,13 +74,17 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 
 ### 5. The launcher (EvolutionUI)
 
-- **The icon**: none with no drive; a still disc icon with an empty drive (optional - see Open); blinking
-  while reading; lit when the disc is ready but the carousel is shown (after Circle).
+- **The icon**: a chip centred at the top of the screen (the notifications' height and top, never beside
+  them): none with no drive; a dim disc icon with an empty drive; blinking, with "Reading the disc...", while
+  reading; lit, "Disc: <title>", when the disc is ready but the carousel is shown (after Circle); dim, "This is
+  not a PlayStation disc", for another disc.
 - **Ready**: the carousel fades out, the disc's cover fades in at the selected game's place, with its
-  metadata, and the disc badge on the cover. Cross plays it; Circle goes back to the carousel; taking the disc
-  out goes back too. Not a PS1 disc: a short message, the carousel stays.
-- **Themes**: two new assets, the disc icon and the badge on the cover, with defaults in the default theme
-  (the Graphic Designer draws them); a theme without them gets the defaults.
+  metadata and "DISC" as the meta row's source tag (no badge on the cover). Cross plays it; Circle goes back to the carousel; taking the disc
+  out goes back too; on the carousel, R1 ("Disc", in the footer only while a disc is ready) brings the disc
+  view back. Not a PS1 disc: the chip's message, the carousel stays.
+- **Themes**: two new assets, the drive icon (`disc_drive`) and the Audio CD jewel case (`audio_cd_case`), at
+  1x and @2x, for ab2.0.0 and the default theme (the Graphic Designer draws them); a theme without them gets
+  the defaults.
 - **Strings** ("Reading the disc...", "This is not a PlayStation disc", the help lines) in all 16 language
   files in the same commit.
 
@@ -114,8 +120,9 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
   thread pulls the tracks raw with READ CD (2352 bytes = 1/75 s of 44.1 kHz 16-bit stereo) into a ring
   buffer, SDL audio plays it - through lib_ableem's `Audio`, a new streaming source. Reading ahead a few seconds
   covers the drive's spin-ups.
-- **The visualisation**: from the same PCM - a spectrum of bars (a small FFT, 30 times a second) and/or a
-  waveform, drawn with the renderer; cheap enough for the console's CPU, to be measured there.
+- **The visualisation**: from the same PCM - segmented spectrum bars with peak caps (a small FFT, 30 times a
+  second; the owner chose bars only), drawn with the renderer; cheap enough for the console's CPU, to be
+  measured there.
 - **Strings** ("Audio CD", "Track", the player's help lines) in all languages.
 
 ### 9. Testing
@@ -139,10 +146,11 @@ the serial, the resume-point menu as for any game. A resume point is offered onl
 
 ## Open
 
-- Where the drive icon sits on the carousel screen, and whether an empty drive shows it at all: a mockup from
-  the Graphic Designer first, together with the jewel case and the CD player's screen.
+- A track's INDEX 00 pregap (the PM's call, reversible): selecting a track starts at its INDEX 01; playing on
+  from the track before plays straight through, as a CD player does.
 - CD-Text titles come from few discs; looking the tracks up online (MusicBrainz) would be a new thing.
-- Where the multi-disc set comes from for a disc that is not in the library (the covers db or the rdb).
+- The multi-disc set: no database maps a serial to its set, so `DiscGameService` takes it from RetroArch's
+  rdb ("Game (Region) (Disc 2)" -> the "(Disc 1)" record's serial); without an rdb a disc keeps its own serial.
 - On the Pi, the launcher's user and its access to `/dev/sg*` and the hub's `power/control`.
 
 ## Not in this plan (new things, for the owner's list)
