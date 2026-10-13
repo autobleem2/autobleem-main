@@ -119,6 +119,29 @@ fastboot reboot
 Partition names are the `by-partlabel` names above. **Flash only what's broken.** Do not flash preloader
 or `TEE1` unless you know exactly why.
 
+### 3a'. LastResortRecovery (Windows, the same fastboot route as 3a, as a program)
+**LastResortRecovery** (pc-tools, `apps/lastresort`) does 3a for you: it writes the console's own
+`LBOOT.EPB` back over USB with Android's `fastboot.exe`, with the console in fastboot mode. It ships in
+`AutoBleemInstaller-<v>.zip` as `AutoBleemInstaller/LastResortRecovery/`. Its docs:
+[apps/lastresort/CLAUDE.md](https://github.com/autobleem2/autobleem-pc-tools/blob/develop/apps/lastresort/CLAUDE.md).
+
+- **Use it when** level 1 fails (the console does not start, Sony's recovery cannot fix it) and you can
+  reach fastboot mode: bridge the two round pads on **side A** of the board (LM-11), just right of the
+  "LM-11" silkscreen, with the micro-USB port connected to the PC. It shows up as USB `0bb4:0c01`.
+- **It needs:** a Windows PC; the console's `LBOOT.EPB` (the window looks for it at the root of every
+  removable drive, or you browse to it; a backup from another tool is flashed after a warning, one without
+  `boot.img` is refused); and a driver for the console's fastboot USB id, which Windows does not have.
+  The program installs one itself (a WinUSB `.inf` with a **self-signed catalogue**, whose certificate goes
+  into the PC's Root and TrustedPublisher stores). Only that step needs an administrator; the program
+  re-runs itself elevated for it.
+- **What it does:** checks the backup and the console (`fastboot devices`, partition sizes), flashes
+  `boot.img` first and the user data last, then clears `MISC` and reboots. Once it has begun writing images
+  it refuses to be stopped. Its log is `%TEMP%\LastResortRecovery\LastResortRecovery.log`.
+
+> ⚠️ **Not yet proven.** LastResortRecovery has **not been run against a real console**, and its driver
+> install (the signing and the certificate-store change) has **never been exercised**. Both wait for the
+> owner. Until then treat it as untested: 3a or 3b are the routes known to be done by hand.
+
 ### 3b. MediaTek BROM download mode — the true unbrick (SP Flash Tool / mtkclient)
 For a hard brick (no fastboot, dead bootloader): short the **BROM/download test point to ground while
 connecting USB**, so the MT8167 boot ROM enters download mode *before* the preloader runs. Then:

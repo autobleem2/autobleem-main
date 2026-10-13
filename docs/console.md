@@ -26,8 +26,8 @@ overlay, flashed by ABFlashKit - `boot.img` (a FIT: LZ4 kernel + dtb, `dd` to BO
 per-console dropbear host key), exFAT, and - on `feature/pad-drivers` - the 6.1 pad drivers backported.
 The overlay's rule: **it only adds to the console, it never shadows a file of the stock root**
 (`overlay.py shape/check` against `reference/console-rootfs.txt`; a busybox `/bin/sh` shadowing Sony's
-broke AutoBleem's start on 2026-09-24). Recovery: `docs/kernel-flash-recovery.md` and pc-tools'
-LastResortRecovery.
+broke AutoBleem's start on 2026-09-24). Recovery: `docs/kernel-flash-recovery.md` (Level 3 describes pc-tools'
+LastResortRecovery, not yet run against a console).
 
 **USB ports.** Sticks and pads belong on the **front** ports. The rear micro-USB (power) port is an OTG
 *host* on the AutoBleem kernel (a device on the stock one): hot-plugging there drops the USB stack (`-71`
