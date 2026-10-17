@@ -86,10 +86,15 @@ def pi_ghost():
 
 
 # ---- shell
+def hull():
+    """the shell's outer form, solid: the outline with the soft top edge"""
+    s = prism(outline(), 0, H)
+    return chamfer(s.edges().group_by(Axis.Z)[-1], 2.0)
+
+
 def shell(led="led5", vents=None):
     """vents: the roof field (centre x, centre y, slot length, slot count); the default sits over the Pi 3's SoC"""
-    s = prism(outline(), 0, H)
-    s = chamfer(s.edges().group_by(Axis.Z)[-1], 2.0)                         # soft top edge
+    s = hull()                                                               # soft top edge
     s -= prism(outline(WALL), -1, H - ROOF + 1)
     # port windows (0.8 mm around each port, bigger where a plug's body must pass)
     s -= box(W - WALL - 1, BY + 10.25 - 8.8, BT - 0.8, WALL + 2, 17.6, 15.1)              # Ethernet
@@ -308,14 +313,20 @@ def on_bed(part):
     return Pos(-bb.min.X, -bb.min.Y, -bb.min.Z) * part
 
 
+_TESS = {}                                  # id(solid) -> (solid, vertices, triangles): the same part in many files
+
+
 def write_parts_3mf(path, label, parts):
     """ONE object of several named parts [(name, solid)], where they stand: a slicer keeps it one object and merges
-    the parts where they overlap (a holder in its wall, a panel in its base) into one print"""
+    the parts where they overlap (a holder in its wall, a panel in its base) into one print. Pass the same solid
+    objects to several calls and each is tessellated once"""
     import zipfile
     shift = Compound(children=[p for _, p in parts]).bounding_box().min
     objs, comps = [], []
     for i, (pname, p) in enumerate(parts, 1):
-        vs, ts = p.tessellate(0.02, 0.2)
+        if id(p) not in _TESS:                 # the solid itself is kept, so its id is never reused
+            _TESS[id(p)] = (p,) + tuple(p.tessellate(0.02, 0.2))
+        _, vs, ts = _TESS[id(p)]
         # tessellate() gives each face its own vertices: weld the shared ones, else the mesh is open along every edge
         key, idx, uniq = {}, [], []
         for q in vs:

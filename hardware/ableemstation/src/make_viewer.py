@@ -64,8 +64,9 @@ def b64file(path):
 
 pack = {"README.md": b64file(os.path.join(FILES, "..", "README.md"))}
 parts3mf = ["base", "shell", "shell-rgb"] if not VARIANT else (
-    ["uni-shell", "uni-shell-rgb", "uni-shell-active", "uni-shell-active-rgb"]          # + the bottoms: base + panels, one print
-    + [f[len("ableemstation-"):-4] for f in sorted(os.listdir(OUT)) if f.startswith("ableemstation-uni-bottom-") and f.endswith(".3mf")])
+    # the shells with their front + right panels and the bottoms (base + back panel), one print each, per option
+    [f[len("ableemstation-"):-4] for f in sorted(os.listdir(OUT))
+     if f.startswith(("ableemstation-uni-shell-", "ableemstation-uni-bottom-")) and f.endswith(".3mf")])
 for n in parts3mf:
     pack["3mf/ableemstation-%s.3mf" % n] = b64file(os.path.join(OUT, "ableemstation-%s.3mf" % n))
 for n in ("buttons", "lens"):                      # the same parts for both cases, in files/
@@ -167,21 +168,21 @@ if (mesh.pi) mesh.pi.visible = false;
 // the shells to swap: the passive or the active-cooler roof, the 5 mm LED's tube or the RGB pixel's slot
 const SH = { shell: mesh.shell.geometry };
 for (const n of Object.keys(DATA)) if (/^shell-/.test(n)) { const g = loader.parse(b64(DATA[n])); g.computeVertexNormals(); SH[n] = g; }
-// the universal case: a panel set and a ghost per board, two front panels, the active roof
+// the universal case: a back panel and a ghost per board, the front and right panels, the active roof
 const U = P.models ? {} : null;
 if (U) {
-  // panels print standing with the shell's filament change: the same two colours, the same line; they stand on the
-  // base, so they stay put when the shell is lifted off
+  // the back panel prints with the base, with the shell's filament change: the same two colours, the same line; it
+  // stays put when the shell is lifted off. The front and right panels print with the shell: they ride with it
   const ZP = P.BAND - .6;
   MAT.panel = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: .55, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, 1), -ZP)] });
   MAT.panelDark = new THREE.MeshStandardMaterial({ color: 0x2e3742, roughness: .6, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), ZP)] });
   MAT.metal = new THREE.MeshStandardMaterial({ color: 0xb8bec4, roughness: .35, metalness: .8 });
-  for (const n of Object.keys(DATA)) if (/^(set-|front-|pi-|usb-)/.test(n)) {
+  for (const n of Object.keys(DATA)) if (/^(back-|right-|front-|pi-|usb-)/.test(n)) {
     const g = loader.parse(b64(DATA[n])); g.computeVertexNormals();
-    const ghost = /^(pi-|usb-)/.test(n);
-    const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : ghost ? MAT.metal : MAT.panel); m.castShadow = m.receiveShadow = true;
-    if (!ghost) { const lo = new THREE.Mesh(g, MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
-    m.visible = false; U[n] = m; scene.add(m);
+    const ghost = /^(pi-|usb-)/.test(n), withShell = /^(right-|front-)/.test(n);
+    const m = new THREE.Mesh(g, n.startsWith("pi-") ? MAT.pi : ghost ? MAT.metal : withShell ? MAT.shell : MAT.panel); m.castShadow = m.receiveShadow = true;
+    if (!ghost) { const lo = new THREE.Mesh(g, withShell ? MAT.dark : MAT.panelDark); lo.castShadow = lo.receiveShadow = true; m.add(lo); }
+    m.visible = false; U[n] = m; (withShell ? mesh.shell : scene).add(m);
   }
 }
 let hideShell = q.shell === "0", hideBase = q.base === "0";
@@ -194,9 +195,10 @@ function setShell() {
 function setU() {
   if (!U) return;
   for (const k of Object.keys(U)) if (U[k].isMesh) U[k].visible = false;
-  U[front === "usb" && cover ? `set-${model}-front` : `set-${model}`].visible = true; U["front-" + front].visible = true;   // cover: the rear USB block feeding the front closed
+  U["back-" + model].visible = true; U["front-" + front].visible = true;
+  U[front === "usb" && cover ? `right-${model}-front` : `right-${model}`].visible = true;   // cover: the rear USB block feeding the front closed
   if (U["usb-sockets"]) U["usb-sockets"].visible = front === "usb";
-  if (hideBase) for (const k of Object.keys(U)) if (/^(set-|front-|usb-)/.test(k)) U[k].visible = false;   // the panels stand on the base
+  if (hideBase) for (const k of Object.keys(U)) if (/^(back-|usb-)/.test(k)) U[k].visible = false;   // the back panel prints with the base
   mesh.pi = U["pi-" + model]; mesh.pi.visible = piOn;
   setShell();
   document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === model));
@@ -238,9 +240,9 @@ if (P.side) decal("sticker-side", P.side.w, P.side.h, P.side.c, [0, -1, 0], [0, 
 const BOT = {};
 if (P.bottom) for (const [k, n] of Object.entries(P.bottoms)) {
   BOT[k] = decal(n, P.bottom.w, P.bottom.h, P.bottom.c, [1, 0, 0], [0, -1, 0], mesh.base); if (BOT[k]) BOT[k].visible = false; }
-// the back panel's port labels: one on each panel set of its board (they stand on the base, shown with their set)
-if (P.back && U) for (const [k, n] of Object.entries(P.backs)) for (const s of [`set-${k}`, `set-${k}-front`]) if (U[s]) {
-  const m = decal(n, P.back.w, P.back.h, P.back.c, [1, 0, 0], [0, 0, 1], U[s]); if (m) { delete DEC[n]; DEC[n + "@" + s] = m; } }
+// the back panel's port labels: one on each board's back panel (it prints with the base, shown with it)
+if (P.back && U) for (const [k, n] of Object.entries(P.backs)) if (U["back-" + k]) {
+  const m = decal(n, P.back.w, P.back.h, P.back.c, [1, 0, 0], [0, 0, 1], U["back-" + k]); if (m) { delete DEC[n]; DEC[n + "@back-" + k] = m; } }
 function showBottom() { for (const [k, m] of Object.entries(BOT)) if (m) m.visible = k === model; }
 const C = new THREE.Vector3(P.W / 2, P.D / 2, P.H / 2.2);
 const VIEWS = { iso: [-150, 260, 190], front: [70, 380, 60], back: [70, -300, 60], right: [380, 52, 70], top: [70, 60, 400],
@@ -293,9 +295,11 @@ view(q.view || "iso"); if (q.explode) setEx(true); if (q.pi) setPi(true); if (q.
 // here (stored, no compression - the 3MFs and PNGs are compressed already), so the page needs no server
 function pick() {
   const c = CW.find(x => x[0] === cwKey), set = c[6] ? `stickers/${c[6]}/` : "stickers/";
-  const shell = (U ? "uni-shell" + (roof ? "-active" : "") : "shell") + (rgb ? "-rgb" : "");
-  // four prints: the shell, the bottom (universal: the base with this option's three panels, one object), buttons, lens
-  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? `uni-bottom-${model}-${front}${front === "usb" && !cover ? "-open" : ""}` : "base"}.3mf`,
+  // four prints: the shell (universal: with this option's front and right panels, one object), the bottom (universal:
+  // the base with the back panel, one object), buttons, lens
+  const shell = U ? `uni-shell${roof ? "-active" : ""}${rgb ? "-rgb" : ""}-${model}-${front === "usb" ? (cover ? "usb" : "usb-open") : "blank"}`
+                  : "shell" + (rgb ? "-rgb" : "");
+  const f = ["README.md", `3mf/ableemstation-${shell}.3mf`, `3mf/ableemstation-${U ? "uni-bottom-" + model : "base"}.3mf`,
     "3mf/ableemstation-buttons.3mf", "3mf/ableemstation-lens.3mf", `wiring/${rgb ? "wiring-rgb" : "wiring"}.png`];
   f.push(...Object.keys(PACK).filter(k => k.startsWith("orca/")));
   for (const n of ["sticker-top", "sticker-front"].concat(U ? ["sticker-side", P.bottoms[model], P.backs[model]] : []))
@@ -316,8 +320,9 @@ function note(names) {
     ["PRINT (no supports; README.md has the details)",
      `- shell, roof down, profile "ABleemStation - ASA". Filament change at ${L["0.16"].toFixed(2)} mm = layer ${LN["0.16"]} (0.16 mm layers) / ${L["0.24"].toFixed(2)} mm = layer ${LN["0.24"]} (0.24 mm):`,
      "  the top colour first, the band colour after the change.", has("shell"),
-     ...(U ? [`- bottom: the base with its three panels standing in place - ONE object, print it as it is (the panels weld to`,
-       `  the base at their tabs), "ABleemStation - ASA Base". Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
+     ...(U ? ["  The front and side panels are parts of the shell's object - print it as it is, they weld into the walls.",
+       `- bottom: the base with the back panel standing in place - ONE object, print it as it is (the panel welds to`,
+       `  the base along its tab), "ABleemStation - ASA Base". Filament change at ${PC["0.16"].toFixed(2)} mm = layer ${PN["0.16"]} / ${PC["0.24"].toFixed(2)} mm = layer ${PN["0.24"]}:`,
        "  the band colour first (the base is band-coloured too), the top colour after the change.", has("bottom")]
        : [`- base, flat, standoffs up, "ABleemStation - ASA Base".`, has("base")]),
      `- button tree x 1 (both caps in one part), flat, shafts up, "ABleemStation - ASA". Push its two ears on the pins inside the shell, then melt the pin ends flat with a soldering iron.`, "- lens x 1, clear PETG, standing on the flange, 100 % infill, slow."],

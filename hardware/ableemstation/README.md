@@ -109,11 +109,17 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
 | side (USB, Ethernet) | `right-pi23` · `right-pi4` (Ethernet and USB swapped) · `right-pi5` · each also `-front` (one USB block closed, see below) · `right-blank` (to drill yourself) |
 | front (between the buttons and the LED) | `front-blank` · `front-usb` (two USB-A sockets) |
 
-- **Assembly - everything on the base**: `uni-base` is the Pi 3 case's base plus a rebate along each opening and
-  the front USB pedestal. Screw the Pi down, fit the switches and the USB sockets, and stand the panels in the
-  rebates (a tab on each panel's inside sits in it). Then slide the shell down over it all: each panel's tongue (its
-  inner half) runs up the grooves in the opening's sides and ends in a groove in the roof. Four screws from below,
-  done. Swapping a board = lifting the shell and swapping two panels (with the one-piece bottom below: a new bottom).
+- **The panels print with the case - the choice stays**: the front and side panels are parts of the shell's 3MF
+  object, the back panel a part of the bottom's (the base). Each fills its opening and reaches 0.6 mm into the wall
+  round it, so the slicer welds it in: one solid print, no gap, nothing to fit. Which panels you get is the file you
+  pick (or the viewer's options).
+- **Assembly**: screw the Pi down on the bottom, fit the switches and the USB sockets, then slide the shell down over
+  it all: the back panel's tongue (its inner half) runs up the grooves in the back opening's sides and ends in a groove
+  in the roof. Four screws from below, done. The board's USB and Ethernet reach 0.1 mm (a Pi 5's Ethernet 1.0 mm) past
+  its edge into the side wall, so each side panel has shallow channels inside, from the shell's bottom edge up to
+  the port windows - the ports slide up them as the shell goes on (the wall there is 1.1 mm at the thinnest; outside
+  nothing shows). `right-blank` has every board's channels, so any board fits under it. Swapping a board = a new
+  shell and a new bottom.
 - **Shells**: `uni-shell` (the hidden roof vents of the Pi 3 case) and `uni-shell-active` (a longer, 8-slot field over
   the Raspberry Pi 5 **Active Cooler**, 63.5 x 42.5 x 13.7 mm - it fits under the roof with 3 mm to spare), each also
   `-rgb` for the RGB pixel. A Pi 5 without the cooler throttles under a long load; the active shell is for it.
@@ -124,28 +130,31 @@ and most of the shell are the Pi 3 case's. What differs are the ports on two edg
   the Ethernet (Pi 2/3/5: the one by the GPIO header; Pi 4: the one at the board's edge). Nothing is desoldered;
   the `right-…-front` panel closes that block from outside. Front and back of that block are wired together - use
   one of them at a time. On a Pi 4 / 5 the front ports run at USB 2.0.
-- **Printing - four prints**: the shell, the **bottom**, the button tree and the lens. The bottom
-  (`uni-bottom-<board>-<front>.3mf`, e.g. `uni-bottom-pi4-usb`) is the base with that option's three panels standing
-  in their rebates - one object of four parts in Orca. Print it as it is: each panel's tab sits on its seat, so the
-  panels weld to the base and the bottom comes off the bed in one piece (nothing to assemble, no ears, no props).
-  With the front USB there is also `uni-bottom-<board>-usb-open`: the rear USB block that feeds the front stays
-  open (use the front or the rear, not both at once). The panels' filament change below applies to it: the base starts in the band colour and its few tall bits (the
-  standoffs, the USB cradles) end in the top colour, inside the case. The viewer's download picks the bottom of the
-  option on screen. The separate panels below stay for a board swap or a reprint of one wall.
-- **Printing the panels on their own**: panels print **standing** on their bottom edge, so a filament change gives them the shell's two
+- **Printing - four prints**: the shell, the **bottom**, the button tree and the lens. The shell
+  (`uni-shell[-active][-rgb]-<board>-<front>.3mf`, e.g. `uni-shell-active-rgb-pi5-usb`) is one object of four parts
+  in Orca - the shell, the LED holder, the front panel and the side panel - printed roof down like the Pi 3 shell.
+  `<board>` is `pi23` / `pi4` / `pi5` / `blank` (a closed side wall); `<front>` is `usb` (the rear USB block that feeds
+  the front closed), `usb-open` (that block left open - use the front or the rear, not both at once) or `blank`.
+  The bottom (`uni-bottom-<board>.3mf`, `pi23` / `pi4` / `pi5` / `blank`) is the base with its back panel standing in
+  its rebate - one object of two parts. Print it as it is: the panel's tab sits on its seat, so it welds to the base
+  and the bottom comes off the bed in one piece. The panels' filament change below applies to it: the base starts in
+  the band colour and its few tall bits (the standoffs, the USB cradles) end in the top colour, inside the case. The
+  viewer's download picks the shell and the bottom of the option on screen. The STEP / STL files are the shell bodies
+  with their openings and every panel on its own, where it sits in the case (`panel-*`), for your own changes.
+- **Printing a back panel on its own** (a board swap or a reprint of the back wall): panels print **standing** on their bottom edge, so a filament change gives them the shell's two
   colours on the same line: **10.92 mm = layer 68** with 0.16 mm layers, **10.80 mm = layer 45** with 0.24 mm (`make_universal.py` prints
   both). Dark first, then the top colour. The plain files have no supports: the tab's underside hangs over the
   bed, so print the `-ears` files (below); the panels are 2.4 mm thick where they stand, so use a brim (the Orca
   profiles' mouse ears or a 5 mm brim).
-  `ableemstation-panels-all.3mf` has every panel on one plate.
-  **Breakaway ears**: every panel also comes as `panel-…-ears.3mf` (and `panels-all-ears.3mf`) - at each end a fin
+  `ableemstation-panels-all.3mf` has every back panel on one plate.
+  **Breakaway ears**: every back panel also comes as `panel-…-ears.3mf` (and `panels-all-ears.3mf`) - at each end a fin
   across the panel on a two-layer foot holds it upright while it prints. The fin stands 0.4 mm off the tongue's end
   (further in the first 1.2 mm, where the first layers squash wider) on two small bridges: hold the panel next to
   the ear, twist the fin off sideways when the print is cold, and trim what is left of the bridges flush with a
   knife, so the tongue slides into its groove (the tongue's end hides in the groove, so nothing shows).
   The same files carry **tab props**: a row of fins on a two-layer foot under the tab inside the panel, one layer of
   air below the tab and 0.5 mm off the panel, so they touch nothing - pull the row out when the print is cold.
-  Shells, `uni-base`, buttons and lens as for the Pi 3 case (the buttons and lens files are the same).
+  The shell, the bottom (or `uni-base`), buttons and lens print as for the Pi 3 case (the buttons and lens files are the same).
 - **POWER on a Pi 5**: GPIO3 shuts it down (`dtoverlay=gpio-shutdown`) but cannot wake it from halt. Wire the POWER
   button to the board's **J2** pads (the power-button header) instead: it then works like the board's own button.
   RESET, the LED and the RGB pixel are wired the same on every board.

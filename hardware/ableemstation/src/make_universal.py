@@ -4,10 +4,14 @@ The shell, the base, the buttons and the lens are the Pi 3 case's (make_case.py)
   right  (the short edge: USB + Ethernet)              right-pi23 / -pi4 / -pi5, each also "-front" (the USB block
                                                        furthest from the Ethernet closed - it feeds the front USB), blank
   front  (between the buttons and the LED)             front-usb (two windows) / front-blank
-Everything is assembled on the base (uni-base): the Pi, the switches, the two front USB sockets on their pedestal,
-and the panels, whose tab stands in a rebate along the base's edge. The shell then slides down over it all: each
-panel's tongue (its inner half) runs up the grooves in the opening's sides and ends in a groove in the roof.
-Panels print standing, bottom edge down, so a filament change gives them the shell's two colours at the same line. Shells: passive (the Pi 3 case's
+The front and right panels print WITH the shell: one 3MF object per option (the shell body, the LED holder and the two
+panels as parts), each panel filling its opening and grooves fully and reaching JOINT_IN into the shell around it, so
+the slicer welds it all into one solid - the panel choice stays, the panel is no separate part any more. The back panel
+prints with the base the same way (the bottom: base + back panel). The Pi, the switches and the two front USB sockets
+on their pedestal are fitted on the bottom, and the shell slides down over it all; the back panel's tongue runs up
+the back opening's grooves and ends in a groove in the roof. The Pi's right-edge ports reach into the right wall, so
+each right panel has relief channels inside, from the shell's bottom edge up to the port windows.
+The back panels also come on their own, printed standing (the same two colours at the same line). Shells: passive (the Pi 3 case's
 hidden roof vents) and active (a longer, denser vent field over the Raspberry Pi 5 Active Cooler), each for the plain
 LED and the RGB pixel. Port positions: Raspberry Pi Ltd's mechanical drawings (3B+, 4B, 5).
 Writes ../files/universal/ (STEP, STL, 3MF, viewer/). Run after make_case.py:  python make_universal.py"""
@@ -17,7 +21,7 @@ import os
 from build123d import Compound, Mesher, Plane, Polygon, Pos, Rot, export_step, export_stl, extrude
 
 from make_case import (BASE_T, BT, BX, BY, BZ, D, FIT, H, ROOF, W, WALL, BAND, LED_X, BTN_Z, BTN_X, CAP_REST, LENS_FL,
-                       LENS_R, LAYERS, base, box, button_tree, cyl_y, cyl_z, first_layer_at, layer_number, led_holder, lens, on_bed, outline, prism, shell,
+                       LENS_R, LAYERS, base, box, button_tree, cyl_y, cyl_z, first_layer_at, hull, layer_number, led_holder, lens, on_bed, outline, prism, shell,
                        shell_print, write_parts_3mf)
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files", "universal"))
@@ -91,6 +95,30 @@ def panel(name, cuts=()):
     return p
 
 
+FUSED = ("front", "right")      # the openings whose panel prints with the shell
+HULL = hull()
+
+
+def fused_panel(name, cuts=()):
+    """a panel that prints with the shell (a part of its 3MF object): no clearance, no tongue - it fills the opening and
+    its grooves fully and reaches JOINT_IN into the wall's sides, the roof and the inner lips, so the slicer welds it
+    to the shell along every edge; the outside is the plain wall again (the waist groove runs on)"""
+    wall, a0, a1, _, rz, ribs = OPENINGS[name]
+    v1 = WALL + TGC + EASE                                     # the groove's inner side
+    g = TD + 0.2 + EASE                                        # how far a groove runs past the opening's end
+    span = a1 - a0 + 2 * (g + JOINT_IN)
+    p = wbox(wall, a0 - g - JOINT_IN, 0, 0, span, WALL, ZT + JOINT_IN)                        # the wall, opening + grooves
+    p += wbox(wall, a0 - g - JOINT_IN, 0, ZT, span, v1 + JOINT_IN, g + JOINT_IN)              # the grooves' top, in the roof
+    for u, on in zip((a0 - g, a1), ribs):                      # the gap between the wall and an inner lip
+        if on:
+            p += wbox(wall, u, WALL - 0.01, rz, g, v1 - WALL + JOINT_IN + 0.01, ZT - rz + 0.01)
+    p &= HULL                                                  # nothing past the soft top edge
+    p -= prism(outline(), BAND - 1.2, 1.2) - prism(outline(0.8), BAND - 1.3, 1.4)          # the waist groove
+    for c in cuts:
+        p -= c
+    return p
+
+
 # ---- the port windows, per board (world space; 0.8 mm round each port, bigger where a plug's body must pass)
 def back_cuts(model):
     if model == "pi23":
@@ -111,14 +139,43 @@ ETH_USB = {"pi23": (10.25, (29.0, 47.0)), "pi4": (45.75, (27.0, 9.0)), "pi5": (1
 
 def right_cuts(model, front_usb=False):
     if model not in ETH_USB:
-        return []
+        return right_reliefs(model)
     eth, usb = ETH_USB[model]
     c = [box(W - WALL - 1, BY + eth - 8.8, BT - 0.8, WALL + 2, 17.6, 15.1)]               # Ethernet
     for yc in (usb[:1] if front_usb else usb):                                           # usb[1]: the block furthest from the Ethernet
         c.append(box(W - WALL - 1, BY + yc - 7.4, BT - 0.8, WALL + 2, 14.8, 17.6))
     if front_usb:                                                                        # the closed block still pokes 0.1 mm past the
         c.append(box(W - WALL - 0.01, BY + usb[1] - 7.4, BT - 0.8, 1.01, 14.8, 17.6))   # board edge: a 1 mm relief inside
-    return c
+    return c + right_reliefs(model)
+
+
+# the ports on the board's right edge reach past it into the wall (USB and Ethernet 0.1 mm, the Pi 5's Ethernet 1.0 mm).
+# The shell slides down over the board, so in the shell's frame each port comes up from its bottom edge: a channel
+# inside the wall under each port window, RELIEF_FIT deeper than the port reaches, as wide as the window
+RELIEF_FIT = 0.3
+
+
+def right_ports(model):
+    """(centre along the edge, window width, window height, how far the port reaches into the wall) per port"""
+    eth, usb = ETH_USB[model]
+    ports = [(eth, 17.6, 15.1, (3.0 if model == "pi5" else 2.1) - 2.0)]
+    return ports + [(yc, 14.8, 17.6, 2.1 - 2.0) for yc in usb]
+
+
+def right_reliefs(model):
+    """the channels for a board's right-edge ports; a blank panel gets every board's, so any board fits under it"""
+    models = ETH_USB if model not in ETH_USB else (model,)
+    return [box(W - WALL - 0.01, BY + yc - w / 2, -1, reach + RELIEF_FIT + 0.01, w, BT - 0.8 + h + 1)
+            for m in models for yc, w, h, reach in right_ports(m)]
+
+
+def swept_ports(model):
+    """the board's right-edge ports swept down to the shell's bottom edge: what they pass while the shell goes on"""
+    eth, usb = ETH_USB[model]
+    s = box(BX + 85 - 21 + (3.0 if model == "pi5" else 2.1), BY + eth - 8, -1, 21, 16, BT + 13.5 + 1)
+    for yc in usb:
+        s += box(BX + 85 - 17 + 2.1, BY + yc - 6.6, -1, 17, 13.2, BT + 16 + 1)
+    return s
 
 
 # front USB: two USB-A sockets (a THT "USB-A female, 180 degrees" part: a 13.1 x 5.7 x 14.1 mm shell, two mounting
@@ -188,7 +245,7 @@ def usb_cradle(x):
 
 
 def front_usb_panel():
-    p = panel("front")
+    p = fused_panel("front")
     for x in USB_X:
         p -= box(x - 6.5, D - WALL - 1, USB_Z - 2.8, 13.0, WALL + 2, 5.6)                      # the plug's window
         p -= box(x - 9.0, D - 1.4, USB_Z - 5.0, 18.0, 2.0, 10.0)                               # the plug's recess
@@ -208,17 +265,17 @@ def joint_fill(name):
 
 
 def bottom_base():
-    """the base of the one-piece bottom: uni_base with the joints filled"""
-    b = uni_base()
-    for name in OPENINGS:
-        b += joint_fill(name)
-    return b
+    """the base of the one-piece bottom: uni_base with the back panel's joint filled"""
+    return uni_base() + joint_fill("back")
 
 
 def uni_base():
-    """the Pi 3 case's base + a rebate under each panel's tab + the front USB sockets' pedestal"""
+    """the Pi 3 case's base + a rebate under the back panel's tab + the front USB sockets' pedestal (the front and
+    right panels print with the shell, so the base has a plain edge there)"""
     b = base()
     for name, (wall, a0, a1, (f0, f1), _, _) in OPENINGS.items():
+        if name in FUSED:
+            continue
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT, f1 - f0 + 0.6, 2.5 + 0.65, 3)                # the seat
         b -= wbox(wall, f0 - 0.3, WALL - 0.5, SEAT - 1.2, f1 - f0 + 0.6, 1.5, 3)                 # room for the 45-degree start
     for x in USB_X:
@@ -323,6 +380,16 @@ def standing(name, p):
     return on_bed(Rot(0, 0, 90) * p if name.startswith("right") else p)
 
 
+def shell_options():
+    """the shell's panel options: (file suffix, right panel, front panel); pi models: the front USB with the rear block
+    that feeds it closed (usb) or open (usb-open), or a blank front; the blank right wall: either front"""
+    o = []
+    for m in ("pi23", "pi4", "pi5"):
+        o += [("%s-usb" % m, "right-%s-front" % m, "front-usb"), ("%s-usb-open" % m, "right-" + m, "front-usb"),
+              ("%s-blank" % m, "right-" + m, "front-blank")]
+    return o + [("blank-usb", "right-blank", "front-usb"), ("blank-blank", "right-blank", "front-blank")]
+
+
 def main():
     shells, bodies = {}, {}
     for kind, vents in (("", None), ("-active", ACTIVE_VENTS)):
@@ -332,54 +399,66 @@ def main():
         bodies[kind] = s
         for led, suffix in (("led5", ""), ("rgb", "-rgb")):
             shells["uni-shell%s%s" % (kind, suffix)] = s + led_holder(led)
-    panels = {}
+    panels, fused = {}, {}                             # back: the slide-in panels; front + right: print with the shell
     for m in ("pi23", "pi4", "pi5", "blank"):
         panels["back-" + m] = panel("back", back_cuts(m))
-        panels["right-" + m] = panel("right", right_cuts(m))
+        fused["right-" + m] = fused_panel("right", right_cuts(m))
         if m != "blank":
-            panels["right-%s-front" % m] = panel("right", right_cuts(m, True))
-    panels["front-usb"] = front_usb_panel()
-    panels["front-blank"] = panel("front")
+            fused["right-%s-front" % m] = fused_panel("right", right_cuts(m, True))
+    fused["front-usb"] = front_usb_panel()
+    fused["front-blank"] = fused_panel("front")
 
-    for name, p in list(shells.items()) + [("panel-" + n, p) for n, p in panels.items()]:
+    # STEP / STL: the shell bodies (with their openings) and every panel on its own, where it stands in the case
+    for name, p in list(shells.items()) + [("panel-" + n, p) for n, p in list(panels.items()) + list(fused.items())]:
         export_step(p, os.path.join(OUT, "ableemstation-%s.step" % name))
         export_stl(p, os.path.join(OUT, "ableemstation-%s.stl" % name))
-    for kind, body in bodies.items():                  # printed: the shell + its LED holder, one object of two parts
+    # printed: the shell per option = ONE object of four parts (shell, LED holder, front panel, right panel), roof down;
+    # every solid turned once, so each is tessellated once for all the files it is in
+    down = lambda p: Rot(180, 0, 0) * p                # noqa: E731
+    fdown = {n: down(p) for n, p in fused.items()}
+    for kind, body in bodies.items():
+        bdown = down(body)
         for led, suffix in (("led5", ""), ("rgb", "-rgb")):
-            name = "uni-shell%s%s" % (kind, suffix)
-            write_parts_3mf(os.path.join(OUT, "ableemstation-%s.3mf" % name), "ableemstation-" + name, shell_print(body, led))
+            hold = down(led_holder(led))
+            for opt, right, front in shell_options():
+                name = "uni-shell%s%s-%s" % (kind, suffix, opt)
+                write_parts_3mf(os.path.join(OUT, "ableemstation-%s.3mf" % name), "ableemstation-" + name,
+                                [("shell", bdown), ("led-holder", hold), ("panel-front", fdown[front]), ("panel-right", fdown[right])])
+    print("shells: %d options each of 4 (passive / active x LED / RGB), shell + LED holder + front + right panel as one object"
+          % len(shell_options()))
+    # each fused panel welds into the shell all round its opening and shows nothing outside it
+    for n, p in fused.items():
+        joint = (p & bodies[""]).volume
+        out = (p - HULL).volume
+        print("panel %s: overlaps the shell by %.0f mm3, outside the shell's form %.3f mm3" % (n, joint, out))
+        assert joint > 20 and out < 0.001, "panel %s is not one with the shell" % n
+
+    # the back panels on their own, printed standing (a board swap or a reprint of the back wall)
     flats = {n: standing(n, p) for n, p in panels.items()}
     for n, p in flats.items():
         write_3mf("panel-" + n, p)
         bb = p.bounding_box().size
         print("panel %s prints %.1f x %.1f x %.1f mm (standing)" % (n, bb.X, bb.Y, bb.Z))
-    m = Mesher()                                       # every panel on one plate, in rows
-    x = y = row = 0.0
+    m = Mesher()                                       # every back panel on one plate, in a row
+    x = 0.0
     for n, p in flats.items():
-        bb = p.bounding_box().size
-        if x and x + bb.X > 250:
-            x, y, row = 0.0, y + row + 8, 0.0
-        m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
-        x, row = x + bb.X + 8, max(row, bb.Y)
+        m.add_shape(Pos(x, 0, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
+        x += p.bounding_box().size.X + 8
     m.write(os.path.join(OUT, "ableemstation-panels-all.3mf"))
     # the same panels with their breakaway ears and tab props; the ears touch a panel only through the bridges, the
     # props not at all
-    eared, m, x, y, row = {}, Mesher(), 0.0, 0.0, 0.0
+    eared, m, x = {}, Mesher(), 0.0
     for n, p in panels.items():
-        e, t = ears(n.split("-")[0]), tab_props(n.split("-")[0])
+        e, t = ears("back"), tab_props("back")
         bridges = (e & p).volume
         assert 0 < bridges < 3.0, "panel %s: the ears touch it with %.2f mm3, not just through the bridges" % (n, bridges)
         assert (t & p).volume < 1e-6, "panel %s: the tab props touch it" % n
         eared[n] = standing(n, p + e + t)
         write_3mf("panel-%s-ears" % n, eared[n])
-    print("panels with ears + tab props: %s (bridges %.2f mm3 per panel)" % (", ".join(eared), bridges))
-    for n, p in eared.items():
-        bb = p.bounding_box().size
-        if x and x + bb.X > 250:
-            x, y, row = 0.0, y + row + 4, 0.0
-        m.add_shape(Pos(x, y, 0) * p, linear_deflection=0.02, angular_deflection=0.2)
-        x, row = x + bb.X + 4, max(row, bb.Y)
+        m.add_shape(Pos(x, 0, 0) * eared[n], linear_deflection=0.02, angular_deflection=0.2)
+        x += eared[n].bounding_box().size.X + 4
     m.write(os.path.join(OUT, "ableemstation-panels-all-ears.3mf"))
+    print("panels with ears + tab props: %s (bridges %.2f mm3 per panel)" % (", ".join(eared), bridges))
     # the panels' filament change: printed bottom-up, the first layer at or above the shell's colour line
     # (the shell prints roof-down: its change at H - BAND from the roof is the line H - change from the bottom)
     pchange = {k: first_layer_at(H - first_layer_at(H - BAND, f, lh), f, lh) for k, (f, lh) in LAYERS.items()}
@@ -391,26 +470,23 @@ def main():
     export_step(b, os.path.join(OUT, "ableemstation-uni-base.step"))
     export_stl(b, os.path.join(OUT, "ableemstation-uni-base.stl"))
     write_3mf("uni-base", on_bed(b))
-    # the bottom per option: the base (joints filled) + its three panels, one object to print in one go: the parts
-    # overlap along each panel, so they print as one solid
+    # the bottom per back panel: the base (joint filled) + the back panel, one object to print in one go: the parts
+    # overlap along the panel, so they print as one solid
     bb = bottom_base()
     for sname, s in shells.items():
         v = (bb & s).volume
         assert v < 0.01, "the bottom's joint fill hits %s: %.2f mm3" % (sname, v)
     for model in ("pi23", "pi4", "pi5"):
         assert (bb & pi_ghost(model)).volume < 0.01, "the bottom's joint fill hits the " + model
-        for front in ("usb", "usb-open", "blank"):        # usb-open: the rear USB block feeding the front left open
-            parts = [("base", bb), ("panel-back", panels["back-" + model]),
-                     ("panel-right", panels["right-%s%s" % (model, "-front" if front == "usb" else "")]),
-                     ("panel-front", panels["front-" + front.split("-")[0]])]
-            for pname, p in parts[1:]:
-                joint = (p & bb).volume
-                assert joint > 20, "bottom %s-%s: %s overlaps the base by %.1f mm3 only - not one piece" % (model, front, pname, joint)
-            write_bottom("uni-bottom-%s-%s" % (model, front), parts)
-    print("bottoms: base + 3 panels as one object, 9 options; each panel overlaps the base by %s mm3"
-          % ", ".join("%.0f" % (panels[n] & bb).volume for n in ("back-pi4", "right-pi4", "front-usb")))
+    for model in ("pi23", "pi4", "pi5", "blank"):
+        p = panels["back-" + model]
+        joint = (p & bb).volume
+        assert joint > 20, "bottom %s: the back panel overlaps the base by %.1f mm3 only - not one piece" % (model, joint)
+        write_bottom("uni-bottom-" + model, [("base", bb), ("panel-back", p)])
+    print("bottoms: base + back panel as one object, 4 options; the panel overlaps the base by %.0f mm3" % (panels["back-pi4"] & bb).volume)
     usb = usb_sockets()
-    # fit checks: no board touches a shell, a panel or the base; a panel fills its opening without touching the shell
+    # fit checks: no board touches a shell, a panel or the base; a back panel fills its opening without touching the
+    # shell; the shell with its fused panels slides down over the board (its right-edge ports swept to the bottom edge)
     bad = 0
     for model in ("pi23", "pi4", "pi5"):
         for sname, s in shells.items():
@@ -418,25 +494,31 @@ def main():
             v = (s & g).volume
             bad += v > 0.01
             print("overlap %s x %s: %.2f mm3" % (model, sname, v))
-        g = pi_ghost(model)
-        for n, p in panels.items():
-            if model in n or n in ("back-blank", "front-blank", "front-usb"):   # right-blank: to drill for any board
-                v = (p & g).volume
+        g, sw = pi_ghost(model), swept_ports(model)
+        for n, p in list(panels.items()) + list(fused.items()):
+            if model in n or n.endswith("-blank") or n == "front-usb":   # the blank right wall: for any board
+                v = (p & g).volume + (p & sw).volume
                 bad += v > 0.01
                 if v > 0.01:
-                    print("overlap %s x panel-%s: %.2f mm3" % (model, n, v))
-        print("overlap %s x base: %.2f mm3" % (model, (b & g).volume))
+                    print("overlap %s x panel-%s (in place or sliding on): %.2f mm3" % (model, n, v))
+        v = max((s & sw).volume for s in shells.values())
+        bad += v > 0.01
+        print("overlap %s x base: %.2f mm3; its ports sliding into the shells: %.2f mm3" % (model, (b & g).volume, v))
     for n, p in panels.items():
         v = (p & shells["uni-shell"]).volume + (p & shells["uni-shell-active-rgb"]).volume + (p & b).volume
         bad += v > 0.01
         print("panel %s x shell/base: %.2f mm3" % (n, v))
-    v = (usb & b).volume + (usb & panels["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
+    for n, p in fused.items():
+        v = (p & b).volume
+        bad += v > 0.01
+        print("panel %s (with the shell) x base: %.2f mm3" % (n, v))
+    v = (usb & b).volume + (usb & fused["front-usb"]).volume + (usb & shells["uni-shell-rgb"]).volume
     bad += v > 0.01
     print("front USB sockets x base/panel/shell: %.2f mm3" % v)
     tree = button_tree()                       # its ears clear of the front panel's groove lips (the test print)
-    v = max((tree & shells[n]).volume for n in shells) + (tree & panels["front-usb"]).volume
+    v = max((tree & shells[n]).volume for n in shells) + max((tree & fused[n]).volume for n in ("front-usb", "front-blank"))
     bad += v > 0.01
-    print("button tree x shells/front panel: %.2f mm3" % v)
+    print("button tree x shells/front panels: %.2f mm3" % v)
     # the boards: each lies on its pedestal, a screw pilot under each hole (air in it, plastic round it), and the step
     # carries the shell's overhang
     z0, zb = board_z()
@@ -451,17 +533,21 @@ def main():
         print("USB board at x=%g: %s" % (x, "seated, 2 screw pilots, shell carried" if ok else "NOT SEATED"))
     assert not bad, "%d fit check(s) failed" % bad
 
-    # the viewer: the four shells, the base, caps, lens, each board's panel set and ghost, both front panels
+    # the viewer: the four shells (bodies), the base, caps, lens, each board's back panel and ghost; the front and
+    # right panels ride with the shell
     view = os.path.join(OUT, "viewer")
+    for f in os.listdir(view):                         # no mesh left over from an older set of parts
+        if f.endswith(".stl"):
+            os.remove(os.path.join(view, f))
     caps = [button_tree()]
     lens_in = Pos(LED_X, D - WALL - LENS_FL - 0.2, BTN_Z) * lens()
     vparts = {"shell": shells["uni-shell"], "shell-active": shells["uni-shell-active"], "shell-rgb": shells["uni-shell-rgb"],
               "shell-active-rgb": shells["uni-shell-active-rgb"], "base": b,
-              "caps": Compound(children=caps), "lens": lens_in,
-              "front-usb": panels["front-usb"], "front-blank": panels["front-blank"], "usb-sockets": usb}
+              "caps": Compound(children=caps), "lens": lens_in, "usb-sockets": usb}
+    for n, p in fused.items():
+        vparts[n] = p
     for model in ("pi23", "pi4", "pi5"):
-        vparts["set-" + model] = panels["back-" + model] + panels["right-" + model]
-        vparts["set-%s-front" % model] = panels["back-" + model] + panels["right-%s-front" % model]
+        vparts["back-" + model] = panels["back-" + model]
         vparts["pi-" + model] = pi_ghost(model, cooler=(model == "pi5"))
     for n, p in vparts.items():
         export_stl(p, os.path.join(view, n + ".stl"), tolerance=0.05, angular_tolerance=0.2)
